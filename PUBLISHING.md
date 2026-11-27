@@ -7,7 +7,7 @@ repository. This repository already meets its requirements:
 | Requirement (ThemeDatabase README) | Here |
 |---|---|
 | `skin.json` at the repository root | ✅ |
-| a `github` block whose `owner` / `repo_name` match the entry | ✅ `Blackhagwag` / `PlayStation-5-Millennium-Theme` |
+| a `github` block whose `owner` / `repo_name` match the entry | ✅ `Blackhagwag` / `PlayStation-5-Theme` |
 | `header_image` and `splash_image`: `https` URLs that load an image | ✅ `assets/real/header.jpg` (real capture) |
 | `README.md` (shown on the theme page) | ✅ |
 
@@ -19,7 +19,7 @@ repository. This repository already meets its requirements:
 2. In `metadata.json`, add this entry to the `themes` array (keep the file's ordering):
 
    ```json
-   { "owner": "Blackhagwag", "repo": "PlayStation-5-Millennium-Theme" }
+   { "owner": "Blackhagwag", "repo": "PlayStation-5-Theme" }
    ```
 
 3. Open the pull request. A check validates `skin.json`; once it is merged the theme appears on

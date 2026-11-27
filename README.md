@@ -13,7 +13,7 @@ glass panels and smooth motion — while every Steam function keeps working unde
 > Valve. "PlayStation" and "PS5" are trademarks of Sony Interactive Entertainment. No Sony logos
 > or assets are included. Game art in the real captures belongs to its publishers; harness renders use placeholder art.
 
-**[⬇ Download the latest ZIP from GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases/latest)**
+**[⬇ Download the latest ZIP from GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases/latest)**
 
 ## Screenshots
 
@@ -117,7 +117,7 @@ No installer, no Node.js, no Python — just the ZIP.
 1. Install [Millennium](https://docs.steambrew.app/users/getting-started/installation) if you
    haven't yet, and start Steam once.
 2. Download **`PlayStation-5-Millennium-Theme-vX.Y.Z.zip`** from
-   [Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases/latest).
+   [Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases/latest).
 3. Open Millennium's themes folder (the Themes page in Millennium's settings links to it in
    recent versions; otherwise open it yourself):
    - Windows: `C:\Program Files (x86)\Steam\millennium\themes\`

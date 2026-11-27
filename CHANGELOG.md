@@ -2,7 +2,15 @@
 
 All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
-ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
+ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases).
+
+## [1.5.3] — 2026-11-27 — Repository renamed
+
+### Changed
+- The repository is now **`Blackhagwag/PlayStation-5-Theme`** (GitHub redirects the old
+  address). `skin.json`'s `github` block, `source`, `header_image` / `splash_image` and all links
+  in the README point to the new name, as the Millennium theme store requires. The ZIP keeps its
+  name (`PlayStation-5-Millennium-Theme-vX.Y.Z.zip`) and its folder, so updating works as before.
 
 ## [1.5.2] — 2026-11-27 — Real Library & Control Center Screenshots
 
