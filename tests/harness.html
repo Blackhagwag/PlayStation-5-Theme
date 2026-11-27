@@ -9,10 +9,13 @@
  /* the mock's own skeleton (Steam's real layout comes from Steam) */
  html,body{margin:0;height:100%;overflow:hidden;color:#fff}
  #popup_target{display:flex;flex-direction:column;height:100%}
- .TitleBar{height:32px;display:flex;justify-content:flex-end;align-items:center;padding:0 8px;flex:none}
+ .TitleBar{height:32px;display:flex;align-items:center;padding:0 8px;flex:none}
+ .URLBarReplacement{height:32px;background:#171d25;flex:none}
+ .LocalContentContainer{flex-direction:column}.LibraryInner{flex:1;display:flex;min-height:0}
+ .DownloadStatus{flex:1;display:flex;justify-content:center}.DetailedDownloadProgress{width:720px;display:flex}
  .TitleBarControls{display:flex;gap:4px}.TitleBarControls .Button{width:28px;height:24px;display:grid;place-items:center;opacity:.6}
  .ContentFrame{flex:1;display:flex;flex-direction:column;min-height:0}
- .LocalContentContainer,.Library{flex:1;display:flex;min-height:0}
+ .LocalContentContainer{flex:1;display:flex;min-height:0}
  .LeftListSizableContainer{width:270px;display:flex;flex-direction:column}
  .LeftListSizableContainer .Container{padding:10px;font-size:13px;overflow:auto}
  .LeftListSizableContainer .row{padding:6px 10px}
@@ -29,18 +32,21 @@
 </style></head>
 <body class="DesktopUI">
 <div id="popup_target">
-  <div class="TitleBar"><div class="TitleBarControls"><div class="AccountMenu" id="acct">Vasya_PS5 · 12,50€</div><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
-  <div class="SuperNavBar">
+  <div class="OuterFrame"><div class="TopBar">
+  <div class="TitleBar"><div class="RootMenuBar"><div class="RootMenuButton"><div>Steam</div></div><div class="RootMenuButton"><div>View</div></div><div class="RootMenuButton"><div>Friends</div></div><div class="RootMenuButton"><div>Games</div></div><div class="RootMenuButton"><div>Help</div></div></div><div style="flex:1"></div><div class="TitleBarControls"><div class="AccountMenu" id="acct"><span>Vasya_PS5</span> <span class="WalletBalance">12,50€</span></div><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
+  <div class="SuperNavBar"><div class="SuperNav"><svg class="Arrow Enabled" viewBox="0 0 10 10"><path d="M6 2L3 5l3 3"/></svg><div class="MenuWrapper">
     <div class="SuperNavMenu"><div class="MenuButton">Store</div></div>
     <div class="SuperNavMenu Selected"><div class="MenuButton">Library</div></div>
     <div class="SuperNavMenu"><div class="MenuButton">Community</div></div>
-  </div>
-  <div class="ContentFrame"><div class="LocalContentContainer"><div class="Library">
+    <div class="SuperNavMenu"><div class="MenuButton"><span>Vasya_PS5</span></div></div>
+  </div></div></div>
+  </div></div>
+  <div class="ContentFrame"><div class="LocalContentContainer Library"><div class="URLBarReplacement"></div><div class="LibraryInner">
     <div class="LeftListSizableContainer"><div class="Container"><div class="row">Starfall Odyssey</div><div class="row Selected">Neon Drift Racing</div><div class="row">Hollow Kingdom</div></div></div>
     <div class="LibraryWindowDivider"></div>
     <div class="MainPanel"><div class="AppDetailsTransitionGroup" id="route"></div></div>
   </div></div></div>
-  <div class="BottomBar"><div class="DownloadStatus"><span class="Status">Downloading</span><div class="ProgressBar" style="width:90px"><div style="width:60%;height:100%"></div></div><span class="Percentage">60%</span></div><div style="flex:1"></div><div class="AddGameButton"><svg width="12" height="12"></svg>Add a Game</div><div class="FriendsButton"><svg width="12" height="12"></svg>Friends &amp; Chat</div></div>
+  <div class="BottomBarContainer"><div class="BottomBar"><div class="AddGameButton"><div class="Icon"><svg width="12" height="12"></svg></div><div class="Text">Add a Game</div></div><div class="DownloadStatus"><div class="DownloadStatusContent"><div class="DetailedDownloadProgress"><div class="Icon"></div><div class="IconBevel"></div><div class="ProgressBarWrapper"><div class="StatusLine"><span class="Status">Downloading Iron Tactics</span><span class="Status Percentage">60%</span></div><div class="ProgressBar"><div style="width:60%;height:100%"></div></div></div></div></div></div><div class="FriendsButton"><div class="Text">Friends &amp; Chat</div><div class="Icon"><svg width="12" height="12"></svg></div></div></div></div>
 </div>
 <script src="mock-steam.js"></script>
 <script>
@@ -50,10 +56,11 @@
    if (m) {
      r.innerHTML = `<div class="AppDetailsMain"><div class="Header"><div class="TopCapsule"><div class="HeaderBackgroundImage"><img src="/assets/${m[1]}/library_hero.jpg"></div></div></div><div class="PlayBar"><div class="PlayButtonContainer"><button class="PlayButton">▶ PLAY</button></div><div><div class="PlayBarLabel">Last played</div><div class="PlayBarDetailLabel">Today</div></div></div><div class="AppDetailsOverviewPanel" style="padding:20px 28px;height:600px"><div class="AppDetailsSectionContainer" style="padding:16px">Steam activity feed (native)</div></div></div>`;
    } else {
-     r.innerHTML = `<div class="Body InnerContainer"><div class="LibraryHome"><h2 class="SectionHeader">What's New</h2><div class="UpdatesContainer">${[101,103,104].map((id,i)=>`<div><div class="EventTime">${['This week','Yesterday','2 days ago'][i]}</div><div class="PartnerEventRowCapsule_Container"><div><img src="/assets/${id}/header.jpg"><div class="PartnerEventRowCapsule_TextTitle">${['Major update 2.0 is live','Patch notes 1.4.2','Weekend event starts now'][i]}</div><div class="GameIconAndName"><span class="GameIcon"></span><span class="GameName">Game</span></div></div></div></div>`).join('')}</div><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div>`;
+     r.innerHTML = `<div class="AppDetailsMain"><div class="Container"><div class="Body InnerContainer"><div class="whatsnew-shelf"><h2 class="SectionHeader">What's New</h2><div class="UpdatesContainer">${[101,103,104].map((id,i)=>`<div><div class="EventTime">${['This week','Yesterday','2 days ago'][i]}</div><div class="PartnerEventRowCapsule_Container"><div><img src="/assets/${id}/header.jpg"><div class="PartnerEventRowCapsule_TextTitle">${['Major update 2.0 is live','Patch notes 1.4.2','Weekend event starts now'][i]}</div><div class="GameIconAndName"><span class="GameIcon"></span><span class="GameName">Game</span></div></div></div></div>`).join('')}</div></div><div class="LibraryHome"><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div></div></div>`;
    }
    const web = /^\/browser/.test(p);
    document.querySelector('.LocalContentContainer').style.display = web ? 'none' : '';
+   document.querySelectorAll('.SuperNavMenu').forEach((m, k) => m.classList.toggle('Selected', web ? k === 0 : k === 1));
    let bw = document.querySelector('.BrowserWrapper');
    if (web && !bw) { bw = document.createElement('div'); bw.className = 'BrowserWrapper'; bw.innerHTML = '<div style="padding:40px;color:#000;background:#c6d4df;height:100%">STORE WEB VIEW (native CEF view in real Steam)</div>'; document.querySelector('.ContentFrame').appendChild(bw); }
    if (bw) bw.style.display = web ? '' : 'none';

@@ -85,6 +85,230 @@
     }
   };
 
+
+  /* ───────────── store game page: the PS Store hero ─────────────
+     Built once per page in front of Steam's top block, from what the page already
+     holds (nothing is fetched, nothing is computed):
+       · art      — the game's library hero on Steam's CDN, else its first screenshot
+       · title    — .apphub_AppName (logo from the CDN when it exists)
+       · chips    — the sale percent (.discount_pct of the base edition — never
+                    .bundle_base_discount, which is a struck-through note) with Steam's
+                    countdown text, the review summary row, release date, developer
+       · price    — Steam's own final / original price text of the base edition
+       · buttons  — the primary one CLICKS Steam's own button of the base edition
+                    (Add to Cart / Play / Download / Install…), the heart clicks Steam's
+                    wishlist links, the others scroll to Steam's editions and gallery
+     Steam's release / developer / tag nodes are MOVED into a facts strip (their links
+     and the tag "+" keep working). If the page lacks the basics, nothing is built. */
+  const SR = /^(ru|uk|be)/i.test(document.documentElement.lang || '') || /russian|ukrainian/i.test(String(window.g_strLanguage || ''));
+  const TXT = SR
+    ? { editions: 'Все издания', media: 'Медиа', wish: 'В список желаемого', wished: 'В списке желаемого', close: 'Закрыть', prev: 'Назад', next: 'Вперёд', owned: 'В библиотеке' }
+    : { editions: 'All editions', media: 'Media', wish: 'Add to wishlist', wished: 'On your wishlist', close: 'Close', prev: 'Previous', next: 'Next', owned: 'In library' };
+  const SVG = {
+    heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20.2s-7.6-4.6-9.2-9.4C1.7 7.4 3.9 4.3 7.2 4.3c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.5 3.1 4.4 6.5-1.6 4.8-9.2 9.4-9.2 9.4z"/></svg>',
+    cart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.1 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 1.9-1.5L20.5 8H6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg>',
+    left: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  };
+  const $ = (sel, r = document) => r.querySelector(sel);
+  const $$ = (sel, r = document) => [...r.querySelectorAll(sel)];
+  const text = n => (n ? n.textContent.replace(/\s+/g, ' ').trim() : '');
+  const el = (tag, cls, attrs = {}, kids = []) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'text') n.textContent = v;
+      else if (k === 'svg') n.innerHTML = v;   // our own static SVG only
+      else n.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of [].concat(kids)) if (kid) n.append(kid);
+    return n;
+  };
+  const CDN = id => `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${id}`;
+
+  const readProps = () => {
+    try {
+      const p = JSON.parse(($('.gamehighlight_desktopcarousel') || {}).dataset?.props || 'null');
+      return p ? { shots: (p.screenshots || []).filter(x => x && x.full) } : { shots: [] };
+    } catch (e) { return { shots: [] }; }
+  };
+  const legacyShots = () => $$('.highlight_strip_screenshot img, .highlight_screenshot_link').map(n => {
+    const full = n.tagName === 'A' ? n.getAttribute('href') : (n.src || '').replace(/\.116x65\.jpg/, '.1920x1080.jpg');
+    return full ? { full, standard: n.tagName === 'IMG' ? n.src : full } : null;
+  }).filter(Boolean);
+  // the base edition: the first purchase block that is not a bundle
+  const basePurchase = () => {
+    const wraps = $$('#game_area_purchase .game_area_purchase_game_wrapper');
+    return wraps.find(w => !w.classList.contains('dynamic_bundle_description')) || wraps[0] || $('#game_area_purchase .game_area_purchase_game') || null;
+  };
+
+  const Viewer = (() => {
+    let node = null, list = [], i = 0;
+    const show = () => {
+      node.querySelector('img').src = list[i].full;
+      node.querySelector('.count').textContent = `${i + 1} / ${list.length}`;
+    };
+    const key = e => {
+      if (!node || !node.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') { i = (i - 1 + list.length) % list.length; show(); }
+      else if (e.key === 'ArrowRight') { i = (i + 1) % list.length; show(); }
+    };
+    const close = () => { if (node) node.classList.remove('open'); removeEventListener('keydown', key, true); };
+    const open = (shots, start) => {
+      list = shots; i = start || 0;
+      if (!node) {
+        node = el('div', 'ps5-viewer', { role: 'dialog', 'aria-modal': 'true' }, [
+          el('img', '', { alt: '' }),
+          el('button', 'prev', { type: 'button', 'aria-label': TXT.prev, svg: SVG.left }),
+          el('button', 'next', { type: 'button', 'aria-label': TXT.next, svg: SVG.right }),
+          el('button', 'close', { type: 'button', 'aria-label': TXT.close, svg: SVG.close }),
+          el('div', 'count'),
+        ]);
+        node.addEventListener('click', e => {
+          if (e.target.closest('.prev')) { i = (i - 1 + list.length) % list.length; show(); }
+          else if (e.target.closest('.next')) { i = (i + 1) % list.length; show(); }
+          else if (e.target.closest('.close') || e.target === node) close();
+        });
+        document.body.appendChild(node);
+      }
+      show();
+      node.classList.add('open');
+      addEventListener('keydown', key, true);
+    };
+    return { open };
+  })();
+
+  const buildHero = () => {
+    if (!isStore || state.kind !== 'app' || document.querySelector('[data-ps5-hero]')) return;
+    const id = (/^\/app\/(\d+)/.exec(location.pathname) || [])[1];
+    const name = text($('.apphub_AppName')) || text($('#appHubAppName'));
+    const anchor = $('.game_page_background.game .page_top_area') || $('.page_title_area') || $('#game_highlights');
+    if (!id || !name || !anchor) return;
+    const base = basePurchase();
+    const shots = (() => { const p = readProps().shots; return p.length ? p : legacyShots(); })();
+
+    // art: library hero → first screenshot
+    const art = el('img', 'ps5-hero-art', { alt: '', decoding: 'async' });
+    const arts = [`${CDN(id)}/library_hero.jpg`, ...(shots[0] ? [shots[0].full] : [])];
+    let ai = 0;
+    art.onload = () => art.classList.add('on');
+    art.onerror = () => { if (++ai < arts.length) art.src = arts[ai]; };
+    art.src = arts[0];
+
+    const logo = el('img', 'ps5-hero-logo', { alt: '', decoding: 'async' });
+    const title = el('h1', 'ps5-hero-title', { text: name });
+
+    // chips
+    const chips = el('ul', 'ps5-hero-chips');
+    const pct = base && base.querySelector('.discount_block:not(.no_discount) .discount_pct');
+    if (pct && /\d/.test(text(pct))) {
+      const cd = base.querySelector('.game_purchase_discount_countdown');
+      chips.append(el('li', 'ps5-hero-chip sale', { text: [text(pct), cd ? text(cd).replace(/^[^!]*!\s*/, '') : ''].filter(Boolean).join(' · ') }));
+    }
+    const rows = $$('#userReviews .user_reviews_summary_row');
+    const row = rows.find(r => r.matches('[itemprop=aggregateRating]')) || rows[rows.length - 1];
+    const summary = row && row.querySelector('.game_review_summary');
+    if (summary && text(summary)) {
+      const tone = summary.classList.contains('positive') ? 'ok' : summary.classList.contains('mixed') ? 'warn' : summary.classList.contains('negative') ? 'bad' : '';
+      const share = ((row.getAttribute('data-tooltip-html') || '').match(/(\d+)\s?%/) || [])[1];
+      chips.append(el('li', '', {}, [el('a', 'ps5-hero-chip', { href: '#app_reviews_hash', 'data-tone': tone }, [el('span', 'dot'), document.createTextNode(text(summary) + (share ? ` · ${share}%` : ''))])]));
+    }
+    const date = text($('.glance_ctn .release_date .date'));
+    if (date) chips.append(el('li', 'ps5-hero-chip', { text: date }));
+    const dev = text($('.glance_ctn #developers_list a, .glance_ctn .dev_row .summary a'));
+    if (dev) chips.append(el('li', 'ps5-hero-chip', { text: dev }));
+
+    const desc = text($('.game_description_snippet'));
+
+    // price: Steam's own strings of the base edition
+    let price = null;
+    const owned = $('.game_area_already_owned');
+    if (owned) price = el('div', 'ps5-hero-owned', { text: text(owned.querySelector('.already_in_library')) || TXT.owned });
+    else if (base) {
+      const sale = base.querySelector('.discount_block:not(.no_discount)');
+      if (sale && sale.querySelector('.discount_final_price')) {
+        price = el('div', 'ps5-hero-price', {}, [
+          sale.querySelector('.discount_pct') ? el('span', 'pct', { text: text(sale.querySelector('.discount_pct')) }) : null,
+          sale.querySelector('.discount_original_price') ? el('span', 'orig', { text: text(sale.querySelector('.discount_original_price')) }) : null,
+          el('span', 'final', { text: text(sale.querySelector('.discount_final_price')) }),
+        ]);
+      } else {
+        const plain = base.querySelector('.discount_block.no_discount .discount_final_price, .game_purchase_price');
+        if (plain && text(plain)) price = el('div', 'ps5-hero-price', {}, [el('span', 'final', { text: text(plain) })]);
+      }
+    }
+
+    // buttons
+    const buy = el('div', 'ps5-hero-buy', {}, [price]);
+    const steamBtn = owned
+      ? owned.querySelector('.game_area_already_owned_btn a, a.btn_green_steamui')
+      : base && base.querySelector('.btn_addtocart .btn_green_steamui, .game_purchase_action a.btn_green_steamui, .game_purchase_action .btn_green_steamui, .game_purchase_action a[href]');
+    if (steamBtn && text(steamBtn)) {
+      const primary = el('button', 'ps5-hero-btn primary', { type: 'button', svg: owned ? '' : SVG.cart });
+      primary.append(document.createTextNode(text(steamBtn)));
+      primary.addEventListener('click', () => steamBtn.click());
+      buy.append(primary);
+    }
+    const add = $('#add_to_wishlist_area'), added = $('#add_to_wishlist_area_success');
+    if (add && added) {
+      const addLink = add.querySelector('a'), removeLink = added.querySelector('a');
+      const wish = el('button', 'ps5-hero-btn ghost icon wish', { type: 'button', svg: SVG.heart });
+      const isOn = () => getComputedStyle(added).display !== 'none';
+      const sync = () => { const on = isOn(); wish.setAttribute('aria-pressed', String(on)); wish.title = on ? TXT.wished : TXT.wish; wish.setAttribute('aria-label', wish.title); };
+      wish.addEventListener('click', () => { const a = isOn() ? removeLink : addLink; if (a) a.click(); setTimeout(sync, 350); });
+      const mo = new MutationObserver(sync);
+      [add, added].forEach(n => mo.observe(n, { attributes: true, attributeFilter: ['style', 'class'] }));
+      sync();
+      buy.append(wish);
+    }
+    const go = (label, target) => {
+      const b = el('button', 'ps5-hero-btn ghost', { type: 'button', text: label });
+      b.addEventListener('click', () => { const t = $(target); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      return b;
+    };
+    if ($('#game_area_purchase') && $$('#game_area_purchase .game_area_purchase_game_wrapper').length > 1) buy.append(go(TXT.editions, '#game_area_purchase'));
+    if ($('#game_highlights')) buy.append(go(TXT.media, '#game_highlights'));
+
+    // screenshot thumbnails: a click shows it behind the hero, a second click opens the viewer
+    const thumbs = shots.slice(0, 3).map((sh, k) => {
+      const b = el('button', 'ps5-hero-shot', { type: 'button', 'aria-label': `${TXT.media} ${k + 1}` }, [el('img', '', { src: sh.standard || sh.thumbnail || sh.full, alt: '', loading: 'lazy', decoding: 'async' })]);
+      b.addEventListener('click', () => {
+        if (b.classList.contains('on')) { Viewer.open(shots, k); return; }
+        thumbs.forEach(t => t.classList.remove('on'));
+        b.classList.add('on');
+        art.classList.remove('on');
+        art.onload = () => art.classList.add('on');
+        art.src = sh.full;
+      });
+      return b;
+    });
+
+    const hero = el('section', 'ps5-hero', { 'data-ps5-hero': '' }, [
+      el('div', 'ps5-hero-stage', {}, [art]),
+      el('div', 'ps5-hero-shade'),
+      el('div', 'ps5-hero-inner', {}, [
+        el('div', 'ps5-hero-main', {}, [logo, title, chips.children.length ? chips : null, desc ? el('p', 'ps5-hero-desc', { text: desc }) : null, buy]),
+        thumbs.length ? el('div', 'ps5-hero-shots', {}, thumbs) : null,
+      ]),
+    ]);
+    logo.onload = () => { if (logo.naturalWidth > 40) hero.classList.add('has-logo'); };
+    logo.src = `${CDN(id)}/logo.png`;
+
+    // facts: Steam's own nodes, moved (not copied)
+    const factNodes = $$('.glance_ctn .release_date, .glance_ctn .dev_row');
+    const tags = $('.glance_ctn .glance_tags_ctn');
+    const facts = factNodes.length || tags ? el('div', 'ps5-facts', {}, [...factNodes, tags]) : null;
+
+    anchor.before(...[hero, facts].filter(Boolean));
+    root.classList.add('ps5-hero-on');
+    const sbw = () => root.style.setProperty('--ps5-sbw', Math.max(0, innerWidth - root.clientWidth) + 'px');
+    sbw();
+    addEventListener('resize', sbw, { passive: true });
+  };
+
   let last = 0, timer = 0, observer = null;
   const pass = () => {
     timer = 0;
@@ -102,6 +326,7 @@
     }
     markMounts();
     paintArt();
+    try { buildHero(); } catch (e) { console.warn('[PS5] store hero', e); }
   };
   const soon = () => {
     if (timer) return;

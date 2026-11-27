@@ -2,7 +2,7 @@
    PlayStation 5 — Millennium theme
    components.css: the PS5 elements built by js/ps5.js
    (#ps5-bg, #ps5-boot, #ps5-top, #ps5-home, #ps5-library, #ps5-cc,
-    #ps5-details, #ps5-lightbox, #ps5-snack)
+    #ps5-gamemenu, #ps5-snack)
    ========================================================================== */
 
 .ps5-ico { display: inline-flex; width: 22px; height: 22px; flex: none; }
@@ -26,9 +26,9 @@
   inset: -20%;
   opacity: 0.85;
   background:
-    radial-gradient(40% 30% at 20% 70%, rgba(0, 112, 209, 0.35), transparent 70%),
-    radial-gradient(35% 28% at 80% 30%, rgba(40, 90, 255, 0.28), transparent 70%),
-    radial-gradient(50% 35% at 55% 95%, rgba(0, 170, 255, 0.18), transparent 70%);
+ps5-details, #ps5-lightbox, #ps5-snack)radial-gradient(40% 30% at 20% 70%, rgba(0, 112, 209, 0.35), transparent 70%),
+ps5-details, #ps5-lightbox, #ps5-snack)radial-gradient(35% 28% at 80% 30%, rgba(40, 90, 255, 0.28), transparent 70%),
+ps5-details, #ps5-lightbox, #ps5-snack)radial-gradient(50% 35% at 55% 95%, rgba(0, 170, 255, 0.18), transparent 70%);
   animation: ps5-waves 38s ease-in-out infinite alternate;
   will-change: transform;
   transition: opacity 600ms var(--ps5-ease);
@@ -54,8 +54,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.05) 75%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 22%, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.05) 75%),
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 22%, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
   opacity: 0;
   transition: opacity 700ms var(--ps5-ease);
 }
@@ -93,8 +93,8 @@ html.ps5-on-web:not(.ps5-web-hidden) #ps5-bg { display: none; }
 #ps5-boot .ps5-boot-mark i:nth-child(1) { border: none; width: 0; height: 0; border-left: 19px solid transparent; border-right: 19px solid transparent; border-bottom: 32px solid rgba(255, 255, 255, 0.9); }
 #ps5-boot .ps5-boot-mark i:nth-child(2) { border-radius: 50%; animation-delay: 90ms; }
 #ps5-boot .ps5-boot-mark i:nth-child(3) { border: none; position: relative; animation-delay: 180ms; background:
-    linear-gradient(45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%),
-    linear-gradient(-45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%); }
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%),
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(-45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%); }
 #ps5-boot .ps5-boot-mark i:nth-child(4) { border-radius: 4px; animation-delay: 270ms; }
 @keyframes ps5-boot-shape { from { opacity: 0; transform: translateY(10px) scale(0.8); } to { opacity: 1; transform: none; } }
 @keyframes ps5-boot-glow { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1.1); } }
@@ -362,8 +362,8 @@ html.ps5-on-web:not(.ps5-web-hidden) #ps5-bg { display: none; }
   box-sizing: border-box;
   color: #fff;
   background:
-    radial-gradient(120% 80% at 80% -10%, rgba(0, 80, 190, 0.35), transparent 60%),
-    linear-gradient(180deg, rgba(6, 16, 40, 0.97), rgba(0, 0, 0, 0.98));
+ps5-details, #ps5-lightbox, #ps5-snack)radial-gradient(120% 80% at 80% -10%, rgba(0, 80, 190, 0.35), transparent 60%),
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(180deg, rgba(6, 16, 40, 0.97), rgba(0, 0, 0, 0.98));
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
   opacity: 0;
@@ -664,45 +664,73 @@ html.ps5-on-web:not(.ps5-web-hidden) #ps5-bg { display: none; }
 .ps5-cc-icon:focus-visible { outline: none; box-shadow: var(--ps5-focus); }
 .ps5-cc-icon.on { background: #fff; color: #0b0b0f; transform: scale(1.08); }
 
-/* ───────────── game hub strip (game page) ───────────── */
-#ps5-details { position: relative; z-index: 1; padding: 6px 28px 24px; color: #fff; }
-#ps5-details .ps5-cards { margin-top: 18px; }
-.ps5-det-about { max-width: 880px; }
-.ps5-det-about h3,
-.ps5-det-shots h3 { margin: 26px 0 10px; font-size: 18px; font-weight: 700; }
-.ps5-det-about p { margin: 0; color: var(--ps5-text-2); font-size: 15px; line-height: 1.6; }
-.ps5-det-facts { margin-top: 10px; font-size: 13px; color: var(--ps5-text-3); }
-.ps5-det-strip { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 12px; }
-.ps5-shot {
-  flex: none;
-  width: 260px;
-  aspect-ratio: 16 / 9;
-  padding: 0;
-  border: none;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-  cursor: zoom-in;
-  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
-}
-.ps5-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ps5-shot:hover,
-.ps5-shot:focus-visible { outline: none; transform: scale(1.04); box-shadow: var(--ps5-focus); }
-
-#ps5-lightbox {
+/* ───────────── game actions menu ("…" on the Home Screen) ───────────── */
+#ps5-gamemenu {
   position: fixed;
-  inset: 0;
-  z-index: 1100;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.88);
-  opacity: 0;
-  visibility: hidden;
-  cursor: zoom-out;
-  transition: opacity 240ms var(--ps5-ease), visibility 0s linear 240ms;
+  z-index: 1050;
+  min-width: 248px;
+  max-width: min(320px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background:
+ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 40%),
+ps5-details, #ps5-lightbox, #ps5-snack)rgba(9, 20, 46, 0.96);
+  -webkit-backdrop-filter: blur(26px) saturate(1.3);
+  backdrop-filter: blur(26px) saturate(1.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 24px 60px -18px rgba(0, 0, 0, 0.85);
+  color: #fff;
+  transform-origin: top left;
 }
-#ps5-lightbox.open { opacity: 1; visibility: visible; transition: opacity 240ms var(--ps5-ease); }
-#ps5-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 12px; box-shadow: var(--ps5-shadow); }
+#ps5-gamemenu[hidden] { display: none; }
+#ps5-gamemenu.open { animation: ps5-gm-in 170ms var(--ps5-ease); }
+@keyframes ps5-gm-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.ps5-gm-head {
+  padding: 8px 12px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ps5-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ps5-gm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ps5-gm-item .ps5-ico { width: 18px; height: 18px; color: rgba(255, 255, 255, 0.75); }
+.ps5-gm-item:hover,
+.ps5-gm-item:focus-visible { outline: none; background: var(--ps5-accent); color: #fff; }
+.ps5-gm-item:hover .ps5-ico,
+.ps5-gm-item:focus-visible .ps5-ico { color: #fff; }
+.ps5-gm-item.primary { background: #fff; color: #0b0b0f; font-weight: 700; margin-bottom: 4px; }
+.ps5-gm-item.primary .ps5-ico { color: #0b0b0f; }
+.ps5-gm-item.primary:hover,
+.ps5-gm-item.primary:focus-visible { background: #fff; box-shadow: 0 0 0 2px var(--ps5-accent); }
+.ps5-gm-item.danger:hover,
+.ps5-gm-item.danger:focus-visible { background: #d0263f; }
+.ps5-gm-sep { height: 1px; margin: 5px 8px; background: rgba(255, 255, 255, 0.10); }
+
+/* gear and other icons react to hover in the Control Center row */
+.ps5-cc-icon .ps5-ico svg { transition: transform 400ms var(--ps5-ease); }
+.ps5-cc-icon[data-sec="settings"]:hover .ps5-ico svg { transform: rotate(60deg); }
+.ps5-cc-icon:hover:not(.on) { color: color-mix(in srgb, var(--ps5-accent) 45%, #fff); }
+.ps5-cc-wallet { color: #fff; text-transform: none; letter-spacing: 0; font-weight: 700; }
 
 /* ───────────── snack (launch feedback) ───────────── */
 #ps5-snack {

@@ -37,7 +37,7 @@ try {
   await page.waitForTimeout(400);
   check('logo art shown', await page.locator('#ps5-home.has-logo').count() === 1);
   check('description from store API', (await page.locator('.ps5-home-desc').textContent()).includes('"test"'));
-  check('Steam shelves kept under home', await page.locator('#ps5-home + .LibraryHome').count() === 1);
+  check('Steam shelves kept under home', await page.evaluate(() => { const h = document.getElementById('ps5-home'), l = document.querySelector('.LibraryHome'); return !!l && !!(h.compareDocumentPosition(l) & Node.DOCUMENT_POSITION_FOLLOWING); }));
   await shot('preview-home.jpg');
 
   // ---- v1.1.0: one profile button, bottom bar, What's New
@@ -49,10 +49,29 @@ try {
   await page.waitForTimeout(2200);
   check('bottom bar: friends online badge', (await page.locator('.FriendsButton .ps5-friends-badge').textContent()) === '6');
   check('bottom bar: downloading state from SteamClient.Downloads', await page.evaluate(() => document.documentElement.classList.contains('ps5-downloading')));
-  const pill = await page.locator('.AddGameButton').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n, '::before').content]);
+  const pill = await page.locator('.AddGameButton').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.querySelector('.Icon'), '::before').content]);
   check('bottom bar: Add a Game is a PS5 pill with icon', pill[0] === '999px' && pill[1] !== 'none', pill.join(' '));
+  const dl = await page.locator('.DownloadStatus').boundingBox();
+  const bar = await page.locator('.BottomBar').boundingBox();
+  check('bottom bar: Downloads is a compact capsule (Steam stretches it to the full bar)', dl.width <= 340 && dl.height <= 40, JSON.stringify(dl));
+  check('bottom bar: Downloads stays centred', Math.abs((dl.x + dl.width / 2) - (bar.x + bar.width / 2)) < 40, `${dl.x + dl.width / 2} vs ${bar.x + bar.width / 2}`);
+  check('bottom bar: progress kept inside the capsule', await page.locator('.DownloadStatus .ProgressBar').isVisible() && (await page.locator('.DownloadStatus .Percentage').textContent()) === '60%');
+
+  // ---- v1.2.0: black strip, home order, top menu, tabs
+  check('no black strip: empty .URLBarReplacement taken out of the layout', (await page.locator('.URLBarReplacement').evaluate(n => n.offsetHeight)) === 0);
+  check('PS5 Home is the first block of the home scroller (above What\'s New)', await page.evaluate(() => { const b = document.querySelector('.Body.InnerContainer'); return b.firstElementChild.id === 'ps5-home' && b.children[1].classList.contains('whatsnew-shelf'); }));
+  const rm = await page.locator('.RootMenuButton').nth(1).evaluate(n => [getComputedStyle(n, '::before').maskImage || getComputedStyle(n, '::before').webkitMaskImage, getComputedStyle(n, '::after').content]);
+  check('top menu: icon per item and separators', /svg/.test(rm[0]) && rm[1] !== 'none');
+  const tab = await page.locator('.SuperNavMenu.Selected > .MenuButton').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n, '::before').content, getComputedStyle(n, '::after').transform]);
+  check('nav tabs: active tab lit (white pill, icon, blue indicator)', tab[0] === 'rgb(255, 255, 255)' && tab[1] !== 'none' && tab[2] !== 'none', tab.join(' | '));
+  const prof = await page.locator('.SuperNavMenu:nth-of-type(4) > .MenuButton').evaluate(n => getComputedStyle(n).getPropertyValue('--ps5-tab-icon'));
+  check('nav tabs: profile tab gets the person icon', /circle/.test(prof));
   const wn = await page.locator('.PartnerEventRowCapsule_Container > div').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
-  check("What's New: content cards restyled", wn === '18px', wn);
+  check("What's New: content cards restyled", wn === '16px', wn);
+  const wnBox = await page.locator('.PartnerEventRowCapsule_Container > div').first().evaluate(n => { const c = getComputedStyle(n); return [c.borderTopWidth, c.paddingTop, c.display, n.getBoundingClientRect().height]; });
+  check("What's New: Steam's box sizes untouched (no border / padding / display change)", wnBox[0] === '0px' && wnBox[1] === '0px' && wnBox[2] === 'flex' && wnBox[3] === 230, wnBox.join(' '));
+  const ut = await page.locator('.UpdatesContainer').evaluate(n => getComputedStyle(n).paddingTop);
+  check("What's New: shelf container keeps Steam's padding", ut === '0px', ut);
   await page.locator('#route').evaluate(n => { n.scrollTop = n.querySelector('.UpdatesContainer').offsetTop - 120; });
   await page.locator('.PartnerEventRowCapsule_Container > div').first().hover();
   await page.waitForTimeout(350);
@@ -134,19 +153,45 @@ try {
   check('CC: Music → steam://open/library/view/soundtracks', calls.some(c => c[1] === 'steam://open/library/view/soundtracks'));
   check('downloads: one shared listener (bottom bar + CC), not one per opening', calls.filter(c => c[0] === 'RegisterDownloads').length === 1);
 
-  await page.dblclick('.ps5-tile[data-i="0"]');
-  await page.waitForSelector('#ps5-details .ps5-card');
+  // ---- v1.2.0: the "…" button opens a game actions menu (no navigation, no second view)
+  await page.evaluate(() => { window.__steamCalls.length = 0; });
+  const selId = await page.evaluate(() => window.appStore.allApps.find(a => a.display_name === document.querySelector('.ps5-tile.selected').title).appid);
+  await page.click('#ps5-home [data-act="details"]');
+  await page.waitForSelector('#ps5-gamemenu.open');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('"…" opens the game actions menu', await page.locator('#ps5-gamemenu:not([hidden])').count() === 1);
+  check('"…" does not navigate away from Home', !calls.some(c => c[0] === 'Navigate') && await page.locator('#ps5-home').count() === 1);
+  check('"…" leaves the page structure alone (no injected game strip, list still hidden)', await page.locator('#ps5-details').count() === 0 && await page.locator('.LeftListSizableContainer').isHidden());
+  const gm = await page.locator('#ps5-gamemenu').boundingBox();
+  check('game menu inside the window', gm.x >= 0 && gm.y >= 0 && gm.x + gm.width <= 1440 && gm.y + gm.height <= 860, JSON.stringify(gm));
+  check('game menu: real actions listed', await page.locator('#ps5-gamemenu [data-act]').count() >= 8);
+  await shot('preview-game-menu.jpg');
+  await page.click('#ps5-gamemenu [data-act="properties"]');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('menu: Properties → SteamClient.Apps.OpenAppSettingsDialog', calls.some(c => c[0] === 'OpenAppSettingsDialog' && c[1] === selId));
+  check('menu closes after an action', await page.locator('#ps5-gamemenu:not([hidden])').count() === 0);
+  await page.click('#ps5-home [data-act="details"]');
+  await page.keyboard.press('Escape');
+  check('menu closes with Esc', await page.locator('#ps5-gamemenu:not([hidden])').count() === 0);
+  await page.click('#ps5-home [data-act="details"]');
+  await page.mouse.click(900, 300);
+  check('menu closes on a click outside', await page.locator('#ps5-gamemenu:not([hidden])').count() === 0);
+  await page.click('#ps5-home [data-act="details"]');
+  await page.click('#ps5-home [data-act="details"]');
+  check('menu: one instance, second click toggles it shut', await page.locator('#ps5-gamemenu').count() === 1 && await page.locator('#ps5-gamemenu:not([hidden])').count() === 0);
+  await page.click('#ps5-home [data-act="details"]');
+  await page.click('#ps5-gamemenu [data-act="hub"]');
   await page.waitForTimeout(600);
   calls = await page.evaluate(() => window.__steamCalls);
-  check('double-click tile → SteamUIStore.Navigate(/library/app/id)', calls.some(c => c[0] === 'Navigate' && c[1] === '/library/app/102'));
-  check('game hub strip placed after the play bar', await page.locator('.PlayBar + #ps5-details').count() === 1);
-  check('game hub: screenshots strip', await page.locator('#ps5-details .ps5-shot').count() === 4);
-  check('game list visible again off home', await page.locator('.LeftListSizableContainer').isVisible());
+  check('menu: Game hub → SteamUIStore.Navigate(/library/app/id)', calls.some(c => c[0] === 'Navigate' && c[1] === '/library/app/' + selId));
+  check('game page: one view only (Steam\'s page, nothing injected)', await page.locator('#ps5-details, #ps5-lightbox').count() === 0 && await page.locator('.AppDetailsMain').count() === 1);
+  check('game page: no game list on the left (PS5 mode default)', await page.locator('.LeftListSizableContainer').isHidden());
   await shot('preview-game.jpg');
-  await page.click('.ps5-shot');
-  await page.waitForTimeout(300);
-  check('screenshot lightbox opens', await page.locator('#ps5-lightbox.open').count() === 1);
-  await page.keyboard.press('Escape');
+  await page.addStyleTag({ content: ':root{--ps5-home-sidebar:home}' }).then(h => h.evaluate(n => n.id = 'side-opt'));
+  await page.waitForTimeout(2200);
+  check('option «Game list → Hidden on Home only» shows it on game pages', await page.locator('.LeftListSizableContainer').isVisible());
+  await page.evaluate(() => document.getElementById('side-opt').remove());
+  await page.waitForTimeout(2200);
 
   await page.evaluate(() => window.SteamUIStore.Navigate('/library/home'));
   await page.waitForTimeout(300);
@@ -161,6 +206,9 @@ try {
   calls = await page.evaluate(() => window.__steamCalls);
   check('profile on a web page hides the native web view', calls.some(c => c[0] === 'SetVisible' && c[1] === false) && await page.evaluate(() => document.documentElement.classList.contains('ps5-web-hidden')));
   check('profile panel opens on the Profile section', (await page.locator('.ps5-cc-icon.on').getAttribute('data-sec')) === 'profile');
+  check('profile panel shows the wallet from Steam\'s account button', (await page.locator('.ps5-cc-wallet').textContent()).includes('12,50€'));
+  const gear = await page.locator('.ps5-cc-icon[data-sec="settings"] svg').innerHTML();
+  check('Settings icon is a cog, not a sun', gear.includes('M10.3 2.8') && !gear.includes('M12 2.8v2.4'));
   check('profile panel has the account section (replaces Steam account menu)', await page.locator('[data-act="account"]').count() === 1 && await page.locator('[data-act="store-prefs"]').count() === 1);
   await page.waitForTimeout(450);   // let the opening animation finish
   const box = await page.locator('.ps5-cc-panel').boundingBox();
@@ -219,6 +267,12 @@ try {
     const file = path.join(DIR, '..', rel);
     r.fulfill({ status: 200, contentType: rel.endsWith('.css') ? 'text/css' : 'text/javascript', body: fs.readFileSync(file) });
   });
+  await wp.route('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/**', async r => {
+    const m = /apps\/(\d+)\/(library_hero\.jpg|logo\.png)/.exec(r.request().url());
+    if (!m) return r.fulfill({ status: 404, body: '' });
+    const res = await fetch(`http://localhost:${PORT}/assets/${m[1]}/${m[2]}`);
+    r.fulfill({ status: res.status, contentType: 'image/svg+xml', body: Buffer.from(await res.arrayBuffer()) });
+  });
   await wp.route('https://cdn.ps5-mock.test/**', async r => {
     const u = r.request().url().replace('https://cdn.ps5-mock.test/', `http://localhost:${PORT}/`);
     const res = await fetch(u);
@@ -240,15 +294,56 @@ try {
   check('store: React mount capsules marked', await wp.locator('[data-ps5-cap="1"]').count() === 3);
   const navbg = await wp.locator('.store_nav').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check('store: navigation is a rounded glass bar', navbg === '20px', navbg);
+  // double discount: Steam's struck-through bundle note must not become a second badge
+  const bb = await wp.locator('#dev-trending .bundle_base_discount').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).fontSize, getComputedStyle(n, '::before').content]);
+  const dp = await wp.locator('#dev-trending .discount_pct').evaluate(n => getComputedStyle(n).backgroundColor);
+  check('discounts: -55% is the one sale badge', dp === 'rgb(0, 112, 209)', dp);
+  check('discounts: bundle "-10%" stays Steam\'s small struck-through note (no second badge)', bb[0] === 'rgba(0, 0, 0, 0)' && bb[1] === '11px' && bb[2] !== 'none', bb.join(' | '));
+  check('discounts: nothing recomputed or duplicated (DOM unchanged)', (await wp.locator('#dev-trending .discount_pct').count()) === 1 && (await wp.locator('#dev-trending').textContent()).match(/%/g).length === 2);
+  // arrows: compact disc, no big white circle
+  await wp.locator('.carousel_container .arrow.right').hover();
+  await wp.waitForTimeout(250);
+  const ar = await wp.locator('.carousel_container .arrow.right').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n, '::before').width, getComputedStyle(n, '::before').backgroundColor, n.getBoundingClientRect().width, n.getBoundingClientRect().height]);
+  check('arrows: hit area transparent and unchanged (45×108)', ar[0] === 'rgba(0, 0, 0, 0)' && ar[1] === '0px' && Math.round(ar[4]) === 45 && Math.round(ar[5]) === 108, ar.join(' | '));
+  check('arrows: 38 px disc, blue on hover (no white circle)', ar[2] === '38px' && ar[3] === 'rgb(0, 112, 209)', ar.join(' | '));
+  if (SHOTS) await wp.locator('.carousel_container').screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-arrows.jpg'), type: 'jpeg', quality: 82 });
+  const v7 = await wp.evaluate(() => getComputedStyle(document.body).getPropertyValue('--color-greyneutral-2').trim());
+  check('store palette: Steam\'s own colour variables remapped to PS5', v7 === '#061230', v7);
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store.jpg'), type: 'jpeg', quality: 82 });
   await wp.evaluate(() => history.pushState({}, '', '/search/?term=space'));
   await wp.waitForTimeout(400);
   check('store: SPA navigation updates page kind', /ps5-p-search/.test(await cls()) && !/ps5-p-home/.test(await cls()));
   await wp.goto('https://store.steampowered.com/app/101/Starfall_Odyssey/');
   await wp.waitForTimeout(500);
+  await wp.waitForTimeout(400);
+  check('store game page: PS Store hero built once', await wp.locator('[data-ps5-hero]').count() === 1 && /ps5-hero-on/.test(await cls()));
+  check('hero: title, logo, chips (sale + reviews + date + developer)', (await wp.locator('.ps5-hero-chip').count()) === 4 && await wp.locator('.ps5-hero.has-logo').count() === 1);
+  check('hero: sale chip reads Steam\'s own percent and countdown', (await wp.locator('.ps5-hero-chip.sale').textContent()) === '-25% · Offer ends 4 December');
+  check('hero: price is Steam\'s strings of the base edition, one percent only', (await wp.locator('.ps5-hero-price').textContent()) === '-25%59,99€44,99€' && (await wp.locator('.ps5-hero-price .pct').count()) === 1);
+  await wp.click('.ps5-hero-btn.primary');
+  check('hero: primary button clicks Steam\'s own Add to Cart', (await wp.evaluate(() => window.__cart)) === 1 && (await wp.locator('.ps5-hero-btn.primary').textContent()) === 'Add to Cart');
+  await wp.click('.ps5-hero-btn.wish');
+  await wp.waitForTimeout(450);
+  check('hero: heart drives Steam\'s wishlist links', (await wp.locator('.ps5-hero-btn.wish').getAttribute('aria-pressed')) === 'true' && await wp.locator('#add_to_wishlist_area_success').isVisible());
+  await wp.click('.ps5-hero-btn.wish');
+  await wp.waitForTimeout(450);
+  check('hero: heart removes again', (await wp.locator('.ps5-hero-btn.wish').getAttribute('aria-pressed')) === 'false');
+  check('hero: facts strip holds Steam\'s moved nodes (tags keep their links)', await wp.locator('.ps5-facts .glance_tags_ctn .app_tag').count() === 3 && await wp.locator('.glance_ctn .glance_tags_ctn').count() === 0);
+  check('hero: Steam\'s duplicated title / snippet step back', await wp.locator('.apphub_AppName').isHidden() && await wp.locator('.glance_ctn .game_description_snippet').isHidden());
+  check('hero: editions + media buttons (2 editions on the page)', (await wp.locator('.ps5-hero-btn.ghost:not(.wish)').count()) === 2);
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-hero.jpg'), type: 'jpeg', quality: 84 });
+  await wp.click('.ps5-hero-shot >> nth=1');
+  await wp.waitForTimeout(200);
+  await wp.click('.ps5-hero-shot >> nth=1');
+  await wp.waitForTimeout(300);
+  check('hero: thumbnail → background, second click → viewer', await wp.locator('.ps5-viewer.open').count() === 1 && (await wp.locator('.ps5-viewer .count').textContent()) === '2 / 5');
+  await wp.keyboard.press('ArrowRight');
+  check('viewer: arrow keys page through', (await wp.locator('.ps5-viewer .count').textContent()) === '3 / 5');
+  await wp.keyboard.press('Escape');
+  check('viewer: Esc closes', await wp.locator('.ps5-viewer.open').count() === 0);
   check('store game page: kind + art from the page', /ps5-p-app/.test(await cls()) && /library_hero/.test(await wp.evaluate(() => document.documentElement.style.getPropertyValue('--ps5-page-art'))));
-  const buy = await wp.locator('.game_area_purchase_game').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
-  const btn = await wp.locator('.btn_green_steamui').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).backgroundColor]);
+  const buy = await wp.locator('.game_area_purchase_game').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
+  const btn = await wp.locator('.btn_green_steamui').first().evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).backgroundColor]);
   check('store game page: PS Store buy panel and blue pill button', buy === '20px' && btn[0] === '999px' && btn[1] === 'rgb(0, 112, 209)', buy + ' ' + btn.join(' '));
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-game.jpg'), type: 'jpeg', quality: 82 });
   await wp.goto('https://store.steampowered.com/wishlist/id/vasya/');

@@ -48,7 +48,9 @@
   window.SteamUIStore = { Navigate: p => { calls.push(['Navigate', p]); history.push(p); }, WindowStore: { MainWindowInstance: { m_history: history } } };
   let dlCb = null;
   window.SteamClient = {
-    Apps: { RunGame: (...a) => calls.push(['RunGame', ...a]), TerminateApp: (...a) => calls.push(['TerminateApp', ...a]), CancelLaunch: (...a) => calls.push(['CancelLaunch', ...a]) },
+    Installs: { OpenUninstallWizard: (...a) => calls.push(['OpenUninstallWizard', ...a]) },
+    Apps: { OpenAppSettingsDialog: (...a) => calls.push(['OpenAppSettingsDialog', ...a]), ShowStore: (...a) => calls.push(['ShowStore', ...a]), BrowseScreenshotsForApp: (...a) => calls.push(['BrowseScreenshotsForApp', ...a]), ShowControllerConfigurator: (...a) => calls.push(['ShowControllerConfigurator', ...a]), CreateDesktopShortcutForApp: (...a) => calls.push(['CreateDesktopShortcutForApp', ...a]),
+      RunGame: (...a) => calls.push(['RunGame', ...a]), TerminateApp: (...a) => calls.push(['TerminateApp', ...a]), CancelLaunch: (...a) => calls.push(['CancelLaunch', ...a]) },
     URL: { ExecuteSteamURL: u => calls.push(['ExecuteSteamURL', u]) },
     User: { StartRestart: () => calls.push(['StartRestart']), StartShutdown: () => calls.push(['StartShutdown']) },
     Downloads: { RegisterForDownloadOverview: cb => { dlCb = cb; calls.push(['RegisterDownloads']); cb({ update_appid: 104, update_state: 'Updating', update_bytes_to_download: 16e9, update_bytes_downloaded: 9.7e9, update_network_bytes_per_second: 48e6, update_seconds_remaining: 140, paused: false }); return { unregister: () => { dlCb = null; calls.push(['UnregisterDownloads']); } }; } },

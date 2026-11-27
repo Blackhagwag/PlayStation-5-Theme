@@ -127,6 +127,8 @@
       restart: 'Restart Steam', exit: 'Exit Steam', changeUser: 'Change account', goOffline: 'Go offline', confirm: 'Press again to confirm',
       launching: name => `Starting ${name}…`, screenshots: 'Screenshots', about: 'About', loading: 'Loading…',
       keysHint: 'Ctrl+Shift+Space Control Center · Ctrl+Shift+L Game Library',
+      storePage: 'Store page', communityHub: 'Community hub', controllerLayout: 'Controller layout', desktopShortcut: 'Create desktop shortcut',
+      properties: 'Properties', uninstall: 'Uninstall', shortcutDone: 'Desktop shortcut created', walletBalance: 'Wallet',
       account: 'Account', accountDetails: 'Account details', wallet: 'Wallet & purchases', storePrefs: 'Store preferences', language: 'Language',
     },
     ru: {
@@ -153,6 +155,8 @@
       restart: 'Перезапустить Steam', exit: 'Выйти из Steam', changeUser: 'Сменить аккаунт', goOffline: 'Перейти в офлайн', confirm: 'Нажмите ещё раз для подтверждения',
       launching: name => `Запуск: ${name}…`, screenshots: 'Скриншоты', about: 'Об игре', loading: 'Загрузка…',
       keysHint: 'Ctrl+Shift+Space Центр управления · Ctrl+Shift+L Библиотека',
+      storePage: 'Страница в магазине', communityHub: 'Центр сообщества', controllerLayout: 'Раскладка контроллера', desktopShortcut: 'Ярлык на рабочем столе',
+      properties: 'Свойства', uninstall: 'Удалить', shortcutDone: 'Ярлык создан', walletBalance: 'Кошелёк',
       account: 'Аккаунт', accountDetails: 'Об аккаунте', wallet: 'Кошелёк и покупки', storePrefs: 'Настройки магазина', language: 'Язык',
     },
   };
@@ -362,28 +366,6 @@
     return e && e.total > 0 ? e : null;
   }, null);
 
-  const localShots = (() => {
-    let all = null;
-    return app => {
-      const sc = SC();
-      if (!sc || !sc.Screenshots) return Promise.resolve([]);
-      if (!all) {
-        try {
-          const api = sc.Screenshots;
-          all = Promise.resolve(api.GetAllAppsLocalScreenshotsCount())
-            .then(n => (n > 0 ? api.GetAllAppsLocalScreenshotsRange(0, Math.min(n, 2000) - 1) : []))
-            .catch(() => []);
-          setTimeout(() => { all = null; }, 120000);   // re-read every two minutes at most
-        } catch (e) { return Promise.resolve([]); }
-      }
-      const ids = new Set([String(app.appid), gameIdOf(app)]);
-      return all.then(list => (Array.isArray(list) ? list : [])
-        .filter(s => s && ids.has(String(s.strGameID)) && s.strUrl)
-        .sort((a, b) => (b.nCreated || 0) - (a.nCreated || 0))
-        .slice(0, 6)
-        .map(s => { const u = '/' + String(s.strUrl).replace(/^\/+/, ''); return { thumb: u, full: u }; }));
-    };
-  })();
 
   /* ───────────────────────── icons (inline SVG, no external files) ───────────────────────── */
 
@@ -401,7 +383,13 @@
     mic: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></g></svg>',
     music: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17.5V6l10-2v11.5" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></g></svg>',
     download: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" d="M12 3.5v11m-4.5-4.5L12 14.5 16.5 10M4.5 19.5h15"/></svg>',
-    gear: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7" stroke-linecap="round"/></g></svg>',
+    // a cog with eight teeth (v1.1.0's circle with rays read as a sun)
+    gear: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M10.3 2.8h3.4l.5 2.4a7.3 7.3 0 0 1 1.8 1l2.3-.8 1.7 2.9-1.8 1.7a7.4 7.4 0 0 1 0 2l1.8 1.7-1.7 2.9-2.3-.8a7.3 7.3 0 0 1-1.8 1l-.5 2.4h-3.4l-.5-2.4a7.3 7.3 0 0 1-1.8-1l-2.3.8-1.7-2.9 1.8-1.7a7.4 7.4 0 0 1 0-2L4 8.3l1.7-2.9 2.3.8a7.3 7.3 0 0 1 1.8-1z"/><circle cx="12" cy="12" r="2.9"/></g></svg>',
+    bag: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke-linecap="round"/></g></svg>',
+    image: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3 3-2.5L20 17"/></g></svg>',
+    link: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></g></svg>',
+    trash: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l1 12.5h9l1-12.5M10 11v5M14 11v5"/></g></svg>',
+    controller2: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7.5 7h9a4.5 4.5 0 0 1 4.4 3.6l1 5a2.6 2.6 0 0 1-4.6 2.1L15.5 15h-7l-1.8 2.7a2.6 2.6 0 0 1-4.6-2.1l1-5A4.5 4.5 0 0 1 7.5 7z" stroke-linejoin="round"/><path d="M12 3v4"/></g></svg>',
     power: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 3.5v8"/><path d="M7 6.3a7.5 7.5 0 1 0 10 0"/></g></svg>',
     user: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6" stroke-linecap="round"/></g></svg>',
     trophy: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1.5A3.5 3.5 0 0 0 7.5 11M17 6h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z"/></g></svg>',
@@ -619,7 +607,7 @@
           <div class="ps5-home-sub"></div>
           <div class="ps5-home-actions">
             <button class="ps5-btn-play" data-act="play"></button>
-            <button class="ps5-btn-round" data-act="details" title="">${icon('dots')}</button>
+            <button class="ps5-btn-round" data-act="details" title="" aria-haspopup="menu" aria-expanded="false">${icon('dots')}</button>
           </div>
           <p class="ps5-home-desc"></p>
           <div class="ps5-cards ps5-home-cards"></div>
@@ -641,7 +629,7 @@
         const app = games[sel];
         if (!app) return;
         if (b.dataset.act === 'play') runAction(appById(app.appid) || app, b.dataset.state || 'play');
-        else if (b.dataset.act === 'details') navigate('/library/app/' + app.appid);
+        else if (b.dataset.act === 'details') GameMenu.open(appById(app.appid) || app, b);
       });
       node.addEventListener('dblclick', e => {
         const tile = e.target.closest('.ps5-tile:not([data-kind])');
@@ -685,7 +673,7 @@
       name.textContent = a.display_name;
       node.classList.remove('has-logo');
       logo.removeAttribute('src');
-      node.querySelector('[data-act="details"]').title = t.details;
+      node.querySelector('[data-act="details"]').title = t.more;
       const appid = a.appid;
       ensureDetails(a).then(() => {
         if (infoFor !== appid) return;
@@ -747,17 +735,20 @@
 
     const unmount = () => {
       if (node && node.isConnected) node.remove();
-      root.classList.remove('ps5-home-mounted', 'ps5-hide-list');
+      root.classList.remove('ps5-home-mounted');
+      GameMenu.close();
     };
 
     const update = () => {
       const host = doc.querySelector('.LibraryHome');
       if (!host || cssVar('--ps5-home') === 'off' || !S()) { unmount(); return false; }
       if (!node) build();
-      const anchor = host.parentElement;
-      if (node.parentElement !== anchor || node.nextElementSibling !== host) anchor.insertBefore(node, host);
+      // The home is the first thing in the scroller, above Steam's What's New shelf and
+      // shelves (both live in .Body.InnerContainer). v1.1.0 sat right before .LibraryHome,
+      // i.e. UNDER What's New, which then opened the page.
+      const anchor = host.closest('.Body.InnerContainer') || host.parentElement;
+      if (node.parentElement !== anchor || anchor.firstElementChild !== node) anchor.insertBefore(node, anchor.firstElementChild);
       root.classList.add('ps5-home-mounted');
-      root.classList.toggle('ps5-hide-list', cssVar('--ps5-home-sidebar') !== 'show');
       const now = Date.now();
       if (now - checked > 3000 || !games.length) {
         checked = now;
@@ -1029,6 +1020,9 @@
       return out;
     };
 
+    // the balance Steam shows in its account button (.AccountMenu .WalletBalance), still in the DOM when hidden
+    const wallet = () => ((doc.querySelector('.TitleBarControls .AccountMenu .WalletBalance, .AccountMenu .WalletBalance') || {}).textContent || '').trim();
+
     const STATE_NAME = s => { const t = T(); return [t.offline, t.online, t.busy, t.away, t.away, t.online, t.online, t.invisible][s] || t.online; };
 
     const card = () => {
@@ -1055,7 +1049,7 @@
           <div class="ps5-cc-actions">
             ${btn('profile', t.viewProfile, 'user', 'primary')}${btn('my-games', t.myGames, 'grid')}${btn('my-achievements', t.myAchievements, 'trophy')}${btn('my-friends', t.myFriends, 'friends')}${btn('my-badges', t.badges, '')}
           </div>
-          <div class="ps5-cc-subhead">${esc(t.account)}</div>
+          <div class="ps5-cc-subhead">${esc(t.account)}${wallet() ? ` · <span class="ps5-cc-wallet">${esc(t.walletBalance)}: ${esc(wallet())}</span>` : ''}</div>
           <div class="ps5-cc-actions">
             ${btn('account', t.accountDetails, 'gear')}${btn('wallet', t.wallet, '')}${btn('store-prefs', t.storePrefs, '')}${btn('language', t.language, '')}${btn('changeuser', t.changeUser, 'swap')}
           </div>`;
@@ -1242,83 +1236,126 @@
     return { open: openFn, close, toggle: s => (open ? close() : openFn(s)), isOpen: () => open, key };
   })();
 
-  /* ───────────────────────── game page: PS5 game hub strip ───────────────────────── */
-
-  const Details = (() => {
-    let node = null, forApp = 0, lightbox = null;
-
-    const build = () => {
-      node = h('section', '', '<div class="ps5-cards ps5-det-cards"></div><div class="ps5-det-about"></div><div class="ps5-det-shots"></div>');
-      node.id = 'ps5-details';
-      node.addEventListener('click', e => {
-        const s = e.target.closest('[data-full]');
-        if (s) openShot(s.dataset.full);
-      });
+  /* ───────────────────────── game actions menu ("…") ─────────────────────────
+     v1.1.0's "…" on the Home Screen navigated to Steam's game page and the theme then
+     injected its own strip (cards, about, screenshots) under Steam's play bar, while the
+     sidebar came back: two views of one game, a second scroller and the game list.
+     Now "…" opens this menu — one instance, anchored to the button, kept inside the
+     window — and every entry is a real Steam action. The game page itself is only
+     opened on purpose ("Game hub" entry, double-click on a tile). */
+  const GameMenu = (() => {
+    let node = null, forApp = null, anchorEl = null;
+    const close = () => {
+      if (!node || node.hidden) return false;
+      node.hidden = true;
+      node.classList.remove('open');
+      forApp = null;
+      if (anchorEl) { anchorEl.setAttribute('aria-expanded', 'false'); try { anchorEl.focus({ preventScroll: true }); } catch (e) { /* gone */ } }
+      anchorEl = null;
+      return true;
     };
-
-    const openShot = src => {
-      if (!lightbox) {
-        lightbox = h('div', '', '<img alt="">');
-        lightbox.id = 'ps5-lightbox';
-        lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
-        doc.body.appendChild(lightbox);
-      }
-      lightbox.querySelector('img').src = src;
-      lightbox.classList.add('open');
-    };
-
-    const render = app => {
+    const items = app => {
       const t = T();
-      const ach = achievementsOf(app);
+      const state = playState(app);
+      const steamApp = app.app_type !== SHORTCUT;
       const inst = isInstalled(app);
-      const cards = [
-        { ico: 'controller', label: t.playtime, value: app.minutes_playtime_forever > 0 ? fmtPlaytime(app.minutes_playtime_forever) : '—',
-          note: app.minutes_playtime_last_two_weeks > 0 ? `${fmtPlaytime(app.minutes_playtime_last_two_weeks)} ${t.twoWeeks}` : '' },
-        { ico: 'clock', label: t.lastPlayed, value: fmtAgo(app.rt_last_time_played) },
-        ach ? { ico: 'trophy', label: t.achievements, value: `${ach.unlocked}/${ach.total}`, bar: Math.round(ach.unlocked / ach.total * 100) } : null,
-        { ico: 'disk', label: t.storage, value: inst ? fmtBytes(sizeOnDisk(app)) : t.notInstalled, note: inst ? t.installed : '' },
+      return [
+        { act: 'run', ico: state === 'stop' ? 'stop' : state === 'cancel' ? 'cross' : state === 'install' ? 'install' : 'play', label: t[state], primary: true },
+        { act: 'hub', ico: 'controller', label: t.details },
+        steamApp && { act: 'store', ico: 'bag', label: t.storePage },
+        steamApp && { act: 'achievements', ico: 'trophy', label: t.myAchievements },
+        { act: 'screenshots', ico: 'image', label: t.screenshots },
+        steamApp && { act: 'hubweb', ico: 'friends', label: t.communityHub },
+        { sep: true },
+        { act: 'controller', ico: 'controller2', label: t.controllerLayout },
+        inst && { act: 'shortcut', ico: 'link', label: t.desktopShortcut },
+        { act: 'properties', ico: 'gear', label: t.properties },
+        inst && steamApp && { act: 'uninstall', ico: 'trash', label: t.uninstall, danger: true },
       ].filter(Boolean);
-      node.querySelector('.ps5-det-cards').innerHTML = cards.map(c => `
-        <div class="ps5-card">${icon(c.ico)}
-          <div class="ps5-card-label">${esc(c.label)}</div>
-          <div class="ps5-card-value">${esc(c.value)}</div>
-          ${c.bar != null ? `<div class="ps5-bar"><i style="width:${c.bar}%"></i></div>` : ''}
-          ${c.note ? `<div class="ps5-card-note">${esc(c.note)}</div>` : ''}
-        </div>`).join('');
-      const about = node.querySelector('.ps5-det-about');
-      const shots = node.querySelector('.ps5-det-shots');
-      about.innerHTML = '';
-      shots.innerHTML = '';
-      const appid = app.appid;
-      Promise.all([storeInfo(appid), localShots(app)]).then(([info, mine]) => {
-        if (forApp !== appid || !node) return;
-        if (info && info.desc) {
-          const facts = [info.developer, info.release, ...(info.genres || [])].filter(Boolean).map(esc).join(' · ');
-          about.innerHTML = `<h3>${esc(t.about)}</h3><p>${esc(info.desc)}</p>${facts ? `<div class="ps5-det-facts">${facts}</div>` : ''}`;
-        }
-        const list = [...(mine || []), ...((info && info.shots) || [])].slice(0, 10);
-        if (list.length) {
-          shots.innerHTML = `<h3>${esc(t.screenshots)}</h3><div class="ps5-det-strip">${list.map(s =>
-            `<button class="ps5-shot" data-full="${esc(s.full)}"><img src="${esc(s.thumb)}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div>`;
-        }
-      });
     };
-
-    const update = () => {
-      const m = /^\/library\/app\/(\d+)/.exec(currentPath());
-      const playBar = m && (doc.querySelector('.AppDetailsMain > .PlayBar') || doc.querySelector('.AppDetailsMain .PlayBar'));
-      if (!m || !playBar) { if (node && node.isConnected) node.remove(); forApp = 0; return; }
-      const app = appById(m[1]);
+    const build = () => {
+      node = h('div', '');
+      node.id = 'ps5-gamemenu';
+      node.setAttribute('role', 'menu');
+      node.hidden = true;
+      node.addEventListener('click', e => {
+        const b = e.target.closest('[data-act]');
+        if (!b || !forApp) return;
+        const app = appById(forApp.appid) || forApp;
+        const id = app.appid;
+        const sc = SC();
+        close();
+        try {
+          switch (b.dataset.act) {
+            case 'run': runAction(app, playState(app)); break;
+            case 'hub': navigate('/library/app/' + id); break;
+            case 'store': try { sc.Apps.ShowStore(id); } catch (err) { openWeb('https://store.steampowered.com/app/' + id + '/'); } break;
+            case 'achievements': openWeb('https://steamcommunity.com/my/stats/' + id + '/achievements/'); break;
+            case 'screenshots': sc.Apps.BrowseScreenshotsForApp(String(id)); break;
+            case 'hubweb': openWeb('https://steamcommunity.com/app/' + id + '/'); break;
+            case 'controller': sc.Apps.ShowControllerConfigurator(id); break;
+            case 'shortcut': sc.Apps.CreateDesktopShortcutForApp(id); snack(T().shortcutDone); break;
+            case 'properties': sc.Apps.OpenAppSettingsDialog(id, ''); break;
+            case 'uninstall': try { sc.Installs.OpenUninstallWizard([id], false); } catch (err) { steamURL('steam://uninstall/' + id); } break;
+            default: break;
+          }
+        } catch (err) { console.warn('[PS5] game action failed', b.dataset.act, err); }
+      });
+      node.addEventListener('keydown', e => {
+        const list = [...node.querySelectorAll('[data-act]')];
+        const i = list.indexOf(doc.activeElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); (list[i + 1] || list[0]).focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); (list[i - 1] || list[list.length - 1]).focus(); }
+        else if (e.key === 'Tab') { close(); }
+      });
+      doc.body.appendChild(node);
+    };
+    const open = (app, anchor) => {
       if (!app) return;
       if (!node) build();
-      // place it directly under the play bar (React keeps its own children; ours is extra)
-      const anchor = playBar.closest('.AppDetailsMain > *') || playBar;
-      if (node.previousElementSibling !== anchor) anchor.insertAdjacentElement('afterend', node);
-      if (forApp !== app.appid) { forApp = app.appid; render(app); }
-      ensureDetails(app).then(() => { if (forApp === app.appid && !Library.isOpen()) Bg.set('app:' + app.appid, artFor(app).hero); });
+      if (!node.hidden && forApp && forApp.appid === app.appid) { close(); return; }
+      forApp = app;
+      anchorEl = anchor || null;
+      node.innerHTML = `<div class="ps5-gm-head">${esc(app.display_name)}</div>` + items(app).map(it => it.sep
+        ? '<div class="ps5-gm-sep" role="separator"></div>'
+        : `<button class="ps5-gm-item${it.primary ? ' primary' : ''}${it.danger ? ' danger' : ''}" role="menuitem" data-act="${it.act}">${icon(it.ico)}<span>${esc(it.label)}</span></button>`).join('');
+      node.hidden = false;
+      // position: under the button when it fits, above it otherwise; always inside the window
+      const r = anchor ? anchor.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 2, bottom: innerHeight / 2 };
+      const w = node.offsetWidth, hgt = node.offsetHeight, pad = 12;
+      let left = Math.min(Math.max(pad, r.left), innerWidth - w - pad);
+      let top = r.bottom + 10;
+      if (top + hgt > innerHeight - pad) top = Math.max(pad, r.top - hgt - 10);
+      node.style.left = left + 'px';
+      node.style.top = top + 'px';
+      node.classList.remove('open'); void node.offsetWidth; node.classList.add('open');
+      if (anchorEl) anchorEl.setAttribute('aria-expanded', 'true');
+      const first = node.querySelector('[data-act]');
+      if (first) first.focus({ preventScroll: true });
     };
-    onCleanup(() => { if (node) node.remove(); if (lightbox) lightbox.remove(); });
-    return { update, closeLightbox: () => { if (lightbox && lightbox.classList.contains('open')) { lightbox.classList.remove('open'); return true; } return false; } };
+    // a click anywhere else closes it
+    listen(doc, 'pointerdown', e => { if (node && !node.hidden && !node.contains(e.target) && !(anchorEl && anchorEl.contains(e.target))) close(); }, true);
+    listen(window, 'blur', () => close());
+    listen(window, 'resize', () => close(), { passive: true });
+    onCleanup(() => { if (node) node.remove(); node = null; });
+    return { open, close, isOpen: () => !!(node && !node.hidden) };
+  })();
+
+  /* ───────────────────────── game page: background only ─────────────────────────
+     Steam's own game page (achievements, activity, news, screenshots, play bar) is
+     the single view of a game; the theme only styles it (main.css, html.ps5-on-app)
+     and puts the game's art behind the glass. */
+  const Details = (() => {
+    const update = () => {
+      const m = /^\/library\/app\/(\d+)/.exec(currentPath());
+      if (!m) return;
+      const app = appById(m[1]);
+      if (!app) return;
+      ensureDetails(app).then(() => {
+        if (!Library.isOpen() && /^\/library\/app\/(\d+)/.exec(currentPath())?.[1] === m[1]) Bg.set('app:' + app.appid, artFor(app).hero);
+      });
+    };
+    return { update };
   })();
 
   /* ───────────────────────── bottom bar: online friends on Friends & Chat ───────────────────────── */
@@ -1357,7 +1394,11 @@
       Details.update();
       // background: home → selected game; game page → set by Details; elsewhere → ambient
       if (!onHome && !/^\/library\/app\//.test(path) && !Library.isOpen()) Bg.clear();
-      root.classList.toggle('ps5-on-app', /^\/library\/app\//.test(path));
+      const onApp = /^\/library\/app\//.test(path);
+      root.classList.toggle('ps5-on-app', onApp);
+      // «Game list»: hidden on Home and game pages (default) · Home only · always visible
+      const listMode = cssVar('--ps5-home-sidebar');
+      root.classList.toggle('ps5-hide-list', listMode !== 'show' && (onHome || (onApp && listMode !== 'home')));
       root.classList.toggle('ps5-on-web', WebView.onWebPage());
       root.classList.toggle('ps5-account-show', cssVar('--ps5-account') === 'show');
       root.classList.toggle('ps5-bb-steam', cssVar('--ps5-bottombar') === 'steam');
@@ -1389,7 +1430,7 @@
       if (unlisten) return;
       const hist = safe(() => S().SteamUIStore.WindowStore.MainWindowInstance.m_history, null);
       if (hist && typeof hist.listen === 'function') {
-        try { const u = hist.listen(() => { Library.close(); CC.close(); soon(); }); unlisten = typeof u === 'function' ? u : null; } catch (e) { /* polling covers it */ }
+        try { const u = hist.listen(() => { Library.close(); CC.close(); GameMenu.close(); soon(); }); unlisten = typeof u === 'function' ? u : null; } catch (e) { /* polling covers it */ }
       }
     };
     onCleanup(() => { if (unlisten) unlisten(); });
@@ -1412,7 +1453,7 @@
     if (e.ctrlKey && e.shiftKey && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); CC.toggle(); return; }
     if (e.ctrlKey && e.shiftKey && (e.code === 'KeyL')) { e.preventDefault(); Library.toggle(); return; }
     if (e.key === 'Escape') {
-      if (Details.closeLightbox()) { e.preventDefault(); return; }
+      if (GameMenu.close()) { e.preventDefault(); return; }
       if (CC.isOpen()) { e.preventDefault(); CC.close(); return; }
       if (Library.isOpen()) { e.preventDefault(); Library.close(); return; }
     }

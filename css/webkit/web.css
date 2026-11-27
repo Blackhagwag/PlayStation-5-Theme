@@ -254,15 +254,29 @@ input:is([type=range], [type=checkbox], [type=radio]) { accent-color: var(--ps5-
 .sale_price_discount,
 .game_purchase_action_bg,
 .game_purchase_price.price { background: transparent !important; }
-.discount_pct,
-.bundle_base_discount,
-.no_discount .bundle_base_discount {
+.discount_pct {
   background: var(--ps5-accent) !important;
   color: #fff !important;
-  border-radius: 999px !important;
-  padding: 0 8px !important;
+  border-radius: 8px !important;
   font-weight: 800 !important;
 }
+/* v1.2.0 — the "double discount" bug (e.g. -55% and -10% on one game).
+   .bundle_base_discount is NOT a second discount: Steam prints it small, faint and
+   struck through, next to the sale percent, to tell what a bundle's usual discount
+   is (store.css: grey text, a skewed line in ::before, in v6 pages 11 px in a corner
+   of the grid). v1.0/1.1 gave it the same blue badge as .discount_pct, so a crossed-out
+   note turned into a second discount. It keeps Steam's meaning here — muted, small,
+   struck — and only its colours follow the theme. Box metrics are left to Steam
+   (it places it with grid-area). */
+.discount_block .bundle_base_discount {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.42) !important;
+  font-weight: 500 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.discount_block:not(.no_discount) .bundle_base_discount::before { border-bottom-color: currentColor !important; box-shadow: none !important; }
+.discount_block.no_discount .bundle_base_discount { color: var(--ps5-ink-2) !important; background: var(--ps5-field) !important; border-radius: 6px !important; }
 .discount_original_price { color: var(--ps5-ink-3) !important; }
 .discount_final_price,
 .game_purchase_price,
@@ -466,25 +480,69 @@ input:is([type=range], [type=checkbox], [type=radio]) { accent-color: var(--ps5-
 .carousel_thumbs div { border-radius: 99px !important; }
 .carousel_thumbs div.focus,
 .handle.focus { background: var(--ps5-accent) !important; box-shadow: 0 0 10px var(--ps5-accent-glow); }
-.arrow.left,
-.arrow.right,
+/* v1.2.0 — the huge white circles on the store arrows.
+   Cause: Steam's carousel arrow (.carousel_container .arrow) is a 23×36 px box with
+   36/11 px padding — a 45×108 px hit area; the bottom slider arrows are 38 px wide
+   strips. v1.0/1.1 made those whole boxes round, white on hover and scaled them: a
+   big white ellipse over the capsules. Now the hit areas stay transparent and keep
+   their size (Steam's clicks unchanged); a compact 38 px glass disc is drawn in the
+   middle, under Steam's own chevron, and turns blue on hover. */
 .carousel_container .arrow,
-.slider_left,
-.slider_right {
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+.arrow.left,
+.arrow.right {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  isolation: isolate;
+  opacity: 0.85;
+  transition: opacity 160ms ease !important;
+}
+.carousel_container .arrow::before,
+.arrow.left::before,
+.arrow.right::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(9, 20, 46, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  transition: background 160ms ease, transform 200ms var(--ps5-ease) !important;
+  z-index: -1;
+  transition: background 160ms ease, box-shadow 160ms ease;
 }
+.carousel_container .arrow:hover,
 .arrow.left:hover,
-.arrow.right:hover,
-.slider_left:hover,
-.slider_right:hover { background: #fff !important; transform: scale(1.08); }
-.arrow.left > div,
-.arrow.right > div { filter: none; }
+.arrow.right:hover { opacity: 1; background: transparent !important; }
+.carousel_container .arrow:hover::before,
+.arrow.left:hover::before,
+.arrow.right:hover::before { background: var(--ps5-accent); box-shadow: 0 0 16px -2px var(--ps5-accent-glow); }
 .carousel_wide_mode .arrow.left,
-.carousel_wide_mode .arrow.right { border-radius: 50% !important; }
+.carousel_wide_mode .arrow.right { border-radius: 0 !important; }
+/* the slider under a carousel: a slim rail, small arrow pads, blue thumb */
+.slider_ctn .slider_left,
+.slider_ctn .slider_right,
+.slider_left,
+.slider_right {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-radius: 8px !important;
+  transform: none !important;
+  transition: background 160ms ease !important;
+}
+.slider_ctn .slider_left:hover,
+.slider_ctn .slider_right:hover,
+.slider_left:hover,
+.slider_right:hover { background: color-mix(in srgb, var(--ps5-accent) 70%, transparent) !important; }
+.slider_ctn .slider,
+.slider_ctn.store_autoslider { background: rgba(255, 255, 255, 0.05) !important; border-radius: 8px !important; }
+.slider_ctn .handle { background: rgba(255, 255, 255, 0.22) !important; border-radius: 8px !important; }
+.slider_ctn .handle:hover,
+.slider .handle:hover { background: var(--ps5-accent) !important; }
 /* home tabs (New & Trending, Top Sellers, Upcoming, Specials…) as PS5 pills */
 .home_tabs_row,
 .tab_row,
@@ -612,7 +670,7 @@ input:is([type=range], [type=checkbox], [type=radio]) { accent-color: var(--ps5-
 &.ps5-p-app #highlight_slider_left,
 &.ps5-p-app #highlight_slider_right,
 &.ps5-p-app .highlight_slider_left,
-&.ps5-p-app .highlight_slider_right { border-radius: 50% !important; }
+&.ps5-p-app .highlight_slider_right { border-radius: 8px !important; }
 &.ps5-p-app .ui-slider-handle,
 &.ps5-p-app .highlight_selector { background: var(--ps5-accent) !important; border-radius: 99px !important; }
 /* purchase box: the PS Store buy panel */
@@ -957,5 +1015,381 @@ input:is([type=range], [type=checkbox], [type=radio]) { accent-color: var(--ps5-
 /* community home */
 &.ps5-community.ps5-p-home .community_home_header,
 &.ps5-community.ps5-p-home .apphub_HomeHeader { background: transparent !important; }
+
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v1.2.0 — the store's own palette, remapped to PS5
+   Steam paints both store engines from CSS variables: the classic pages
+   (body.v6: --light-ctn-bg, --price-dark-bg, --green, …) and the new React
+   pages (#StoreTemplate / v7: --color-greyneutral-*, --color-blue-*, …).
+   Remapping them recolours every block, including the hashed-class React parts
+   no selector can reach, with no layout change at all. Declared at (0,3,1) to
+   win over Steam's ":root body.v6" (0,2,1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root.ps5-web.ps5-store,
+:root.ps5-web.ps5-store body {
+  --ps5-s-deep: #020611;
+  --ps5-s-base: #061230;
+  --ps5-s-elev: #0b1a3c;
+  --ps5-s-raised: #10234d;
+  --ps5-s-hover: #16305f;
+  --ps5-s-high: #1d3a70;
+  --ps5-s-edge: #284a86;
+
+  --color-text-light-title: #ffffff;
+  --color-text-light-subtitle: #ffffff;
+  --color-text-light-body: rgba(255, 255, 255, 0.78);
+  --color-text-light-description: rgba(255, 255, 255, 0.70);
+  --color-text-light-note: rgba(255, 255, 255, 0.50);
+  --color-greyneutral-1: var(--ps5-s-deep);
+  --color-greyneutral-2: var(--ps5-s-base);
+  --color-greyneutral-3: var(--ps5-s-elev);
+  --color-greyneutral-4: var(--ps5-s-raised);
+  --color-greyneutral-5: var(--ps5-s-hover);
+  --color-greyneutral-6: var(--ps5-s-high);
+  --color-greyneutral-7: var(--ps5-s-edge);
+  --color-greyneutral-8: rgba(255, 255, 255, 0.14);
+  --color-greyneutral-9: rgba(255, 255, 255, 0.22);
+  --color-greyneutral-10: rgba(255, 255, 255, 0.50);
+  --color-greyneutral-11: rgba(255, 255, 255, 0.74);
+  --color-greyneutral-12: #ffffff;
+  --color-blue-1: #00122e;
+  --color-blue-2: #001a40;
+  --color-blue-3: #002457;
+  --color-blue-4: #00306f;
+  --color-blue-5: #003d8a;
+  --color-blue-6: #004aa6;
+  --color-blue-7: #0058c4;
+  --color-blue-8: var(--ps5-accent);
+  --color-blue-9: var(--ps5-accent);
+  --color-blue-10: color-mix(in srgb, var(--ps5-accent) 80%, #fff);
+  --color-blue-11: #8fc8ff;
+  --color-blue-12: #ffffff;
+  --Neutrals-white: #ffffff;
+  --Neutrals-lightestGrey: rgba(255, 255, 255, 0.74);
+  --Neutrals-lighterGrey: rgba(255, 255, 255, 0.5);
+  --Colors-blue: #8fc8ff;
+  --Blue-gredient: var(--ps5-accent);
+  --Text-Main: #ffffff;
+  --popover-background: rgba(9, 20, 46, 0.96);
+  --popover-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.85);
+  --footer-bg-color: transparent;
+
+  --light-fg: #ffffff;
+  --midlight-fg: rgba(255, 255, 255, 0.74);
+  --dimlight-fg: rgba(255, 255, 255, 0.5);
+  --bright-fg: #ffffff;
+  --page-background: var(--ps5-s-deep);
+  --light-ctn-bg: rgba(255, 255, 255, 0.05);
+  --light-ctn-bg-hover: rgba(255, 255, 255, 0.10);
+  --light-ctn-bg-gradient: linear-gradient(180deg, rgba(20, 40, 86, 0.6), rgba(9, 20, 46, 0.6));
+  --mid-ctn-bg: rgba(255, 255, 255, 0.08);
+  --dark-ctn-bg: rgba(9, 20, 46, 0.6);
+  --dark-ctn-bg-gradient: linear-gradient(180deg, rgba(14, 30, 66, 0.7), rgba(6, 14, 32, 0.7));
+  --price-dark-bg: rgba(2, 8, 22, 0.75);
+  --blue-gradient-bg-bold: linear-gradient(135deg, var(--ps5-accent), #003d8a);
+  --blue-gradient-bg-muted: linear-gradient(180deg, rgba(20, 40, 86, 0.6), rgba(9, 20, 46, 0.6));
+  --multi-color-bg-gradient-1: linear-gradient(135deg, rgba(0, 112, 209, 0.55), rgba(9, 20, 46, 0.8));
+  --multi-color-bg-gradient-2: linear-gradient(135deg, rgba(0, 112, 209, 0.55), rgba(9, 20, 46, 0.8));
+  --green: var(--ps5-accent);
+  --green-mid: var(--ps5-accent);
+  --blue: var(--ps5-accent);
+  --blue-translucent: color-mix(in srgb, var(--ps5-accent) 26%, transparent);
+  --bright-teal: #8fc8ff;
+}
+
+:where(html.ps5-web) {
+
+/* ═══════════════ store home: PS Store composition ═══════════════ */
+&.ps5-p-home .home_page_content,
+&.ps5-p-home .home_ctn { max-width: 1240px; }
+/* section headings: large, white, with a short blue rule like PS Store rows */
+&.ps5-store .home_page_content > h2,
+&.ps5-store .home_ctn h2,
+&.ps5-store .home_page_content .home_title {
+  position: relative;
+  padding-left: 14px !important;
+}
+&.ps5-store .home_page_content > h2::before,
+&.ps5-store .home_ctn h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  bottom: 0.2em;
+  width: 4px;
+  border-radius: 99px;
+  background: var(--ps5-accent);
+}
+/* capsule captions under covers: name, price on one clean line */
+.store_capsule .discount_block,
+.special .discount_block,
+.tab_item .discount_block { border-radius: 10px !important; overflow: hidden; }
+.store_capsule .discount_final_price,
+.special .discount_final_price { font-size: 14px !important; }
+.store_capsule img,
+.special img,
+.capsule_image_ctn img { object-fit: cover; }
+
+/* ═══════════════ STORE GAME PAGE — the PS Store hero (built by js/web.js) ═══════════════ */
+.ps5-hero {
+  position: relative;
+  isolation: isolate;
+  width: calc(100vw - var(--ps5-sbw, 0px));
+  margin-left: calc(50% - (100vw - var(--ps5-sbw, 0px)) / 2);
+  min-height: clamp(460px, 72vh, 720px);
+  display: flex;
+  color: #fff;
+  font-family: inherit;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.ps5-hero-stage { position: absolute; inset: 0; z-index: -2; background: #020611; }
+.ps5-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 700ms var(--ps5-ease), transform 1600ms var(--ps5-ease);
+}
+.ps5-hero-art.on { opacity: 1; transform: none; }
+.ps5-hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(2, 6, 17, 0.92) 0%, rgba(2, 6, 17, 0.7) 32%, rgba(2, 6, 17, 0.1) 70%),
+    linear-gradient(0deg, #020611 0%, rgba(2, 6, 17, 0.55) 26%, rgba(2, 6, 17, 0) 55%),
+    linear-gradient(180deg, rgba(2, 6, 17, 0.55) 0%, rgba(2, 6, 17, 0) 22%);
+}
+.ps5-hero-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  width: min(1240px, 100% - 64px);
+  margin: 0 auto;
+  padding: 120px 0 44px;
+  box-sizing: border-box;
+}
+.ps5-hero-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: min(560px, 100%);
+  max-width: 820px;
+  animation: ps5-hero-rise 600ms var(--ps5-ease) both;
+}
+@keyframes ps5-hero-rise { from { opacity: 0; transform: translateY(16px); } }
+.ps5-hero-logo {
+  display: none;
+  max-width: min(460px, 100%);
+  max-height: 150px;
+  object-fit: contain;
+  object-position: left bottom;
+  filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.7));
+}
+.ps5-hero.has-logo .ps5-hero-logo { display: block; }
+html body .ps5-hero h1.ps5-hero-title {
+  margin: 0 !important;
+  font-size: clamp(34px, 4.4vw, 56px) !important;
+  line-height: 1.04 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: #fff !important;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.65);
+  text-wrap: balance;
+}
+.ps5-hero.has-logo h1.ps5-hero-title {
+  position: absolute !important;
+  width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.ps5-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ps5-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(9, 20, 46, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+.ps5-hero-chip.sale { background: var(--ps5-accent); box-shadow: none; color: #fff; }
+.ps5-hero-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #8a93a6; }
+.ps5-hero-chip[data-tone="ok"] .dot { background: #6fd0ff; }
+.ps5-hero-chip[data-tone="warn"] .dot { background: #f0c457; }
+.ps5-hero-chip[data-tone="bad"] .dot { background: #ff8a7a; }
+a.ps5-hero-chip:hover { background: rgba(255, 255, 255, 0.16); }
+.ps5-hero-desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ps5-hero-buy { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 6px; }
+.ps5-hero-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-right: 6px;
+}
+.ps5-hero-price .final { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+.ps5-hero-price .orig { font-size: 15px; color: rgba(255, 255, 255, 0.5); text-decoration: line-through; }
+.ps5-hero-price .pct {
+  align-self: center;
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: var(--ps5-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ps5-hero-owned { font-size: 14px; font-weight: 700; color: #8ee08a; }
+.ps5-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: transform 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease), background 160ms ease;
+}
+.ps5-hero-btn svg { width: 18px; height: 18px; }
+.ps5-hero-btn.primary { background: var(--ps5-accent); color: #fff; min-width: 190px; box-shadow: 0 10px 30px -10px var(--ps5-accent-glow); }
+.ps5-hero-btn.primary:hover { transform: scale(1.03); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85), 0 0 30px 2px var(--ps5-accent-glow); }
+.ps5-hero-btn.ghost { background: rgba(255, 255, 255, 0.12); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.ps5-hero-btn.ghost:hover { background: rgba(255, 255, 255, 0.22); }
+.ps5-hero-btn.icon { width: 48px; padding: 0; }
+.ps5-hero-btn.wish[aria-pressed="true"] { background: #fff; color: #e2384d; }
+.ps5-hero-shots { display: flex; gap: 10px; flex: none; align-self: flex-end; }
+.ps5-hero-shot {
+  width: 116px;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  opacity: 0.72;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transition: opacity 200ms ease, transform 220ms var(--ps5-ease), box-shadow 200ms ease;
+}
+.ps5-hero-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ps5-hero-shot:hover { opacity: 1; transform: translateY(-3px); }
+.ps5-hero-shot.on { opacity: 1; box-shadow: 0 0 0 2px #fff, 0 0 16px var(--ps5-accent-glow); }
+/* facts strip under the hero: Steam's own release / developer / tags nodes, moved */
+.ps5-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 28px;
+  margin: -6px 0 26px;
+  padding: 14px 20px;
+  border-radius: var(--ps5-r-l);
+  background: var(--ps5-glass);
+  box-shadow: inset 0 0 0 1px var(--ps5-line);
+  color: var(--ps5-ink-2);
+  font-size: 13px;
+}
+.ps5-facts .release_date,
+.ps5-facts .dev_row { display: flex; gap: 8px; margin: 0 !important; }
+.ps5-facts .subtitle { color: var(--ps5-ink-3) !important; text-transform: none !important; }
+.ps5-facts a:not(.app_tag) { color: #fff !important; text-decoration: none !important; font-weight: 600; }
+.ps5-facts a:not(.app_tag):hover { color: color-mix(in srgb, var(--ps5-accent) 40%, #fff) !important; }
+.ps5-facts .glance_tags_ctn { flex-basis: 100%; }
+.ps5-facts .glance_tags.popular_tags { display: flex; flex-wrap: wrap; gap: 6px; height: auto !important; max-height: none !important; }
+.ps5-facts .app_tag { margin: 0 !important; }
+/* with the hero on, Steam's duplicates of what it shows step back (title row, header
+   capsule, snippet); the gallery, reviews, editions and everything else stay */
+&.ps5-hero-on .apphub_HomeHeaderContent .apphub_AppName,
+&.ps5-hero-on .glance_ctn .game_header_image_ctn,
+&.ps5-hero-on .glance_ctn .game_description_snippet { display: none !important; }
+&.ps5-hero-on .glance_ctn { padding-top: 14px !important; }
+&.ps5-hero-on #game_highlights { scroll-margin-top: 90px; }
+&.ps5-hero-on #game_area_purchase { scroll-margin-top: 90px; }
+
+/* screenshot viewer (hero thumbnails) */
+.ps5-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  background: rgba(1, 4, 12, 0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 0s linear 220ms;
+}
+.ps5-viewer.open { opacity: 1; visibility: visible; transition: opacity 220ms ease; }
+.ps5-viewer img { max-width: 90vw; max-height: 84vh; border-radius: 14px; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9); }
+.ps5-viewer button {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.ps5-viewer button:hover { background: var(--ps5-accent); }
+.ps5-viewer button svg { width: 22px; height: 22px; }
+.ps5-viewer .prev { left: 24px; top: 50%; transform: translateY(-50%); }
+.ps5-viewer .next { right: 24px; top: 50%; transform: translateY(-50%); }
+.ps5-viewer .close { right: 24px; top: 24px; }
+.ps5-viewer .count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: rgba(255, 255, 255, 0.7); font-size: 13px; }
+
+/* the rest of the product page, PS Store-like cards (edition cards in a column) */
+&.ps5-p-app #game_highlights { border-radius: var(--ps5-r-l) !important; }
+&.ps5-p-app .game_area_purchase_game_wrapper { margin-bottom: 18px !important; }
+&.ps5-p-app .game_area_purchase_game:hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), var(--ps5-shadow) !important; }
+&.ps5-p-app .game_area_purchase_platform { opacity: 0.75; }
+
+@media (max-width: 900px) {
+  .ps5-hero-shots { display: none; }
+  .ps5-hero-inner { width: calc(100% - 32px); padding-top: 90px; }
+}
+
+/* ═══════════════ WISHLIST: richer PS5 cards ═══════════════ */
+&.ps5-p-wishlist #StoreTemplate section { max-width: 1240px; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button] > a[href*="/app/"]:first-child img {
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.8);
+  transition: transform 300ms var(--ps5-ease);
+}
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button]:hover > a[href*="/app/"]:first-child img { transform: scale(1.03); }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] a[href*="/app/"]:not(:first-child) { font-size: 17px !important; letter-spacing: -0.01em; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] [role=link][aria-label*="%"] { border-radius: 12px; }
 
 }

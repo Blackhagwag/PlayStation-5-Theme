@@ -1,0 +1,2 @@
+/* Game list → hidden on Home only (back on game pages) */
+:root { --ps5-home-sidebar: home; }

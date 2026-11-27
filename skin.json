@@ -2,7 +2,7 @@
   "name": "PlayStation 5",
   "description": "A PlayStation 5 style shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, PSN-style profile, glass panels and smooth motion. Not affiliated with Sony Interactive Entertainment.",
   "author": "Blackhagwag",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "source": "https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme",
   "github": {
     "owner": "Blackhagwag",
@@ -175,13 +175,21 @@
       }
     },
     "Game list on Home": {
-      "description": "Steam's game list (left sidebar) while the Home Screen is open. Hidden gives the full-width console look; the list is back on every other page.",
+      "description": "Steam's game list (left sidebar). PS5 mode hides it on the Home Screen and on game pages, so a game opens as one full PS5 page; the Game Library (grid button, Ctrl+Shift+L) lists every game.",
       "tab": "Home",
       "section": "Layout",
-      "default": "Hidden",
+      "default": "Hidden on Home and game pages",
       "values": {
-        "Hidden": {},
-        "Visible": {
+        "Hidden on Home and game pages": {},
+        "Hidden on Home only": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/sidebar-home-only.css"
+          }
+        },
+        "Always visible": {
           "TargetCss": {
             "affects": [
               "^Steam$"

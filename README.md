@@ -18,8 +18,10 @@ glass panels and smooth motion — while every Steam function keeps working unde
 | Game Library | Control Center |
 |---|---|
 | ![Game Library](assets/preview-library.jpg) | ![Control Center](assets/preview-control-center.jpg) |
-| **PlayStation Store** | **Store game page** |
-| ![Store](assets/preview-store.jpg) | ![Store game page](assets/preview-store-game.jpg) |
+| **PlayStation Store** | **PS Store product page** |
+| ![Store](assets/preview-store.jpg) | ![Store product page](assets/preview-store-hero.jpg) |
+| **Game actions menu ("…")** | **Store arrows** |
+| ![Game menu](assets/preview-game-menu.jpg) | ![Arrows](assets/preview-store-arrows.jpg) |
 | **Wishlist** | **PSN-style profile** |
 | ![Wishlist](assets/preview-wishlist.jpg) | ![Profile](assets/preview-profile-psn.jpg) |
 | **What's New + bottom bar** | **Profile panel over the Store** |
@@ -41,9 +43,15 @@ glass panels and smooth motion — while every Steam function keeps working unde
   real Steam functions (`steam://` URLs and `SteamClient`), nothing is faked.
 - **Game hub** — large art, PS5 white Play button, activity cards, About, screenshots
   (yours + store) with a lightbox. Steam's achievements, news and activity stay on the page.
-- **PlayStation Store** — glass navigation bar, big banners, game cards with hover glow, pill
-  tabs, blue discounts, PS Store product pages (buy panel, screenshots, description, system
-  requirements, reviews, DLC), search, cart and account pages.
+- **PlayStation Store** — Steam's own store palette remapped to PS5 (classic and React pages),
+  glass navigation bar, big banners, game cards with hover glow, pill tabs, compact arrows,
+  correct discounts. **Product pages** open on a full-width PS Store hero: key art, logo,
+  sale / reviews / date / developer chips, price, Add to Cart (Steam's own button), wishlist
+  heart, editions and media shortcuts, screenshot viewer — Steam's gallery, editions,
+  description and reviews below.
+- **Game actions menu** — "…" on the Home Screen: Play, Game hub, Store page, Achievements,
+  Screenshots, Community hub, Controller layout, Desktop shortcut, Properties, Uninstall — all
+  real Steam actions.
 - **Wishlist** — every game a PS5 card with cover, price, discount and Add to Cart; Steam's
   search, sort, filters, reordering and remove keep working.
 - **Community & PSN profile** — round glowing avatar, level, showcases, games, achievements,
@@ -143,7 +151,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 76 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 116 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

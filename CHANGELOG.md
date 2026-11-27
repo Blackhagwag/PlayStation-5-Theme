@@ -4,6 +4,72 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.2.0] — 2026-11-27 — Major UI Rework & Bug Fixes
+
+### Fixed (each one traced to its cause)
+- **Black strip at the top of the library** — Steam keeps an empty placeholder,
+  `.LocalContentContainer > .URLBarReplacement`, as tall as the web pages' address bar and
+  paints it dark. It has no content or function; it now leaves the layout. Also added the
+  opaque Steam layers that were missing from the transparency list (`.Wrapper`, the home's
+  `.Body.InnerContainer`, the game page's scroll containers) and dropped a `.TitleBar` drag
+  override.
+- **"…" on a game opened several conflicting views** (Steam's game page + the theme's injected
+  strip with screenshots + a second scroller + the game list) — the button navigated to Steam's
+  page and the theme then inserted its own block under the play bar while the sidebar came back.
+  Now "…" opens a **PS5 game actions menu**: Play / Stop / Install, Game hub, Store page,
+  Achievements, Screenshots, Community hub, Controller layout, Desktop shortcut, Properties,
+  Uninstall — all real Steam calls (`SteamClient.Apps.OpenAppSettingsDialog`, `ShowStore`,
+  `BrowseScreenshotsForApp`, `ShowControllerConfigurator`, `CreateDesktopShortcutForApp`,
+  `Installs.OpenUninstallWizard`). One instance, kept inside the window, closes on Esc, outside
+  click, action or navigation. The injected game strip is gone: Steam's own game page is the
+  single view, styled as a PS5 hub. The game list stays hidden on Home *and* game pages (option).
+- **Game page rules leaking onto the library home** — the home lives inside `.AppDetailsMain`
+  too; every game page rule is now scoped to the game page route.
+- **What's New** overlapped, clipped and overflowed — Steam measures and positions that shelf
+  itself, and v1.1.0 changed padding, borders, display and heights on its boxes. Rewritten to
+  change paint only (radius, clipping, colour, shadows, image zoom inside its frame). The PS5
+  Home is now mounted *above* the shelf (it sat under it).
+- **Giant Downloads button in the middle of the bottom bar** — Steam stretches `.DownloadStatus`
+  across the bar and widens it to ~720 px while downloading; the pill was painted on that box.
+  Downloads, Add a Game and Friends & Chat are now compact capsules sized by their content
+  (Downloads stays centred, with icon, status, percent and a thin blue progress line). Steam's own
+  `.Icon` boxes carry the PS5 icons (no duplicate icons).
+- **Settings icon looked like a sun** — replaced by a real cog, rotates on hover.
+- **Double discounts** (e.g. -55% plus -10%) — `.bundle_base_discount` is Steam's small,
+  struck-through note of a bundle's usual discount, not a second discount; v1.0/1.1 gave it the
+  same blue badge as the sale percent. It is shown again as Steam means it. Prices and percents
+  are never computed by the theme; the store hero reads only `.discount_pct` of the base edition.
+- **Huge white circles on the store arrows** — Steam's carousel arrow is a 45×108 px hit area
+  (and the slider arrows 38 px strips); v1.0/1.1 made those boxes round, white and scaled on
+  hover. Hit areas now stay transparent and unchanged; a compact 38 px glass disc with Steam's
+  chevron turns blue on hover. Slider rail and thumb restyled to match.
+
+### Added
+- **PlayStation Store product page**: a full-width hero with the game's key art (library hero,
+  else first screenshot), logo, chips (sale + Steam's countdown, review score, release date,
+  developer), short description, Steam's price of the base edition, a primary button that
+  clicks Steam's own Add to Cart / Play / Install, a wishlist heart driving Steam's wishlist
+  links, All editions and Media shortcuts, screenshot thumbnails (background swap + full-screen
+  viewer with arrow keys). Steam's release / developer / tag nodes are moved into a facts strip.
+  Steam's gallery (trailers included), editions, description, reviews stay below, restyled.
+- **Store palette remap**: Steam's own colour variables for both store engines (classic v6 and
+  the React v7 pages: `--color-greyneutral-*`, `--color-blue-*`, `--light-ctn-bg`, `--green`…)
+  now point at the PS5 palette, so even hashed-class React blocks follow the theme.
+- **Top menu bar** (Steam · View · Friends · Games · Help) with icons, hairline separators,
+  hover states; title bar buttons restyled.
+- **Navigation tabs** (Store · Library · Community · Profile): one glass capsule, icon + label,
+  white active pill with a blue indicator, the profile tab with a person icon.
+- Wallet balance (read from Steam's account button) in Control Center → Profile.
+- Store home: section headings with a blue rule, cleaner capsule captions; wishlist cards polish.
+- Tests: 116 checks (was 76), including every bug above.
+
+### Notes
+- The wishlist stays a list of PS5 cards, not a grid: Steam's wishlist is a virtual list that
+  positions rows by a fixed row height; a grid would break its scrolling, sorting and
+  drag-to-reorder. All of its actions stay Steam's.
+- No video of the issues reached the session; fixes follow the written report and an audit of
+  the theme's own code against captures of the live client published by other themes.
+
 ## [1.1.0] — 2026-11-27 — Complete UI Overhaul & Bug Fixes
 
 ### Fixed

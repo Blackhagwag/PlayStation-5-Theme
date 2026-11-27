@@ -1,12 +1,23 @@
 /* ==========================================================================
    PlayStation 5 — Millennium theme
    main.css: the main Steam window (title bar, navigation, library, game
-   pages, downloads). Steam's own elements are restyled, never removed, so
-   every native function keeps working.
+   pages, downloads, bottom bar). Steam's own elements are restyled, never
+   removed, so every native function keeps working.
+
    Class names are the readable names Millennium adds to Steam's modules.
+   Structure notes below were verified against captures of the live client
+   published by other Millennium themes (CDP dumps):
+     .OuterFrame > .TopBar > .TitleBar (.RootMenuBar .RootMenuButton …,
+                                        .TitleBarControls .Button / .AccountMenu)
+                           > .SuperNavBar > .SuperNav > .SuperNavMenu[.Selected] > .MenuButton
+     .ContentFrame > .LocalContentContainer.Library > .URLBarReplacement (empty strip)
+                   > .BrowserWrapper > .URLBar (web pages)
+     .OuterFrame > .BottomBarContainer > .BottomBar
+         .AddGameButton (.Icon + .Text) · .DownloadStatus > .DownloadStatusContent
+         (.Icon + .Queue | .DetailedDownloadProgress) · .FriendsButton (.Text + .Icon)
    ========================================================================== */
 
-/* ---------- the ground: PS5 navy → black, with the art layer from js/ps5.js ---------- */
+/* ═══════════════ ground ═══════════════ */
 body.DesktopUI {
   background: #000 !important;
   color: var(--ps5-text);
@@ -18,16 +29,19 @@ body.DesktopUI::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(140% 90% at 85% -10%, color-mix(in srgb, var(--ps5-bg-top, #0A1C46) 100%, transparent) 0%, transparent 60%),
+    radial-gradient(140% 90% at 85% -10%, var(--ps5-bg-top, #0A1C46) 0%, transparent 60%),
     radial-gradient(90% 70% at 0% 100%, rgba(0, 60, 160, 0.22) 0%, transparent 70%),
     linear-gradient(180deg, var(--ps5-bg-top, #0A1C46) 0%, var(--ps5-bg-bottom, #000) 78%);
 }
 #popup_target { position: relative; z-index: 1; }
 
-/* Steam's opaque layers step aside so the background shows through */
+/* Steam's opaque layers step aside so the PS5 background shows through.
+   (v1.2.0: .Wrapper, the home's .Body.InnerContainer and the game page's
+   scroll containers were missing — they painted Steam's dark slate.) */
 body.DesktopUI,
 #popup_target,
 .FocusNavigationRoot,
+.Wrapper,
 .ForceOpaqueBackground,
 .OuterFrame,
 .TopBar,
@@ -38,13 +52,20 @@ body.DesktopUI,
 .Library,
 [class*="LibraryDisplaySize"],
 .LeftListSizableContainer,
+.LeftListSizableContainer .GameListHomeAndSearch,
 .MainPanel,
 .AppDetailsTransitionGroup,
 .AppDetailsMain,
 .AppDetailsMain > .Container,
+.AppDetailsMain .Body.InnerContainer,
 .AppDetailsOverviewPanel,
+.AppDetailsOverviewPanel > .Container,
+.Body.ScrollContainer.Glassy,
+.Body.ScrollContainer .InnerContainer.Panel,
 .LibraryHome,
 .LibraryHome .Container.Panel,
+.Showcase,
+.ShowcaseOuter,
 .BottomBarContainer,
 .BottomBar {
   background-color: transparent !important;
@@ -52,52 +73,203 @@ body.DesktopUI,
   box-shadow: none !important;
 }
 .StickyHeaderShadow { display: none !important; }
+/* Steam's inner bevel line under the top bar */
+.OuterFrame > .TopBar { box-shadow: none !important; }
 
-/* ---------- title bar ---------- */
-.TitleBar { -webkit-app-region: drag; }
-.TitleBarControls .Button,
-.AccountMenu,
-.RootMenuButton {
-  border-radius: 999px !important;
-  transition: background var(--ps5-t) var(--ps5-ease) !important;
+/* ═══════════════ the black strip at the top of the library (v1.2.0 fix) ═══════════════
+   Cause: the library keeps an EMPTY placeholder, .URLBarReplacement, as tall as the
+   web pages' address bar, so library and web pages start at the same height. It has
+   no content and no function and Steam paints it its dark slate — that was the black
+   bar. It leaves the layout; the content starts right under the tabs. */
+.LocalContentContainer > .URLBarReplacement { display: none !important; }
+
+/* ═══════════════ title bar: Steam · View · Friends · Games · Help ═══════════════ */
+.TopBar .TitleBar {
+  background: linear-gradient(180deg, rgba(0, 4, 16, 0.65), rgba(0, 4, 16, 0)) !important;
 }
-.TitleBarControls .Button:hover,
-.AccountMenu:hover { background: var(--ps5-glass-hover) !important; }
-.TitleBarControls .AnnouncementsButton.Active { background: var(--ps5-accent) !important; color: #fff !important; }
-.closeButton:hover .title-area-icon-inner { background: #d0263f !important; }
-
-/* ---------- PS5 top navigation: "Games  Media" style text tabs ---------- */
-.SuperNavBar {
+.RootMenuBar {
   display: flex !important;
   align-items: center !important;
-  min-height: 52px !important;
-  padding: 0 28px !important;
-  gap: 4px;
+  gap: 2px;
+  padding-left: 6px;
 }
-.SuperNavMenu .MenuButton {
+.RootMenuBar .RootMenuButton {
+  position: relative;
   display: inline-flex !important;
   align-items: center !important;
-  height: 38px !important;
-  padding: 0 16px !important;
-  font-size: 19px !important;
+  gap: 6px;
+  height: 26px !important;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.66) !important;
+  font-size: 12.5px !important;
   font-weight: 500 !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
-  color: rgba(255, 255, 255, 0.56) !important;
+  transition: background 160ms var(--ps5-ease), color 160ms var(--ps5-ease) !important;
+}
+.RootMenuBar .RootMenuButton > div { color: inherit !important; }
+.RootMenuBar .RootMenuButton::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: currentColor;
+  opacity: 0.85;
+  -webkit-mask: var(--ps5-rm-icon) center / contain no-repeat;
+  mask: var(--ps5-rm-icon) center / contain no-repeat;
+}
+/* a hairline between items */
+.RootMenuBar .RootMenuButton + .RootMenuButton::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 7px;
+  bottom: 7px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.10);
+}
+.RootMenuBar .RootMenuButton:hover,
+.RootMenuBar .RootMenuButton.Active,
+.RootMenuBar .RootMenuButton[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: #fff !important;
+}
+.RootMenuBar .RootMenuButton:hover::before { opacity: 1; color: color-mix(in srgb, var(--ps5-accent) 45%, #fff); }
+.RootMenuBar .RootMenuButton:nth-child(1) { --ps5-rm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' d='M4 7h16M4 12h16M4 17h16'/%3E%3C/svg%3E"); }
+.RootMenuBar .RootMenuButton:nth-child(2) { --ps5-rm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/g%3E%3C/svg%3E"); }
+.RootMenuBar .RootMenuButton:nth-child(3) { --ps5-rm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3'/%3E%3C/g%3E%3C/svg%3E"); }
+.RootMenuBar .RootMenuButton:nth-child(4) { --ps5-rm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linejoin='round' d='M7.5 7h9a4.5 4.5 0 0 1 4.4 3.6l1 5a2.6 2.6 0 0 1-4.6 2.1L15.5 15h-7l-1.8 2.7a2.6 2.6 0 0 1-4.6-2.1l1-5A4.5 4.5 0 0 1 7.5 7z'/%3E%3C/svg%3E"); }
+.RootMenuBar .RootMenuButton:nth-child(5) { --ps5-rm-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.8'/%3E%3Ccircle cx='12' cy='17.2' r='.6' fill='black'/%3E%3C/g%3E%3C/svg%3E"); }
+.RootMenuBar .RootMenuButton:nth-child(n+6)::before { display: none; }
+
+/* right side: announcements, notifications, Big Picture, window controls */
+.TitleBarControls .Button,
+.TitleBarControls .AccountMenu {
+  border-radius: 10px !important;
+  background: transparent !important;
+  transition: background 160ms var(--ps5-ease) !important;
+}
+.TitleBarControls .Button:hover,
+.TitleBarControls .AccountMenu:hover { background: rgba(255, 255, 255, 0.10) !important; }
+.TitleBarControls .Button svg,
+.TitleBarControls .Button svg path { fill: rgba(255, 255, 255, 0.82) !important; }
+.TitleBarControls .Button:hover svg,
+.TitleBarControls .Button:hover svg path { fill: #fff !important; }
+.TitleBarControls .AnnouncementsButton.Active,
+.TitleBarControls .NotificationsButton.Active { background: var(--ps5-accent) !important; }
+.windowControlButton:hover .title-area-icon-inner { background: rgba(255, 255, 255, 0.12) !important; border-radius: 8px; }
+.closeButton:hover .title-area-icon-inner { background: #d0263f !important; }
+
+/* ═══════════════ PS5 navigation tabs: Store · Library · Community · Profile ═══════════════
+   One glass capsule, an icon + label per tab, the active tab lit in white with a
+   blue indicator that grows in. Order is Steam's: 1 Store, 2 Library, 3 Community,
+   profile = the tab whose button holds the user name in a <span>, 5 Console (dev). */
+.TopBar .SuperNavBar {
+  display: flex !important;
+  align-items: center !important;
+  height: auto !important;
+  min-height: 56px !important;
+  padding: 0 24px !important;
+  gap: 12px;
+}
+.SuperNav {
+  display: flex !important;
+  align-items: center !important;
+}
+.SuperNav > .MenuWrapper,
+.SuperNav .MenuWrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px;
+  padding: 4px !important;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+.SuperNav .SuperNavMenu > .MenuButton {
+  --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z'/%3E%3Cpath d='M9 10V7a3 3 0 0 1 6 0v3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px;
+  height: 36px !important;
+  padding: 0 16px !important;
   border: none !important;
   border-radius: 999px !important;
-  transition: color var(--ps5-t) var(--ps5-ease), background var(--ps5-t) var(--ps5-ease) !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  transition: color 180ms var(--ps5-ease), background 180ms var(--ps5-ease) !important;
 }
-.SuperNavMenu:hover .MenuButton { color: #fff !important; }
-.SuperNavMenu.Selected .MenuButton {
-  color: #fff !important;
-  font-weight: 700 !important;
-  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+.SuperNav .SuperNavMenu:nth-of-type(2) > .MenuButton { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='black'%3E%3Crect x='3.5' y='3.5' width='7' height='7' rx='1.6'/%3E%3Crect x='13.5' y='3.5' width='7' height='7' rx='1.6'/%3E%3Crect x='3.5' y='13.5' width='7' height='7' rx='1.6'/%3E%3Crect x='13.5' y='13.5' width='7' height='7' rx='1.6'/%3E%3C/g%3E%3C/svg%3E"); }
+.SuperNav .SuperNavMenu:nth-of-type(3) > .MenuButton { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3'/%3E%3C/g%3E%3C/svg%3E"); }
+.SuperNav .SuperNavMenu:nth-of-type(5) > .MenuButton { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M4 6l6 6-6 6M12 18h8'/%3E%3C/svg%3E"); }
+.SuperNav .SuperNavMenu > .MenuButton:has(> span) { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='8.5' r='4'/%3E%3Cpath d='M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
+.SuperNav .SuperNavMenu > .MenuButton::before {
+  content: "";
+  width: 17px;
+  height: 17px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: var(--ps5-tab-icon) center / contain no-repeat;
+  mask: var(--ps5-tab-icon) center / contain no-repeat;
+  transition: transform 220ms var(--ps5-ease);
 }
-.SuperNavMenu .MenuButton::first-letter { text-transform: uppercase; }
+.SuperNav .SuperNavMenu:hover > .MenuButton { color: #fff !important; background: rgba(255, 255, 255, 0.08) !important; }
+.SuperNav .SuperNavMenu:hover > .MenuButton::before { transform: translateY(-1px); }
+.SuperNav .SuperNavMenu.Selected > .MenuButton {
+  color: #0b0b0f !important;
+  background: #fff !important;
+  box-shadow: 0 4px 18px -6px rgba(255, 255, 255, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+}
+/* Steam's own selection line lives in ::after; ours is a blue dot under the pill */
+.SuperNav .SuperNavMenu > .MenuButton::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -8px !important;
+  top: auto !important;
+  width: 18px !important;
+  height: 3px !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 99px !important;
+  background: var(--ps5-accent) !important;
+  box-shadow: 0 0 10px var(--ps5-accent-glow) !important;
+  transform: translateX(-50%) scaleX(0) !important;
+  transition: transform 260ms var(--ps5-ease) !important;
+}
+.SuperNav .SuperNavMenu.Selected > .MenuButton::after { transform: translateX(-50%) scaleX(1) !important; }
+.SuperNav .SuperNavMenu > .MenuButton > span {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* back / forward arrows beside the tabs */
+.SuperNav svg.Arrow,
+.SuperNavBar svg.Arrow {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 7px !important;
+  box-sizing: border-box;
+  border-radius: 50% !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: background 160ms ease, color 160ms ease !important;
+}
+.SuperNav svg.Arrow.Enabled:hover,
+.SuperNavBar svg.Arrow.Enabled:hover { background: rgba(255, 255, 255, 0.12) !important; color: #fff !important; }
+.SuperNav svg.Arrow.Disabled { opacity: 0.3 !important; }
 
 /* the address bar of web pages: a quiet glass rail */
-.URLBar {
+.BrowserWrapper > .URLBar {
   background: rgba(255, 255, 255, 0.03) !important;
   border-bottom: 1px solid var(--ps5-line) !important;
 }
@@ -108,7 +280,7 @@ body.DesktopUI,
 }
 .URLBar .URL { color: var(--ps5-text-2) !important; }
 
-/* ---------- the game list (left): a rounded glass pane ---------- */
+/* ═══════════════ the game list (left) ═══════════════ */
 .LeftListSizableContainer > .Container {
   background: var(--ps5-glass) !important;
   -webkit-backdrop-filter: blur(22px) saturate(1.2);
@@ -121,37 +293,28 @@ body.DesktopUI,
   overflow: hidden;
 }
 .LibraryWindowDivider { background: transparent !important; }
-.GameListHomeAndSearch { background: transparent !important; }
 .GameListHomeAndSearch .SearchInput,
 .LeftListSizableContainer input {
   background: rgba(255, 255, 255, 0.08) !important;
   border-radius: 999px !important;
   border: none !important;
 }
-.LeftListSizableContainer .GameIconAndName,
-.LeftListSizableContainer .ReactVirtualized__Grid__innerScrollContainer > div > div {
-  border-radius: 10px !important;
-  transition: background 160ms var(--ps5-ease) !important;
-}
-.LeftListSizableContainer .ReactVirtualized__Grid__innerScrollContainer > div > div:hover { background: var(--ps5-glass-hover) !important; }
-.LeftListSizableContainer .Selected,
-.LeftListSizableContainer .Selected:hover {
+.HomeBox .Bar,
+.CollectionsButton .Bar { border-radius: 10px !important; }
+.HomeBox .Bar:hover,
+.CollectionsButton .Bar:hover { background: rgba(255, 255, 255, 0.08) !important; }
+.HomeBox .Bar.Selected { background: color-mix(in srgb, var(--ps5-accent) 30%, transparent) !important; }
+.ReactVirtualized__List .Container:has(> .GameListEntryContainer) { border-radius: 10px !important; }
+.ReactVirtualized__List .Container.Selected:has(> .GameListEntryContainer) {
   background: var(--ps5-accent) !important;
   color: #fff !important;
 }
-.LeftListSizableContainer .Collection,
-.LeftListSizableContainer [class*="CollapseIcon"] { background: transparent !important; }
-
-/* sidebar hidden on the PS5 Home Screen (switch «Game list on Home») */
+/* the list is hidden in PS5 mode on Home and on game pages (switch «Game list»):
+   the full Game Library (Ctrl+Shift+L, the grid button) replaces it there */
 html.ps5-hide-list .LeftListSizableContainer,
 html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
 
-/* ---------- main panel ---------- */
-.MainPanel > .AppDetailsTransitionGroup { border-radius: var(--ps5-r-l) var(--ps5-r-l) 0 0; overflow: hidden; }
-
-/* ---------- Steam's home shelves, under the PS5 Home Screen ---------- */
-.LibraryHome .Showcase,
-.LibraryHome .ShowcaseOuter { background: transparent !important; }
+/* ═══════════════ Steam's home shelves, under the PS5 Home Screen ═══════════════ */
 .LibraryHome .SectionHeader,
 .LibraryHome .ShowcaseHeader {
   color: #fff !important;
@@ -162,10 +325,7 @@ html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
 .LibraryHome .LandscapeImage,
 .LibraryHome .PortraitImage,
 .LibraryHome .LibraryItemBox,
-.LibraryHome .FeaturedCapsule,
-.LibraryHome img {
-  border-radius: var(--ps5-r) !important;
-}
+.LibraryHome .FeaturedCapsule { border-radius: var(--ps5-r) !important; }
 .LibraryHome .LibraryItemBox,
 .LibraryHome .FeaturedCapsule {
   overflow: hidden;
@@ -173,42 +333,94 @@ html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
 }
 .LibraryHome .LibraryItemBox:hover,
 .LibraryHome .FeaturedCapsule:hover {
-  transform: translateY(-3px) scale(1.03);
+  transform: translateY(-3px);
   box-shadow: var(--ps5-focus), var(--ps5-shadow) !important;
 }
 
-/* ---------- game page: PS5 game hub ---------- */
-.AppDetailsMain .Header { padding: 0 !important; }
-.Header .TopCapsule { min-height: 52vh !important; }
-.Header .TopCapsule .HeaderBackgroundImage img {
+/* ═══════════════ What's New — PS5 content cards (v1.2.0 rewrite) ═══════════════
+   Steam lays this shelf out itself: it measures every capsule and positions them
+   in a horizontal scroller. v1.1.0 changed padding, borders, display and height
+   on Steam's boxes, Steam's measurements no longer matched and cards overlapped,
+   clipped and overflowed. Rule now: NOTHING here changes a box's size or flow —
+   only paint (radius, clipping, colour, shadow, filters) and transforms of the
+   image inside its own frame. */
+.UpdatesContainer { background: none !important; }
+.UpdatesContainer .EventTime {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, rgba(20, 38, 80, 0.72), rgba(8, 16, 36, 0.92)) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), 0 12px 28px -16px rgba(0, 0, 0, 0.85) !important;
+  transition: box-shadow 260ms var(--ps5-ease), background 260ms var(--ps5-ease) !important;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover,
+.UpdatesContainer .PartnerEventRowCapsule_Container > div:focus-within {
+  background: linear-gradient(180deg, rgba(26, 52, 110, 0.85), rgba(10, 22, 50, 0.95)) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.92), 0 0 22px -2px var(--ps5-accent-glow), 0 16px 30px -16px rgba(0, 0, 0, 0.9) !important;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container img {
+  object-fit: cover !important;
+  transform-origin: 50% 40%;
+  transition: transform 600ms var(--ps5-ease), filter 400ms var(--ps5-ease);
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover img { transform: scale(1.05); filter: brightness(1.08) saturate(1.1); }
+.UpdatesContainer .PartnerEventRowCapsule_TextTitle {
+  color: #fff !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.005em;
+}
+.UpdatesContainer [class*="EventType"],
+.UpdatesContainer [class*="PartnerEventType"] {
+  color: color-mix(in srgb, var(--ps5-accent) 50%, #fff) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.UpdatesContainer [class*="Summary"],
+.UpdatesContainer [class*="Desc"] { color: var(--ps5-text-2) !important; }
+.UpdatesContainer .GameIconAndName { border-radius: 999px !important; transition: background 160ms ease !important; }
+.UpdatesContainer .GameIconAndName:hover { background: rgba(255, 255, 255, 0.14) !important; }
+.UpdatesContainer .GameIconAndName .GameIcon,
+.UpdatesContainer .GameIconAndName .GameIcon img { border-radius: 50% !important; }
+.UpdatesContainer .GameIconAndName .GameName { color: rgba(255, 255, 255, 0.85) !important; }
+.UpdatesContainer .ScrollButton,
+.LibraryHome .ScrollButton {
+  border-radius: 50% !important;
+  background: rgba(9, 20, 46, 0.7) !important;
+  color: #fff !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background 160ms ease !important;
+}
+.UpdatesContainer .ScrollButton:hover,
+.LibraryHome .ScrollButton:hover { background: var(--ps5-accent) !important; }
+
+/* ═══════════════ game page: PS5 game hub (only on /library/app/…) ═══════════════
+   The library home is rendered inside .AppDetailsMain too, so every rule here is
+   scoped to html.ps5-on-app (set by js/ps5.js from Steam's route). */
+html.ps5-on-app .AppDetailsMain .Header { padding: 0 !important; }
+html.ps5-on-app .Header .TopCapsule .HeaderBackgroundImage img {
   -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
 }
-.Header .TopCapsule::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, transparent 55%),
-    linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.6) 100%);
-}
-
-/* play bar: a glass rail under the art */
-.AppDetailsMain .PlayBar,
-.AppDetailsMain .PlayBar.Glassy {
+html.ps5-on-app .AppDetailsMain .PlayBar,
+html.ps5-on-app .AppDetailsMain .PlayBar.Glassy {
   background: var(--ps5-glass) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
   backdrop-filter: blur(24px) saturate(1.2);
   border-top: 1px solid var(--ps5-line) !important;
   border-bottom: 1px solid var(--ps5-line) !important;
 }
-.PlayBarLabel { color: var(--ps5-text-3) !important; text-transform: none !important; letter-spacing: 0 !important; }
-.PlayBarDetailLabel { color: #fff !important; font-weight: 600 !important; }
-
-/* the Play button: the PS5 white button */
-.PlayButtonContainer .PlayButton,
-.PlayBar .PlayButton {
+html.ps5-on-app .PlayBar .InnerContainer.Panel { background: transparent !important; }
+html.ps5-on-app .PlayBarLabel { color: var(--ps5-text-3) !important; text-transform: none !important; letter-spacing: 0 !important; }
+html.ps5-on-app .PlayBarDetailLabel { color: #fff !important; font-weight: 600 !important; }
+/* the Play button: the PS5 white button (also Install / Stop: Steam swaps its text) */
+html.ps5-on-app .PlayButtonContainer .PlayButton,
+html.ps5-on-app .PlayBar .PlayButton {
   background: #fff !important;
   background-image: none !important;
   color: #0b0b0f !important;
@@ -216,165 +428,191 @@ html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
   font-weight: 700 !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
-  min-width: 168px;
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.16) !important;
   transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
 }
-.PlayButtonContainer .PlayButton svg,
-.PlayBar .PlayButton svg { color: #0b0b0f !important; fill: currentColor; }
-.PlayButtonContainer .PlayButton:hover,
-.PlayBar .PlayButton:hover {
-  transform: scale(1.04);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 32px 6px var(--ps5-accent-glow) !important;
+html.ps5-on-app .PlayButtonContainer .PlayButton svg,
+html.ps5-on-app .PlayBar .PlayButton svg { color: #0b0b0f !important; fill: currentColor; }
+html.ps5-on-app .PlayButtonContainer .PlayButton:hover,
+html.ps5-on-app .PlayBar .PlayButton:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 26px 4px var(--ps5-accent-glow) !important;
 }
-.PlayBar .MenuButtonContainer > *,
-.PlayBar .AppButtonsContainer > * { border-radius: 999px !important; }
-
-/* sections of the game page: rounded glass cards */
-.AppDetailsMain .AppDetailsSectionContainer,
-.AppDetailsMain .AppDetailsSection.Panel,
-.AppDetailsMain .GameStat,
-.AppDetailsMain .PartnerEventLargeUpdate,
-.AppDetailsMain .ActivityFeedContainer .Panel {
+html.ps5-on-app .PlayBar .MenuButtonContainer > *,
+html.ps5-on-app .PlayBar .AppButtonsContainer > * { border-radius: 999px !important; }
+/* sections: rounded glass cards (paint only: Steam sizes these blocks itself) */
+html.ps5-on-app .AppDetailsMain .AppDetailsSectionContainer,
+html.ps5-on-app .AppDetailsMain .AppDetailsSection.Panel,
+html.ps5-on-app .AppDetailsMain .GameStat,
+html.ps5-on-app .AppDetailsMain .PartnerEventLargeUpdate,
+html.ps5-on-app .AppDetailsMain .ActivityFeedContainer .Panel {
   background: var(--ps5-glass) !important;
-  border: 1px solid var(--ps5-line) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
   border-radius: var(--ps5-r) !important;
 }
-.AppDetailsMain .AppDetailsSection > .SectionHeader,
-.AppDetailsMain .SectionHeader {
+html.ps5-on-app .AppDetailsMain .SectionHeader {
   color: #fff !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
   font-weight: 700 !important;
 }
-.AppDetailsMain .Body.ScrollContainer { background: none !important; }
-
-/* achievements page */
 .AchievementsPageContainer { background: transparent !important; }
 
-/* ---------- downloads page ---------- */
-.DownloadsPage {
-  background: transparent !important;
-}
+/* ═══════════════ downloads page ═══════════════ */
+.DownloadsPage { background: transparent !important; }
 .DownloadsPage .Panel,
-.DownloadsPage [class*="DownloadItem"] {
-  border-radius: var(--ps5-r) !important;
-}
-.DownloadsPage .ProgressBar > div,
-.BottomBar .ProgressBar > div { background: var(--ps5-accent) !important; box-shadow: 0 0 10px var(--ps5-accent-glow); }
+.DownloadsPage [class*="DownloadItem"] { border-radius: var(--ps5-r) !important; }
+.DownloadsPage [class*="SectionTitle"],
+.DownloadsPage .SectionHeader { color: #fff !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; }
+.DownloadsPage img { border-radius: 10px !important; }
+.DownloadsPage .DialogButton,
+.DownloadsPage button { border-radius: 999px !important; }
+.DownloadsPage .ProgressBar > div { background: var(--ps5-accent) !important; box-shadow: 0 0 10px var(--ps5-accent-glow); }
 
-/* ---------- bottom bar (downloads + friends & chat) ---------- */
-.BottomBar {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent) !important;
-  border-top: none !important;
-}
-.BottomBar .DownloadStatus,
-.BottomBar [class*="FriendsButton"],
-.BottomBar [class*="Button"] {
-  border-radius: 999px !important;
-  transition: background var(--ps5-t) var(--ps5-ease) !important;
-}
-.BottomBar [class*="Button"]:hover,
-.BottomBar .DownloadStatus:hover { background: var(--ps5-glass-hover) !important; }
-
-/* ---------- web pages inside the main window ---------- */
-.BrowserWrapper { background: transparent !important; }
-
-/* ---------- Millennium's own settings page in the main window ---------- */
-.MillenniumSettings { background: transparent !important; }
-
-/* ==========================================================================
-   v1.1.0
-   ========================================================================== */
-
-/* ---------- one profile button: Steam's account button gives way to the PS5 avatar ----------
-   only while js/ps5.js runs (html.ps5-theme) and unless «Steam account button → Visible».
-   Everything that menu held is in Control Center → Profile. */
-html.ps5-theme:not(.ps5-account-show) .TitleBarControls .AccountMenu,
-html.ps5-theme:not(.ps5-account-show) .AccountMenu { display: none !important; }
-
-/* ---------- bottom bar: Downloads · Add a Game · Friends & Chat as PS5 pills ---------- */
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar {
+/* ═══════════════ bottom bar (v1.2.0 rewrite) ═══════════════
+   Steam stretches .DownloadStatus across the whole bar (flex: 1) and widens its
+   content to ~720 px while something downloads — v1.1.0 painted a pill on that
+   stretched box, the giant middle button. Now each button is a compact capsule
+   sized by its content; Downloads keeps Steam's place in the middle. */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBarContainer > .BottomBar {
   display: flex !important;
   align-items: center !important;
-  gap: 10px;
+  justify-content: space-between !important;
+  gap: 12px;
+  height: 52px !important;
   min-height: 52px !important;
-  padding: 0 18px !important;
-  background: linear-gradient(0deg, rgba(0, 4, 16, 0.82), rgba(0, 4, 16, 0.35)) !important;
-  border-top: 1px solid var(--ps5-line) !important;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  padding: 0 16px !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: linear-gradient(0deg, rgba(0, 4, 16, 0.78), rgba(0, 4, 16, 0.25)) !important;
 }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="AddGame"],
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="FriendsButton"] {
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus) {
   position: relative;
+  flex: 0 0 auto !important;
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important;
   gap: 8px;
-  height: 38px !important;
-  padding: 0 16px 0 14px !important;
+  width: auto !important;
+  max-width: 340px;
+  height: 36px !important;
+  min-width: 36px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  box-sizing: border-box;
+  border: none !important;
   border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.86) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
   cursor: pointer;
-  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease) !important;
+  overflow: hidden;
+  transition: background 180ms var(--ps5-ease), color 180ms var(--ps5-ease), box-shadow 220ms var(--ps5-ease) !important;
 }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus:hover,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton:hover,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton:hover,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="AddGame"]:hover,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="FriendsButton"]:hover {
-  background: rgba(255, 255, 255, 0.16) !important;
-  box-shadow: var(--ps5-focus) !important;
-  transform: translateY(-1px);
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus):hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 18px -4px var(--ps5-accent-glow) !important;
 }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar svg { color: #fff !important; fill: currentColor; }
-/* PS5 icons, drawn with masks so they take the text colour */
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus::before,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton::before,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton::before {
-  content: "";
-  width: 18px;
-  height: 18px;
+/* Downloads sits in the middle, as in Steam, at its own size */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus { margin-inline: auto !important; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .DownloadStatusContent {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px;
+  width: auto !important;
+  max-width: 100%;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* while downloading: game icon · status · percent · thin blue progress line */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .DetailedDownloadProgress {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  width: 300px !important;
+  max-width: 100%;
+  min-width: 0;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .DetailedDownloadProgress .Icon {
+  width: 22px !important;
+  height: 22px !important;
   flex: none;
-  background: currentColor;
-  -webkit-mask: var(--ps5-bb-icon) center / contain no-repeat;
-  mask: var(--ps5-bb-icon) center / contain no-repeat;
+  border-radius: 6px;
+  overflow: hidden;
 }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M12 3.5v11m-4.5-4.5L12 14.5 16.5 10M4.5 19.5h15'/%3E%3C/svg%3E"); }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5' stroke-linecap='round'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
-/* Steam's own small icons inside those buttons step aside for ours */
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton > svg,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton > svg:first-child { display: none !important; }
-/* Downloads: blue progress line inside the pill while something downloads */
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus [class*="ProgressBar"] {
-  height: 4px !important;
-  min-width: 90px;
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .DetailedDownloadProgress .IconBevel { display: none !important; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBarWrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .StatusLine {
+  display: flex !important;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .StatusLine .Status { color: rgba(255, 255, 255, 0.7) !important; overflow: hidden; text-overflow: ellipsis; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .StatusLine .Status.Percentage,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .Percentage { color: #fff !important; font-variant-numeric: tabular-nums; flex: none; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar {
+  height: 3px !important;
   border-radius: 99px !important;
   background: rgba(255, 255, 255, 0.16) !important;
   overflow: hidden;
 }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar > div { background: var(--ps5-accent) !important; box-shadow: 0 0 8px var(--ps5-accent-glow); }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .StatusLine,
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .Status { color: var(--ps5-text-2) !important; }
-html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .Percentage { color: #fff !important; font-variant-numeric: tabular-nums; }
-html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus {
-  background: color-mix(in srgb, var(--ps5-accent) 30%, transparent) !important;
-  border-color: color-mix(in srgb, var(--ps5-accent) 70%, transparent) !important;
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar > div {
+  background: var(--ps5-accent) !important;
+  box-shadow: 0 0 8px var(--ps5-accent-glow);
+  border-radius: 99px;
 }
-html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus::before { animation: ps5-dl-bob 1.4s ease-in-out infinite; }
+html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus {
+  background: color-mix(in srgb, var(--ps5-accent) 22%, rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ps5-accent) 60%, transparent) !important;
+}
+/* icons: Steam's .Icon boxes stay; their drawing becomes the PS5 icon */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus .DownloadStatusContent) > .Icon {
+  display: inline-grid !important;
+  place-items: center;
+  width: 18px !important;
+  height: 18px !important;
+  flex: none;
+  margin: 0 !important;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus .DownloadStatusContent) > .Icon > * { display: none !important; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus .DownloadStatusContent) > .Icon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--ps5-bb-icon) center / contain no-repeat;
+  mask: var(--ps5-bb-icon) center / contain no-repeat;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M12 3.5v11m-4.5-4.5L12 14.5 16.5 10M4.5 19.5h15'/%3E%3C/svg%3E"); }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5' stroke-linecap='round'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
+html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus .DownloadStatusContent > .Icon::before { animation: ps5-dl-bob 1.4s ease-in-out infinite; }
 @keyframes ps5-dl-bob { 50% { transform: translateY(2px); } }
-/* Friends & Chat: online count badge added by js/ps5.js */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar :is(.AddGameButton, .FriendsButton, .DownloadStatus) :is(.Text, .Queue) {
+  color: inherit !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* friends online badge (js/ps5.js) */
 .ps5-friends-badge {
   min-width: 20px;
   height: 20px;
@@ -387,119 +625,24 @@ html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus::be
   font-weight: 800;
   display: inline-grid;
   place-items: center;
+  flex: none;
 }
 .ps5-friends-badge[hidden] { display: none; }
+/* Steam's notices above the bar ("Steam updated…") keep their place */
+.BottomBarContainer .Alert {
+  border-radius: 12px !important;
+  background: rgba(9, 20, 46, 0.95) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+}
 
-/* ---------- What's New: a row of PS5 content cards (Steam's real events, Steam's own clicks) ---------- */
-.LibraryHome .UpdatesContainer,
-.UpdatesContainer {
-  background: none !important;
-  padding: 4px 0 18px !important;
-}
-.UpdatesContainer .EventTime {
-  display: inline-flex !important;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px !important;
-  margin-bottom: 10px !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.10) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  text-transform: none !important;
-  letter-spacing: 0.02em !important;
-}
-.UpdatesContainer .PartnerEventRowCapsule_Container > div {
-  position: relative;
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  background: var(--ps5-glass) !important;
-  border: 1px solid var(--ps5-line) !important;
-  box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.7) !important;
-  transition: transform 280ms var(--ps5-ease), box-shadow 280ms var(--ps5-ease), border-color 280ms var(--ps5-ease) !important;
-}
-.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover {
-  transform: translateY(-4px) scale(1.025);
-  border-color: transparent !important;
-  box-shadow: 0 0 0 3px #fff, 0 0 30px 4px var(--ps5-accent-glow), 0 22px 40px -14px rgba(0, 0, 0, 0.8) !important;
-  z-index: 2;
-}
-.UpdatesContainer .PartnerEventRowCapsule_Container img {
-  border-radius: 0 !important;
-  transition: transform 600ms var(--ps5-ease), filter 400ms var(--ps5-ease);
-}
-.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover img { transform: scale(1.06); filter: brightness(1.08); }
-.UpdatesContainer .PartnerEventRowCapsule_TextTitle {
-  color: #fff !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  line-height: 1.3 !important;
-  letter-spacing: -0.01em;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.UpdatesContainer [class*="Summary"],
-.UpdatesContainer [class*="Desc"] {
-  color: var(--ps5-text-2) !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.UpdatesContainer [class*="EventType"],
-.UpdatesContainer [class*="PartnerEventType"] {
-  color: color-mix(in srgb, var(--ps5-accent) 55%, #fff) !important;
-  font-weight: 700 !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-}
-.UpdatesContainer .GameIconAndName {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 4px 4px !important;
-  border-radius: 999px !important;
-  background: rgba(0, 0, 0, 0.35) !important;
-  transition: background 160ms ease !important;
-}
-.UpdatesContainer .GameIconAndName:hover { background: rgba(255, 255, 255, 0.18) !important; }
-.UpdatesContainer .GameIconAndName .GameIcon,
-.UpdatesContainer .GameIconAndName .GameIcon img { border-radius: 50% !important; overflow: hidden; }
-.UpdatesContainer .GameIconAndName .GameName { color: #fff !important; font-weight: 600 !important; }
-/* the shelf's own scroll arrows */
-.UpdatesContainer .ScrollButton,
-.LibraryHome .ScrollButton {
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.14) !important;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-.UpdatesContainer .ScrollButton:hover,
-.LibraryHome .ScrollButton:hover { background: #fff !important; color: #0b0b0f !important; }
+/* ═══════════════ one profile button ═══════════════
+   Steam's account button gives way to the PS5 avatar while js/ps5.js runs,
+   unless «Steam account button → Visible». Its contents (wallet included) are in
+   Control Center → Profile. */
+html.ps5-theme:not(.ps5-account-show) .TitleBarControls .AccountMenu { display: none !important; }
 
-/* ---------- Downloads page: PS5 downloads list ---------- */
-.DownloadsPage .DownloadStatusContent,
-.DownloadsPage [class*="DownloadOverview"],
-.DownloadsPage [class*="AppDownloadPanel"],
-.DownloadsPage [class*="DownloadItem"] {
-  background: var(--ps5-glass) !important;
-  border: 1px solid var(--ps5-line) !important;
-  border-radius: var(--ps5-r) !important;
-}
-.DownloadsPage [class*="SectionTitle"],
-.DownloadsPage .SectionHeader {
-  color: #fff !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 700 !important;
-}
-.DownloadsPage img { border-radius: 10px !important; }
-.DownloadsPage .DialogButton,
-.DownloadsPage button { border-radius: 999px !important; }
-.DownloadsPage canvas { border-radius: var(--ps5-r); }
-
-/* ---------- overlays over web pages: the web view is hidden while one is open ---------- */
+/* ═══════════════ overlays over web pages: the web view is hidden while one is open ═══════════════ */
 html.ps5-web-hidden .BrowserWrapper { visibility: hidden; }
+
+.BrowserWrapper { background: transparent !important; }
+.MillenniumSettings { background: transparent !important; }
