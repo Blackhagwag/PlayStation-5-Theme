@@ -4,6 +4,41 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.4.0] — 2026-11-27 — Library Game Page Rebuild & Store Fixes
+
+Based on the screenshots sent with the report (Cyberpunk 2077 in the library, an "over the hill"
+store page) — the first real captures of the theme in a live client.
+
+### Fixed
+- **Library game page rebuilt** (any game opened from the list / outside the Home row):
+  - Install / Play / Update had no visible label — the white pill was painted on the button
+    while Steam keeps the words in `.ButtonText` (white). The text is dark now in every state;
+    Stop / Cancel get a quiet translucent pill.
+  - The play-bar stats ("Space required", "Last played", "You played", achievements) were boxed
+    into pills — Steam lays them in a superimposed grid it swaps by state; they are plain text now.
+  - The play bar is one flat dark card; settings / info / favourite are round ghost buttons.
+  - "Featured" update spilled out of its frame — Steam frames it with a square blue
+    border-image; it is restyled itself now (12 px, accent gradient header).
+  - The game art no longer washes over the whole page (the yellow background): the header keeps
+    the art, the page sits on the PS5 ground.
+  - One surface and one radius (12 px) for every section, links row without a frame, the
+    "would you recommend it?" card in the theme.
+  The Home Screen (recent games row) is unchanged.
+- **Store "Add to Cart" overlapping the next edition** — Steam hangs the price/button row
+  17 px below each purchase box; it now sits inside the card, right-aligned, with the sale
+  countdown on its own small line.
+- **Store arrows: disc off-centre from the chevron** — the disc was drawn in the middle of the
+  45×108 hit area while Steam's chevron sits elsewhere in it. The chevron's own box is the disc
+  now (legacy carousels); React carousel buttons draw disc and chevron at the same centre.
+- **Home background blur not visible** — the slider used the old key whose saved value could be
+  0 from earlier versions; it has a new key ("Home art blur", default 10 px).
+
+### Changed
+- **Store game page:** media on the left, About this game + User reviews stacked on the right.
+- **Community profiles** are left exactly as Steam draws them (theme layer off on /id/ and
+  /profiles/ pages), as requested.
+- Tests: 174 checks.
+
 ## [1.3.0] — 2026-11-27 — Visual Polish & Store Redesign
 
 ### Fixed

@@ -28,6 +28,8 @@
   // pages that must look exactly like Steam: payments, sign-in, the light hardware pages
   if (/^\/(checkout|login|join|widget|hardware|steamdeck\w*|about|steamcontroller|vr)(\/|$)/i.test(location.pathname)) return;
   if (isCommunity && /^\/(openid|login|linkfilter)(\/|$)/i.test(location.pathname)) return;
+  // v1.4.0: profiles stay exactly as Steam draws them (owners' own backgrounds and showcases)
+  if (isCommunity && /^\/(id|profiles)\//i.test(location.pathname)) return;
 
   const root = document.documentElement;
   const state = window.__ps5Web = { kind: '', on: false };
@@ -298,7 +300,16 @@
     logo.src = `${CDN(id)}/logo.png`;
 
     const about = buildAbout();
-    anchor.before(...[hero, about].filter(Boolean));
+    // media on one side, the facts and reviews on the other
+    const gallery = $('#game_highlights');
+    let split = null;
+    if (gallery && about) {
+      split = el('div', 'ps5-split', {}, [el('div', 'ps5-split-media'), el('div', 'ps5-split-side', {}, [...about.children])]);
+      anchor.before(hero, split);
+      split.firstChild.appendChild(gallery);   // the React carousel moves with its container
+    } else {
+      anchor.before(...[hero, about].filter(Boolean));
+    }
     root.classList.add('ps5-hero-on');
     widenGallery(shots);
     // one width system: the hero's content lines up with Steam's page column

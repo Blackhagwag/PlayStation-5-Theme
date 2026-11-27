@@ -2,7 +2,7 @@
   "name": "PlayStation 5",
   "description": "A PlayStation 5 style shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, PSN-style profile, glass panels and smooth motion. Not affiliated with Sony Interactive Entertainment.",
   "author": "Blackhagwag",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "source": "https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme",
   "github": {
     "owner": "Blackhagwag",
@@ -328,13 +328,13 @@
         }
       }
     },
-    "Background blur": {
-      "description": "How soft the game art behind the Home Screen is. A light blur keeps the art recognisable and the text easy to read; 0 is sharp.\n[i]Default: 12px[/i]",
+    "Home art blur": {
+      "description": "How soft the selected game's art behind the Home Screen is. A light blur keeps it recognisable and the text easy to read; 0 is sharp.\n[i]Default: 10px[/i]",
       "tab": "Look",
       "section": "Background",
-      "default": 12,
+      "default": 10,
       "slider": {
-        "cssVariable": "--ps5-bg-blur",
+        "cssVariable": "--ps5-art-blur",
         "min": 0,
         "max": 40,
         "step": 2,

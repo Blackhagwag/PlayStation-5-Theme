@@ -56,7 +56,24 @@
    const r = document.getElementById('route');
    const m = /^\/library\/app\/(\d+)/.exec(p);
    if (m) {
-     r.innerHTML = `<div class="AppDetailsMain"><div class="Header"><div class="TopCapsule"><div class="HeaderBackgroundImage"><img src="/assets/${m[1]}/library_hero.jpg"></div></div></div><div class="PlayBar"><div class="PlayButtonContainer"><button class="PlayButton">▶ PLAY</button></div><div><div class="PlayBarLabel">Last played</div><div class="PlayBarDetailLabel">Today</div></div></div><div class="AppDetailsOverviewPanel" style="padding:20px 28px;height:600px"><div class="AppDetailsSectionContainer" style="padding:16px">Steam activity feed (native)</div></div></div>`;
+     r.innerHTML = `<div class="AppDetailsMain"><div class="Container"><div class="Body ScrollContainer" style="height:100%;overflow:auto">
+       <div class="Header"><div class="TopCapsule"><div class="HeaderBackgroundImage"><img src="/assets/${m[1]}/library_hero.jpg"></div></div></div>
+       <div class="AppDetailsOverviewPanel"><div class="Container InPage"><div class="Row" style="display:flex;align-items:center;gap:20px;height:72px;padding:0 18px;background:#1a2433">
+         <div class="PlayButtonContainer" style="display:flex;background:#1a9fff"><button class="PlayButton" style="height:44px;border:none;padding:0 26px;background:#1a9fff"><span class="ButtonText" style="color:#fff">УСТАНОВИТЬ</span></button></div>
+         <div class="GameStat Panel" id="gstat" style="background:#2a3a4d;border-radius:4px;padding:6px 10px"><div class="PlayBarLabel">Требуется места</div><div class="PlayBarDetailLabel">75,84 Гбайт</div></div>
+         <div class="GameStat Panel" style="background:#2a3a4d;padding:6px 10px"><div class="PlayBarLabel">Вы играли</div><div class="PlayBarDetailLabel">81,7 ч.</div></div>
+         <div style="flex:1"></div><div class="AppButtonsContainer"><div class="MenuButton" style="width:32px;height:32px">⚙</div></div>
+       </div></div></div>
+       <div class="LinksSection"><div class="AppDetailsSectionContainer"><div class="Links Panel"><a>Страница в магазине</a><a>Доп. контент</a><a>Центр сообщества</a></div></div></div>
+       <div style="display:flex;gap:16px;padding:16px">
+         <div style="flex:2;display:flex;flex-direction:column;gap:16px">
+           <div class="ReviewContainer" style="background:#3b5a7a;padding:14px">Вы играли 81 ч. Вы бы порекомендовали эту игру? <button class="DialogButton">Да</button></div>
+           <div class="AppDetailsSectionContainer" id="featsec" style="padding:10px"><div class="PartnerEventFeatured" id="feat" style="border:3px solid;border-image:linear-gradient(#1a9fff,#1a9fff) 1;margin:-6px"><div class="PartnerEventFeaturedHeader" style="background:#1a9fff;padding:4px 10px">ИЗБРАННОЕ</div><div style="padding:20px;height:120px">КРУПНОЕ ОБНОВЛЕНИЕ — Обновление 2.5</div></div></div>
+           <div class="AppDetailsSectionContainer" style="padding:16px;height:400px"><div class="SectionHeader">Активность</div><div class="ActivityFeedContainer"><div class="Panel" style="background:#223;height:60px"></div></div></div>
+         </div>
+         <div style="flex:1"><div class="AppDetailsSectionContainer" style="padding:16px;height:260px"><div class="SectionHeader">Играющие друзья</div></div></div>
+       </div>
+     </div></div></div>`;
    } else {
      r.innerHTML = `<div class="AppDetailsMain"><div class="Container"><div class="Body InnerContainer"><div class="whatsnew-shelf"><h2 class="SectionHeader">What's New</h2><div class="UpdatesContainer">${[101,103,104].map((id,i)=>`<div><div class="EventTime">${['This week','Yesterday','2 days ago'][i]}</div><div class="PartnerEventRowCapsule_Container"><div><img src="/assets/${id}/header.jpg"><div class="PartnerEventRowCapsule_TextTitle">${['Major update 2.0 is live','Patch notes 1.4.2','Weekend event starts now'][i]}</div><div class="GameIconAndName"><span class="GameIcon"></span><span class="GameName">Game</span></div></div></div></div>`).join('')}</div></div><div class="LibraryHome"><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div></div></div>`;
    }

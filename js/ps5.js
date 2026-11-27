@@ -28,7 +28,7 @@
     try { window.__ps5Theme.destroy(); } catch (e) { /* old instance already gone */ }
   }
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const doc = document;
   const root = doc.documentElement;
 
@@ -1453,15 +1453,8 @@
      the single view of a game; the theme only styles it (main.css, html.ps5-on-app)
      and puts the game's art behind the glass. */
   const Details = (() => {
-    const update = () => {
-      const m = /^\/library\/app\/(\d+)/.exec(currentPath());
-      if (!m) return;
-      const app = appById(m[1]);
-      if (!app) return;
-      ensureDetails(app).then(() => {
-        if (!Library.isOpen() && /^\/library\/app\/(\d+)/.exec(currentPath())?.[1] === m[1]) Bg.set('app:' + app.appid, artFor(app).hero);
-      });
-    };
+    // the header already shows the art: no second copy washed over the whole page
+    const update = () => { if (/^\/library\/app\//.test(currentPath())) Bg.clear(); };
     return { update };
   })();
 

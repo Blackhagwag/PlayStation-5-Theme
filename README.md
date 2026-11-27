@@ -24,8 +24,8 @@ glass panels and smooth motion — while every Steam function keeps working unde
 | ![About](assets/preview-store-about.jpg) | ![Wishlist](assets/preview-wishlist.jpg) |
 | **Game actions menu ("…")** | **Store arrows** |
 | ![Game menu](assets/preview-game-menu.jpg) | ![Arrows](assets/preview-store-arrows.jpg) |
-| **Long titles (second game)** | **PSN-style profile** |
-| ![Store hero 2](assets/preview-store-hero-2.jpg) | ![Profile](assets/preview-profile-psn.jpg) |
+| **Long titles (second game)** | **Purchase options** |
+| ![Store hero 2](assets/preview-store-hero-2.jpg) | ![Buy](assets/preview-store-buy.jpg) |
 | **What's New + bottom bar** | **Profile panel over the Store** |
 | ![What's New](assets/preview-whatsnew.jpg) | ![Profile panel](assets/preview-profile-store.jpg) |
 | **Game hub** | **Steam menus** |
@@ -58,8 +58,8 @@ glass panels and smooth motion — while every Steam function keeps working unde
   discounts, reviews, date added, Add to Cart and remove through Steam, search, sorting,
   "On sale" filter; one click back to Steam's own list.
 - **Address panel** — compact capsule at the top left: back, forward, reload, where you are.
-- **Community & PSN profile** — round glowing avatar, level, showcases, games, achievements,
-  friends, badges, inventory; hubs, Workshop, Discussions, Guides, Screenshots, Market.
+- **Community** — hubs, Workshop, Discussions, Guides, Screenshots, Market in the PS5 style;
+  user profiles stay exactly as Steam (and their owners) draw them.
 - **One profile button** — the PS5 avatar replaces Steam's account button; account details,
   wallet, store preferences, language, status and change account are in its panel. The panel
   works the same on every page, including on top of the Store (the native web view is hidden
@@ -155,7 +155,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 166 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 174 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

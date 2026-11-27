@@ -81,7 +81,7 @@ try {
   check('address panel: compact (≤ 340 × 36)', ab.width <= 340 && Math.round(ab.height) === 36, JSON.stringify(ab));
   // ---- v1.3.0: soft background blur on the selected game's art
   const blur = await page.locator('#ps5-bg .ps5-bg-layer.on').evaluate(n => getComputedStyle(n).filter);
-  check('Home background: light blur (12 px) on the art layer only', /blur\(12px\)/.test(blur), blur);
+  check('Home background: light blur (10 px, new slider key) on the art layer only', /blur\(10px\)/.test(blur), blur);
   check('Home tiles stay sharp', (await page.locator('.ps5-tile.selected img').evaluate(n => getComputedStyle(n).filter)) === 'none');
   const wn = await page.locator('.PartnerEventRowCapsule_Container > div').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check("What's New: content cards restyled", wn === '16px', wn);
@@ -203,6 +203,24 @@ try {
   check('menu: Game hub → SteamUIStore.Navigate(/library/app/id)', calls.some(c => c[0] === 'Navigate' && c[1] === '/library/app/' + selId));
   check('game page: one view only (Steam\'s page, nothing injected)', await page.locator('#ps5-details, #ps5-lightbox').count() === 0 && await page.locator('.AppDetailsMain').count() === 1);
   check('game page: no game list on the left (PS5 mode default)', await page.locator('.LeftListSizableContainer').isHidden());
+  // ---- v1.4.0: the library game page, rebuilt from the user's screenshot (Cyberpunk 2077)
+  await page.waitForTimeout(300);
+  const pb = await page.locator('.PlayButtonContainer').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n.querySelector('.ButtonText')).color, getComputedStyle(n).borderTopLeftRadius]);
+  check('game page: Install/Play is a white pill with READABLE dark text', pb[0] === 'rgb(255, 255, 255)' && pb[1] === 'rgb(11, 11, 15)' && pb[2] === '999px', pb.join(' | '));
+  const gs = await page.locator('#gstat').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius]);
+  check('game page: play-bar stats are plain text, no pill boxes', gs[0] === 'rgba(0, 0, 0, 0)' && gs[1] === '0px', gs.join(' | '));
+  const pbRow = await page.locator('.AppDetailsOverviewPanel .Row').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
+  check('game page: play bar is one flat card (12 px)', pbRow === '12px', pbRow);
+  const ft = await page.locator('#feat').evaluate(n => { const c = getComputedStyle(n); const p = document.getElementById('featsec').getBoundingClientRect(), r = n.getBoundingClientRect(); return [c.borderImageSource, c.borderTopLeftRadius, c.overflow]; });
+  check('game page: "Featured" update restyled itself (no square blue border-image spilling out)', ft[0] === 'none' && ft[1] === '12px' && ft[2] === 'hidden', ft.join(' | '));
+  const lk = await page.locator('.LinksSection .AppDetailsSectionContainer').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).boxShadow]);
+  check('game page: links row without a frame', lk[0] === 'rgba(0, 0, 0, 0)' && lk[1] === 'none', lk.join(' | '));
+  const rv = await page.locator('.ReviewContainer').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius]);
+  check('game page: "would you recommend" card in the theme (not Steam blue)', !/59, 90, 122/.test(rv[0]) && rv[1] === '12px', rv.join(' | '));
+  const radii = await page.$$eval('.AppDetailsMain .AppDetailsSectionContainer:not(.LinksSection *)', ns => [...new Set(ns.map(n => getComputedStyle(n).borderTopLeftRadius))]);
+  check('game page: one radius for all sections', radii.length === 1 && radii[0] === '12px', radii.join(','));
+  const bgArt = await page.locator('#ps5-bg').evaluate(n => [n.classList.contains('has-art'), [...n.querySelectorAll('.ps5-bg-layer')].map(l => getComputedStyle(l).opacity).join(',')]);
+  check('game page: no game art washed over the whole page', !bgArt[0] || bgArt[1] === '0,0', bgArt.join(' | '));
   await shot('preview-game.jpg');
   await page.addStyleTag({ content: ':root{--ps5-home-sidebar:home}' }).then(h => h.evaluate(n => n.id = 'side-opt'));
   await page.waitForTimeout(2200);
@@ -358,15 +376,17 @@ try {
   // arrows: compact disc, no big white circle
   await wp.locator('.carousel_container .arrow.right').hover();
   await wp.waitForTimeout(250);
-  const ar = await wp.locator('.carousel_container .arrow.right').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n, '::before').width, getComputedStyle(n, '::before').backgroundColor, n.getBoundingClientRect().width, n.getBoundingClientRect().height]);
-  check('arrows: hit area transparent and unchanged (45×108)', ar[0] === 'rgba(0, 0, 0, 0)' && ar[1] === '0px' && Math.round(ar[4]) === 45 && Math.round(ar[5]) === 108, ar.join(' | '));
-  check('arrows: 38 px disc, blue on hover (no white circle)', ar[2] === '38px' && ar[3] === 'rgb(0, 112, 209)', ar.join(' | '));
+  const ar = await wp.locator('.carousel_container .arrow.right').evaluate(n => { const d = n.firstElementChild, r = n.getBoundingClientRect(), q = d.getBoundingClientRect(); return [getComputedStyle(n).backgroundColor, Math.round(r.width), Math.round(r.height), Math.round(q.width), getComputedStyle(d).backgroundColor, Math.round((q.left + q.width / 2) - (r.left + r.width / 2)), Math.round((q.top + q.height / 2) - (r.top + r.height / 2)), getComputedStyle(d, '::before').maskImage || getComputedStyle(d, '::before').webkitMaskImage]; });
+  check('arrows: hit area transparent and unchanged (45×108)', ar[0] === 'rgba(0, 0, 0, 0)' && ar[1] === 45 && ar[2] === 108, ar.join(' | '));
+  check('arrows: 38 px disc IS the chevron box (centred, no drift), blue on hover', ar[3] === 38 && ar[4] === 'rgb(0, 112, 209)' && Math.abs(ar[5]) <= 1 && Math.abs(ar[6]) <= 1 && /svg/.test(ar[7]), ar.join(' | '));
   if (SHOTS) await wp.locator('.carousel_container').screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-arrows.jpg'), type: 'jpeg', quality: 82 });
   await wp.locator('#cbr').hover();
   await wp.waitForTimeout(250);
   const cb = await wp.locator('#cbr').evaluate(n => [n.getAttribute('data-ps5-arrow'), getComputedStyle(n).backgroundColor, getComputedStyle(n, '::before').width, getComputedStyle(n, '::before').backgroundColor, Math.round(n.getBoundingClientRect().width), Math.round(n.getBoundingClientRect().height)]);
   check('React carousel arrows (.CarouselBtnRight): marked, transparent hit area at Steam\'s size', cb[0] === '' && cb[1] === 'rgba(0, 0, 0, 0)' && cb[4] === 48 && cb[5] === 96, cb.join(' | '));
   check('React carousel arrows: 36 px disc, blue on hover — no white circle', cb[2] === '36px' && cb[3] === 'rgb(0, 112, 209)', cb.join(' | '));
+  const cc = await wp.locator('#cbr').evaluate(n => [getComputedStyle(n.querySelector('svg')).display, getComputedStyle(n, '::after').width, getComputedStyle(n, '::after').marginLeft]);
+  check('React carousel arrows: chevron drawn at the button centre (Steam\'s off-centre svg hidden)', cc[0] === 'none' && cc[1] === '14px', cc.join(' | '));
   await wp.mouse.move(700, 600);
   await wp.locator('#cbl').focus();
   const cbf = await wp.locator('#cbl').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).outlineStyle]);
@@ -399,8 +419,8 @@ try {
   check('about: left column = release, developer, publisher', rowsL.join('|') === 'Release date|Developer|Publisher', rowsL.join('|'));
   check('about: right column = genres, tags', rowsR.join('|') === 'Genres|Tags', rowsR.join('|'));
   check('about: values are Steam\'s (links kept, tags moved with their "+")', (await wp.locator('.ps5-info-link').first().getAttribute('href')) === 'https://store.steampowered.com/developer/mock' && await wp.locator('.ps5-info-value .glance_tags_ctn .app_tag').count() === 3 && (await wp.locator('.ps5-info-col:last-child .ps5-info-value').first().textContent()) === 'Action, RPG');
-  const cols = await wp.$$eval('.ps5-about > *', ns => ns.map(n => Math.round(n.getBoundingClientRect().height)));
-  check('about + reviews: one balanced row (heights within 40%)', cols.length === 2 && Math.min(...cols) / Math.max(...cols) > 0.6, cols.join(' / '));
+  const sp = await wp.evaluate(() => { const m = document.querySelector('.ps5-split-media').getBoundingClientRect(), d = document.querySelector('.ps5-split-side').getBoundingClientRect(); return [Math.round(m.left), Math.round(d.left), !!document.querySelector('.ps5-split-media #game_highlights'), document.querySelectorAll('.ps5-split-side > .ps5-info, .ps5-split-side > .ps5-reviews').length]; });
+  check('media on one side (left), about + reviews stacked on the other', sp[0] < sp[1] && sp[2] && sp[3] === 2, sp.join(' / '));
   check('reviews: score, label and count from Steam\'s rows', (await wp.locator('.ps5-rev-share').textContent()) === '92%' && (await wp.locator('.ps5-rev-label').textContent()) === 'Very Positive' && await wp.locator('a.ps5-rev-link[href="#app_reviews_hash"]').count() === 1);
   check('Steam\'s glance box steps back, gallery takes the full column', await wp.locator('.glance_ctn').isHidden() && /ps5-glance-off/.test(await cls()));
   const ga = await wp.locator('#galprev').evaluate(n => [n.getAttribute('data-ps5-arrow'), getComputedStyle(n).backgroundColor]);
@@ -422,11 +442,15 @@ try {
   check('viewer: arrow keys page through', (await wp.locator('.ps5-viewer .count').textContent()) === '3 / 5');
   await wp.keyboard.press('Escape');
   check('viewer: Esc closes', await wp.locator('.ps5-viewer.open').count() === 0);
-  if (SHOTS) { await wp.evaluate(() => document.querySelector('.ps5-about').scrollIntoView({ block: 'start' })); await wp.waitForTimeout(200); await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-about.jpg'), type: 'jpeg', quality: 84 }); await wp.evaluate(() => scrollTo(0, 0)); }
+  // purchase rows sit inside their cards (Steam hangs them 17 px below the edge)
+  const pa = await wp.$$eval('.game_area_purchase_game', ns => ns.map(n => { const b = n.getBoundingClientRect(), a = n.querySelector('.game_purchase_action').getBoundingClientRect(); return Math.round(b.bottom - a.bottom); }));
+  check('store: "Add to Cart" rows stay inside their card (no overlap with the next one)', pa.every(d => d >= 8), pa.join(','));
+  if (SHOTS) { await wp.evaluate(() => document.querySelector('#game_area_purchase').scrollIntoView({ block: 'center' })); await wp.waitForTimeout(150); await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-buy.jpg'), type: 'jpeg', quality: 84 }); }
+  if (SHOTS) { await wp.evaluate(() => document.querySelector('.ps5-split').scrollIntoView({ block: 'start' })); await wp.waitForTimeout(200); await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-about.jpg'), type: 'jpeg', quality: 84 }); await wp.evaluate(() => scrollTo(0, 0)); }
   check('store game page: kind + art from the page', /ps5-p-app/.test(await cls()) && /library_hero/.test(await wp.evaluate(() => document.documentElement.style.getPropertyValue('--ps5-page-art'))));
   const buy = await wp.locator('.game_area_purchase_game').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   const btn = await wp.locator('.btn_green_steamui').first().evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).backgroundColor]);
-  check('store game page: PS Store buy panel and blue pill button', buy === '20px' && btn[0] === '999px' && btn[1] === 'rgb(0, 112, 209)', buy + ' ' + btn.join(' '));
+  check('store game page: PS Store buy panel and blue pill button', buy === '12px' && btn[0] === '999px' && btn[1] === 'rgb(0, 112, 209)', buy + ' ' + btn.join(' '));
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-game.jpg'), type: 'jpeg', quality: 82 });
   await wp.goto('https://store.steampowered.com/wishlist/id/vasya/');
   await wp.waitForTimeout(500);
@@ -446,9 +470,9 @@ try {
   check('game #2: long title wraps inside the hero (≤ 3 lines, smaller size)', t2[0] && t2[1] <= 130, t2.join(' / '));
   const d2 = await wp.locator('.ps5-hero-desc').evaluate(n => n.getBoundingClientRect().height);
   check('game #2: long description clamped to 3 lines', d2 < 80, String(d2));
-  check('game #2: no invented rows (no developer / publisher / genres / reviews)', (await wp.$$eval('.ps5-info-label', ns => ns.map(n => n.textContent))).join('|') === 'Release date' && await wp.locator('.ps5-reviews').count() === 0 && await wp.locator('.ps5-about.single').count() === 1);
+  check('game #2: no invented rows (no developer / publisher / genres / reviews)', (await wp.$$eval('.ps5-info-label', ns => ns.map(n => n.textContent))).join('|') === 'Release date' && await wp.locator('.ps5-reviews').count() === 0);
   check('game #2: a single screenshot → no lonely thumbnail strip', await wp.locator('.ps5-hero-shot').count() === 0);
-  const al = await wp.evaluate(() => [Math.round(document.querySelector('.ps5-hero-main').getBoundingClientRect().left), Math.round(document.querySelector('.ps5-about').getBoundingClientRect().left)]);
+  const al = await wp.evaluate(() => [Math.round(document.querySelector('.ps5-hero-main').getBoundingClientRect().left), Math.round(document.querySelector('.ps5-split').getBoundingClientRect().left)]);
   check('hero text and the cards below share one left edge', Math.abs(al[0] - al[1]) <= 2, al.join(' / '));
   const hh = await wp.locator('.ps5-hero').evaluate(n => n.getBoundingClientRect().height);
   check('hero height kept moderate (≤ 600 px at 860 px window)', hh <= 600, String(hh));
@@ -494,13 +518,9 @@ try {
 
   await wp.goto('https://steamcommunity.com/id/vasya/');
   await wp.waitForTimeout(500);
-  check('community profile: kind', /ps5-community/.test(await cls()) && /ps5-p-profile/.test(await cls()));
+  check('community profile: left exactly as Steam draws it (theme layer off)', !/ps5-web/.test(await cls()));
   const av = await wp.locator('.playerAvatar.profile_header_size').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
-  check('community profile: round PSN avatar', av === '50%', av);
-  const pn = await wp.locator('#pname').evaluate(n => [n.scrollWidth <= n.clientWidth + 1, getComputedStyle(n).fontSize]);
-  check('profile: a long nickname wraps instead of being cut off', pn[0], pn.join(' / '));
-  const pc = await wp.locator('.profile_customization').evaluate(n => [getComputedStyle(n).overflow, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).borderTopWidth]);
-  check('profile blocks: no clipping, 12 px radius, no width-adding border', pc[0] === 'visible' && pc[1] === '12px' && pc[2] === '0px', pc.join(' / '));
+  check('community profile: Steam\'s square avatar', av === '0px', av);
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-profile-psn.jpg'), type: 'jpeg', quality: 82 });
   await wp.goto('https://example.com/');
   await wp.waitForTimeout(300);
