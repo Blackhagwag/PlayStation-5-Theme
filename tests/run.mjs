@@ -66,6 +66,23 @@ try {
   check('nav tabs: active tab lit (white pill, icon, blue indicator)', tab[0] === 'rgb(255, 255, 255)' && tab[1] !== 'none' && tab[2] !== 'none', tab.join(' | '));
   const prof = await page.locator('.SuperNavMenu:nth-of-type(4) > .MenuButton').evaluate(n => getComputedStyle(n).getPropertyValue('--ps5-tab-icon'));
   check('nav tabs: profile tab gets the person icon', /circle/.test(prof));
+  // ---- v1.3.0: tab proportions (Steam fixes .SuperNavMenu at 101 px; the mock does too)
+  const tabs = await page.$$eval('.SuperNavMenu > .MenuButton', ns => ns.map(n => { const c = getComputedStyle(n); return { h: Math.round(n.getBoundingClientRect().height), fs: c.fontSize, tt: c.textTransform, fits: n.scrollWidth <= n.clientWidth + 1 }; }));
+  check('tabs: one height (32 px) and one type size (13.5 px), no uppercase', tabs.every(t => t.h === 32 && t.fs === '13.5px' && t.tt === 'none'), JSON.stringify(tabs));
+  check('tabs: every label fits (no squeeze in Steam\'s fixed 101 px box)', tabs.every(t => t.fits), JSON.stringify(tabs));
+  // ---- v1.3.0: address panel
+  check('address panel: first in the top strip, Steam arrows hidden', await page.evaluate(() => document.querySelector('.SuperNavBar').firstElementChild.id === 'ps5-addr') && await page.locator('#steam-back').isHidden());
+  check('address panel: names the section in the library', (await page.locator('#ps5-addr .ps5-addr-text').textContent()) === 'Library · Home');
+  check('address panel: forward disabled when Steam\'s is', await page.locator('#ps5-addr .ps5-addr-fwd').isDisabled() && !(await page.locator('#ps5-addr .ps5-addr-back').isDisabled()));
+  await page.click('#ps5-addr .ps5-addr-back');
+  check('address panel: back presses Steam\'s own arrow', (await page.evaluate(() => window.__back)) === 1);
+  check('address panel: no reload outside web pages', await page.locator('#ps5-addr .ps5-addr-reload').isHidden());
+  const ab = await page.locator('#ps5-addr').boundingBox();
+  check('address panel: compact (≤ 340 × 36)', ab.width <= 340 && Math.round(ab.height) === 36, JSON.stringify(ab));
+  // ---- v1.3.0: soft background blur on the selected game's art
+  const blur = await page.locator('#ps5-bg .ps5-bg-layer.on').evaluate(n => getComputedStyle(n).filter);
+  check('Home background: light blur (12 px) on the art layer only', /blur\(12px\)/.test(blur), blur);
+  check('Home tiles stay sharp', (await page.locator('.ps5-tile.selected img').evaluate(n => getComputedStyle(n).filter)) === 'none');
   const wn = await page.locator('.PartnerEventRowCapsule_Container > div').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check("What's New: content cards restyled", wn === '16px', wn);
   const wnBox = await page.locator('.PartnerEventRowCapsule_Container > div').first().evaluate(n => { const c = getComputedStyle(n); return [c.borderTopWidth, c.paddingTop, c.display, n.getBoundingClientRect().height]; });
@@ -201,6 +218,18 @@ try {
   await page.evaluate(() => { window.__steamCalls.length = 0; window.SteamUIStore.Navigate('/browser'); });
   await page.waitForTimeout(400);
   check('web page detected (ps5-on-web)', await page.evaluate(() => document.documentElement.classList.contains('ps5-on-web')));
+  check('address panel: host › path on web pages', (await page.locator('#ps5-addr .ps5-addr-text').textContent()) === 'store.steampowered.com › app/101/Starfall_Odyssey');
+  check('address panel: Steam\'s wide address strip is hidden', await page.locator('.BrowserWrapper .URLBar').isHidden());
+  await page.click('#ps5-addr .ps5-addr-reload');
+  check('address panel: reload presses Steam\'s own reload', (await page.evaluate(() => window.__reload)) === 1);
+  await page.setViewportSize({ width: 980, height: 700 });
+  await page.waitForTimeout(300);
+  const strip = await page.locator('.SuperNavBar').evaluate(n => [n.scrollWidth, n.clientWidth]);
+  const tabs2 = await page.$$eval('.SuperNavMenu > .MenuButton', ns => ns.every(n => n.scrollWidth <= n.clientWidth + 1));
+  check('narrow window (980 px): top strip does not overflow, labels still fit', strip[0] <= strip[1] + 1 && tabs2, strip.join(' / '));
+  if (SHOTS) await page.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-topbar-narrow.jpg'), type: 'jpeg', quality: 82, clip: { x: 0, y: 0, width: 980, height: 120 } });
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await page.waitForTimeout(200);
   await page.click('.ps5-top-avatar');
   await page.waitForSelector('#ps5-cc.open');
   calls = await page.evaluate(() => window.__steamCalls);
@@ -208,7 +237,9 @@ try {
   check('profile panel opens on the Profile section', (await page.locator('.ps5-cc-icon.on').getAttribute('data-sec')) === 'profile');
   check('profile panel shows the wallet from Steam\'s account button', (await page.locator('.ps5-cc-wallet').textContent()).includes('12,50€'));
   const gear = await page.locator('.ps5-cc-icon[data-sec="settings"] svg').innerHTML();
-  check('Settings icon is a cog, not a sun', gear.includes('M10.3 2.8') && !gear.includes('M12 2.8v2.4'));
+  check('Settings icon is the standard cog (Lucide "settings"), not a sun', gear.includes('M12.22 2h-.44') && gear.includes('r="3"') && !gear.includes('M12 2.8v2.4'));
+  const gearBox = await page.locator('.ps5-cc-icon[data-sec="settings"] .ps5-ico').boundingBox();
+  check('Settings icon size matches the other Control Center icons', Math.round(gearBox.width) === 26 && Math.round(gearBox.height) === 26, JSON.stringify(gearBox));
   check('profile panel has the account section (replaces Steam account menu)', await page.locator('[data-act="account"]').count() === 1 && await page.locator('[data-act="store-prefs"]').count() === 1);
   await page.waitForTimeout(450);   // let the opening animation finish
   const box = await page.locator('.ps5-cc-panel').boundingBox();
@@ -268,10 +299,33 @@ try {
     r.fulfill({ status: 200, contentType: rel.endsWith('.css') ? 'text/css' : 'text/javascript', body: fs.readFileSync(file) });
   });
   await wp.route('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/**', async r => {
-    const m = /apps\/(\d+)\/(library_hero\.jpg|logo\.png)/.exec(r.request().url());
-    if (!m) return r.fulfill({ status: 404, body: '' });
+    const m = /apps\/(\d+)\/(library_hero\.jpg|logo\.png|library_600x900\.jpg|header\.jpg)/.exec(r.request().url());
+    if (!m || (m[1] === '202' && m[2] === 'logo.png')) return r.fulfill({ status: 404, body: '' });
     const res = await fetch(`http://localhost:${PORT}/assets/${m[1]}/${m[2]}`);
     r.fulfill({ status: res.status, contentType: 'image/svg+xml', body: Buffer.from(await res.arrayBuffer()) });
+  });
+  const removed = [];
+  const WL = { '76561190000000001': [[107, 3, 1709251200], [109, 1, 1707696000], [105, 2, 1704067200], [103, 4, 1703030400], [110, 5, 1700000000], [101, 6, 1690000000]], '76561190000000002': [[999, 1, 1700000000]] };
+  const NAMES = { 107: 'Shadow Protocol', 109: 'Last Frontier', 105: 'Ocean of Echoes', 103: 'Hollow Kingdom', 110: 'Crystal Caves', 101: 'Starfall Odyssey', 999: 'Somebody Else' };
+  const PCT = { 107: 40, 105: 20, 110: 75 };
+  await wp.route('https://api.steampowered.com/**', r => {
+    const u = new URL(r.request().url());
+    if (u.pathname.includes('GetWishlist')) {
+      const list = (WL[u.searchParams.get('steamid')] || []).map(([appid, priority, date_added]) => ({ appid, priority, date_added }));
+      return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ response: { items: list } }) });
+    }
+    if (u.pathname.includes('GetItems')) {
+      const input = JSON.parse(u.searchParams.get('input_json'));
+      const store_items = input.ids.map(({ appid }) => ({ appid, name: NAMES[appid], assets: { asset_url_format: `steam/apps/${appid}/\${FILENAME}`, library_capsule: 'library_600x900.jpg', header: 'header.jpg' },
+        best_purchase_option: { packageid: appid * 10, discount_pct: PCT[appid] || 0, final_price_in_cents: Math.round(2999 * (100 - (PCT[appid] || 0)) / 100), formatted_final_price: ((2999 * (100 - (PCT[appid] || 0)) / 100) / 100).toFixed(2).replace('.', ',') + '€', formatted_original_price: '29,99€' },
+        reviews: { summary_filtered: { review_score_label: 'Very Positive', percent_positive: 80 + (appid % 15) } }, release: { steam_release_date: 1600000000 + appid * 1000 } }));
+      return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ response: { store_items } }) });
+    }
+    r.fulfill({ status: 404, body: '' });
+  });
+  await wp.route('https://store.steampowered.com/api/removefromwishlist', r => {
+    removed.push(Object.fromEntries(new URLSearchParams(r.request().postData() || '')));
+    r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' });
   });
   await wp.route('https://cdn.ps5-mock.test/**', async r => {
     const u = r.request().url().replace('https://cdn.ps5-mock.test/', `http://localhost:${PORT}/`);
@@ -279,6 +333,7 @@ try {
     r.fulfill({ status: res.status, contentType: res.headers.get('content-type') || 'image/svg+xml', body: Buffer.from(await res.arrayBuffer()) });
   });
   await wp.route(/https:\/\/(store\.steampowered\.com|steamcommunity\.com|example\.com)\/.*/, r => {
+    if (/\/api\//.test(r.request().url())) return r.fallback();
     const fn = WEB[r.request().url()];
     r.fulfill(fn ? { status: 200, contentType: 'text/html', body: fn() } : { status: 404, body: '' });
   });
@@ -307,6 +362,17 @@ try {
   check('arrows: hit area transparent and unchanged (45×108)', ar[0] === 'rgba(0, 0, 0, 0)' && ar[1] === '0px' && Math.round(ar[4]) === 45 && Math.round(ar[5]) === 108, ar.join(' | '));
   check('arrows: 38 px disc, blue on hover (no white circle)', ar[2] === '38px' && ar[3] === 'rgb(0, 112, 209)', ar.join(' | '));
   if (SHOTS) await wp.locator('.carousel_container').screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-arrows.jpg'), type: 'jpeg', quality: 82 });
+  await wp.locator('#cbr').hover();
+  await wp.waitForTimeout(250);
+  const cb = await wp.locator('#cbr').evaluate(n => [n.getAttribute('data-ps5-arrow'), getComputedStyle(n).backgroundColor, getComputedStyle(n, '::before').width, getComputedStyle(n, '::before').backgroundColor, Math.round(n.getBoundingClientRect().width), Math.round(n.getBoundingClientRect().height)]);
+  check('React carousel arrows (.CarouselBtnRight): marked, transparent hit area at Steam\'s size', cb[0] === '' && cb[1] === 'rgba(0, 0, 0, 0)' && cb[4] === 48 && cb[5] === 96, cb.join(' | '));
+  check('React carousel arrows: 36 px disc, blue on hover — no white circle', cb[2] === '36px' && cb[3] === 'rgb(0, 112, 209)', cb.join(' | '));
+  await wp.mouse.move(700, 600);
+  await wp.locator('#cbl').focus();
+  const cbf = await wp.locator('#cbl').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).outlineStyle]);
+  check('React carousel arrows: focus state also transparent, no outline ring', cbf[0] === 'rgba(0, 0, 0, 0)' && cbf[1] === 'none', cbf.join(' | '));
+  const homeW = await wp.locator('.page_content').evaluate(n => getComputedStyle(n).maxWidth);
+  check('store home keeps Steam\'s centred column (no left-aligned max-width)', homeW !== '1240px', homeW);
   const v7 = await wp.evaluate(() => getComputedStyle(document.body).getPropertyValue('--color-greyneutral-2').trim());
   check('store palette: Steam\'s own colour variables remapped to PS5', v7 === '#061230', v7);
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store.jpg'), type: 'jpeg', quality: 82 });
@@ -328,7 +394,22 @@ try {
   await wp.click('.ps5-hero-btn.wish');
   await wp.waitForTimeout(450);
   check('hero: heart removes again', (await wp.locator('.ps5-hero-btn.wish').getAttribute('aria-pressed')) === 'false');
-  check('hero: facts strip holds Steam\'s moved nodes (tags keep their links)', await wp.locator('.ps5-facts .glance_tags_ctn .app_tag').count() === 3 && await wp.locator('.glance_ctn .glance_tags_ctn').count() === 0);
+  const rowsL = await wp.$$eval('.ps5-info-col:first-child .ps5-info-label', ns => ns.map(n => n.textContent));
+  const rowsR = await wp.$$eval('.ps5-info-col:last-child .ps5-info-label', ns => ns.map(n => n.textContent));
+  check('about: left column = release, developer, publisher', rowsL.join('|') === 'Release date|Developer|Publisher', rowsL.join('|'));
+  check('about: right column = genres, tags', rowsR.join('|') === 'Genres|Tags', rowsR.join('|'));
+  check('about: values are Steam\'s (links kept, tags moved with their "+")', (await wp.locator('.ps5-info-link').first().getAttribute('href')) === 'https://store.steampowered.com/developer/mock' && await wp.locator('.ps5-info-value .glance_tags_ctn .app_tag').count() === 3 && (await wp.locator('.ps5-info-col:last-child .ps5-info-value').first().textContent()) === 'Action, RPG');
+  const cols = await wp.$$eval('.ps5-about > *', ns => ns.map(n => Math.round(n.getBoundingClientRect().height)));
+  check('about + reviews: one balanced row (heights within 40%)', cols.length === 2 && Math.min(...cols) / Math.max(...cols) > 0.6, cols.join(' / '));
+  check('reviews: score, label and count from Steam\'s rows', (await wp.locator('.ps5-rev-share').textContent()) === '92%' && (await wp.locator('.ps5-rev-label').textContent()) === 'Very Positive' && await wp.locator('a.ps5-rev-link[href="#app_reviews_hash"]').count() === 1);
+  check('Steam\'s glance box steps back, gallery takes the full column', await wp.locator('.glance_ctn').isHidden() && /ps5-glance-off/.test(await cls()));
+  const ga = await wp.locator('#galprev').evaluate(n => [n.getAttribute('data-ps5-arrow'), getComputedStyle(n).backgroundColor]);
+  check('gallery paging arrow (Steam\'s white 50% circle) gets the compact disc', ga[0] === '' && ga[1] === 'rgba(0, 0, 0, 0)', ga.join(' | '));
+  await wp.locator('#game_highlights').hover();
+  await wp.click('.ps5-gal-full');
+  await wp.waitForTimeout(250);
+  check('gallery: full-screen viewer', await wp.locator('.ps5-viewer.open').count() === 1);
+  await wp.keyboard.press('Escape');
   check('hero: Steam\'s duplicated title / snippet step back', await wp.locator('.apphub_AppName').isHidden() && await wp.locator('.glance_ctn .game_description_snippet').isHidden());
   check('hero: editions + media buttons (2 editions on the page)', (await wp.locator('.ps5-hero-btn.ghost:not(.wish)').count()) === 2);
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-hero.jpg'), type: 'jpeg', quality: 84 });
@@ -341,6 +422,7 @@ try {
   check('viewer: arrow keys page through', (await wp.locator('.ps5-viewer .count').textContent()) === '3 / 5');
   await wp.keyboard.press('Escape');
   check('viewer: Esc closes', await wp.locator('.ps5-viewer.open').count() === 0);
+  if (SHOTS) { await wp.evaluate(() => document.querySelector('.ps5-about').scrollIntoView({ block: 'start' })); await wp.waitForTimeout(200); await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-about.jpg'), type: 'jpeg', quality: 84 }); await wp.evaluate(() => scrollTo(0, 0)); }
   check('store game page: kind + art from the page', /ps5-p-app/.test(await cls()) && /library_hero/.test(await wp.evaluate(() => document.documentElement.style.getPropertyValue('--ps5-page-art'))));
   const buy = await wp.locator('.game_area_purchase_game').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   const btn = await wp.locator('.btn_green_steamui').first().evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).backgroundColor]);
@@ -349,17 +431,76 @@ try {
   await wp.goto('https://store.steampowered.com/wishlist/id/vasya/');
   await wp.waitForTimeout(500);
   check('wishlist: page kind', /ps5-p-wishlist/.test(await cls()));
+  await wp.click('.ps5-wview').catch(() => {});
   const row = await wp.locator('[data-rfd-draggable-id] > .Panel').first().evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check('wishlist: every game is a PS5 card', row === '20px', row);
   const add = await wp.locator('[data-rfd-draggable-id] button[type=button] > span').first().evaluate(n => getComputedStyle(n).backgroundColor);
   check('wishlist: Add to Cart is the blue primary action', add === 'rgb(0, 112, 209)', add);
   await wp.locator('[data-rfd-draggable-id] > .Panel').nth(1).hover();
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-wishlist.jpg'), type: 'jpeg', quality: 82 });
+  // ---- a different game: long title, no logo, one screenshot, no reviews, no publisher
+  await wp.goto('https://store.steampowered.com/app/202/Long/');
+  await wp.waitForTimeout(700);
+  check('game #2: hero built without a logo (text title)', await wp.locator('[data-ps5-hero]').count() === 1 && await wp.locator('.ps5-hero.has-logo').count() === 0 && await wp.locator('h1.ps5-hero-title').isVisible());
+  const t2 = await wp.locator('h1.ps5-hero-title').evaluate(n => [n.scrollWidth <= n.clientWidth + 1, Math.round(n.getBoundingClientRect().height)]);
+  check('game #2: long title wraps inside the hero (≤ 3 lines, smaller size)', t2[0] && t2[1] <= 130, t2.join(' / '));
+  const d2 = await wp.locator('.ps5-hero-desc').evaluate(n => n.getBoundingClientRect().height);
+  check('game #2: long description clamped to 3 lines', d2 < 80, String(d2));
+  check('game #2: no invented rows (no developer / publisher / genres / reviews)', (await wp.$$eval('.ps5-info-label', ns => ns.map(n => n.textContent))).join('|') === 'Release date' && await wp.locator('.ps5-reviews').count() === 0 && await wp.locator('.ps5-about.single').count() === 1);
+  check('game #2: a single screenshot → no lonely thumbnail strip', await wp.locator('.ps5-hero-shot').count() === 0);
+  const al = await wp.evaluate(() => [Math.round(document.querySelector('.ps5-hero-main').getBoundingClientRect().left), Math.round(document.querySelector('.ps5-about').getBoundingClientRect().left)]);
+  check('hero text and the cards below share one left edge', Math.abs(al[0] - al[1]) <= 2, al.join(' / '));
+  const hh = await wp.locator('.ps5-hero').evaluate(n => n.getBoundingClientRect().height);
+  check('hero height kept moderate (≤ 600 px at 860 px window)', hh <= 600, String(hh));
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-store-hero-2.jpg'), type: 'jpeg', quality: 84 });
+
+  // ---- wishlist grid on real data
+  await wp.goto('https://store.steampowered.com/wishlist/id/vasya/');
+  await wp.waitForSelector('#ps5-wish .ps5-wview', { timeout: 6000 }).catch(() => {});
+  if (!/ps5-wish-grid/.test(await cls())) await wp.click('.ps5-wview');
+  check('wishlist: PS5 grid built from Steam\'s wishlist API', await wp.locator('#ps5-wish .ps5-wcard').count() === 6 && /ps5-wish-grid/.test(await cls()));
+  check('wishlist: Steam\'s list hidden behind the grid (not removed)', await wp.locator('[data-ps5-wnative=""]').count() === 1 && await wp.locator('[data-ps5-wnative=""]').isHidden());
+  check('wishlist: Steam\'s duplicate search/sort bar hidden in grid mode', await wp.locator('[data-ps5-wnative="tools"]').isHidden());
+  const edge = await wp.evaluate(() => [Math.round(document.querySelector('#StoreTemplate h1').getBoundingClientRect().left), Math.round(document.querySelector('.ps5-wgrid').getBoundingClientRect().left)]);
+  check('wishlist: page title and grid share one left edge', Math.abs(edge[0] - edge[1]) <= 20, edge.join(' / '));
+  const gw = await wp.locator('.ps5-wgrid').evaluate(n => { const r = n.getBoundingClientRect(); return [getComputedStyle(n).gridTemplateColumns.split(' ').length, Math.round(r.width), Math.round(r.left), Math.round(innerWidth - r.right)]; });
+  check('wishlist: grid uses the width (≥ 6 columns at 1440 px, centred, no empty right side)', gw[0] >= 6 && gw[1] >= 1200 && Math.abs(gw[2] - gw[3]) <= 24, gw.join(' / '));
+  check('wishlist: card shows Steam\'s price, discount, reviews and date added', (await wp.locator('.ps5-wcard[data-app="110"] .ps5-wcard-pct').textContent()) === '-75%' && (await wp.locator('.ps5-wcard[data-app="110"] .ps5-wcard-price').textContent()) === '29,99€7,50€' && /Added/.test(await wp.locator('.ps5-wcard[data-app="110"] .ps5-wcard-meta').textContent()));
+  check('wishlist: default order = your rank', (await wp.locator('.ps5-wcard').first().getAttribute('data-app')) === '109');
+  await wp.selectOption('.ps5-wsort', 'discount');
+  check('wishlist: sort by discount', (await wp.locator('.ps5-wcard').first().getAttribute('data-app')) === '110');
+  await wp.click('.ps5-wchip');
+  check('wishlist: "On sale" filter', await wp.locator('.ps5-wcard').count() === 3 && (await wp.locator('.ps5-wcount').textContent()) === '3 games');
+  await wp.click('.ps5-wchip');
+  await wp.fill('.ps5-wsearch', 'ocean');
+  await wp.waitForTimeout(250);
+  check('wishlist: search', await wp.locator('.ps5-wcard').count() === 1);
+  await wp.fill('.ps5-wsearch', '');
+  await wp.waitForTimeout(250);
+  await wp.click('.ps5-wcard[data-app="105"] [data-act="cart"]');
+  check('wishlist: Add to Cart calls Steam\'s addToCart(packageid)', JSON.stringify(await wp.evaluate(() => window.__carted)) === '[1050]');
+  await wp.click('.ps5-wcard[data-app="105"] [data-act="remove"]');
+  check('wishlist: remove asks for a second press', removed.length === 0 && await wp.locator('.ps5-wcard[data-app="105"] [data-act="remove"].confirm').count() === 1);
+  await wp.click('.ps5-wcard[data-app="105"] [data-act="remove"]');
+  await wp.waitForTimeout(500);
+  check('wishlist: remove → POST /api/removefromwishlist {sessionid, appid}', removed.length === 1 && removed[0].sessionid === 'sess42' && removed[0].appid === '105' && await wp.locator('.ps5-wcard[data-app="105"]').count() === 0);
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-wishlist.jpg'), type: 'jpeg', quality: 82 });
+  await wp.click('.ps5-wview');
+  check('wishlist: switch back to Steam\'s own list (and its toolbar)', !/ps5-wish-grid/.test(await cls()) && await wp.locator('[data-ps5-wnative=""]').isVisible() && await wp.locator('[data-ps5-wnative="tools"]').isVisible());
+  await wp.click('.ps5-wview');
+  await wp.goto('https://store.steampowered.com/wishlist/profiles/76561190000000002/');
+  await wp.waitForTimeout(1500);
+  check('wishlist: API list ≠ rows on the page → grid not built, Steam\'s list stays', await wp.locator('#ps5-wish').count() === 0 && await wp.locator('[data-rfd-draggable-id]').first().isVisible());
+
   await wp.goto('https://steamcommunity.com/id/vasya/');
   await wp.waitForTimeout(500);
   check('community profile: kind', /ps5-community/.test(await cls()) && /ps5-p-profile/.test(await cls()));
   const av = await wp.locator('.playerAvatar.profile_header_size').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check('community profile: round PSN avatar', av === '50%', av);
+  const pn = await wp.locator('#pname').evaluate(n => [n.scrollWidth <= n.clientWidth + 1, getComputedStyle(n).fontSize]);
+  check('profile: a long nickname wraps instead of being cut off', pn[0], pn.join(' / '));
+  const pc = await wp.locator('.profile_customization').evaluate(n => [getComputedStyle(n).overflow, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).borderTopWidth]);
+  check('profile blocks: no clipping, 12 px radius, no width-adding border', pc[0] === 'visible' && pc[1] === '12px' && pc[2] === '0px', pc.join(' / '));
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-profile-psn.jpg'), type: 'jpeg', quality: 82 });
   await wp.goto('https://example.com/');
   await wp.waitForTimeout(300);

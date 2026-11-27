@@ -161,52 +161,73 @@ body.DesktopUI,
 .windowControlButton:hover .title-area-icon-inner { background: rgba(255, 255, 255, 0.12) !important; border-radius: 8px; }
 .closeButton:hover .title-area-icon-inner { background: #d0263f !important; }
 
-/* ═══════════════ PS5 navigation tabs: Store · Library · Community · Profile ═══════════════
-   One glass capsule, an icon + label per tab, the active tab lit in white with a
-   blue indicator that grows in. Order is Steam's: 1 Store, 2 Library, 3 Community,
-   profile = the tab whose button holds the user name in a <span>, 5 Console (dev). */
+/* ═══════════════ PS5 navigation tabs: Store · Library · Community · Profile (v1.3.0) ═══════════════
+   Steam gives each .SuperNavMenu a fixed width (~101 px) and its own font size; v1.2.0
+   put icon + label + padding inside that box, so longer labels (Сообщество, a long
+   user name) were squeezed and the tabs had uneven widths. Now every tab sizes to its
+   label, all share one height and one type size, and the strip is a single capsule.
+   Order is Steam's: 1 Store, 2 Library, 3 Community, profile = the tab whose button
+   holds the user name in a <span>, 5 Console (dev builds only). */
 .TopBar .SuperNavBar {
   display: flex !important;
   align-items: center !important;
-  height: auto !important;
-  min-height: 56px !important;
-  padding: 0 24px !important;
-  gap: 12px;
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 20px !important;
+  gap: 14px;
 }
 .SuperNav {
   display: flex !important;
   align-items: center !important;
+  height: 100%;
+  min-width: 0;
 }
-.SuperNav > .MenuWrapper,
 .SuperNav .MenuWrapper {
   display: flex !important;
   align-items: center !important;
   gap: 2px;
-  padding: 4px !important;
+  height: 40px;
+  padding: 0 4px !important;
+  box-sizing: border-box;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
+}
+.SuperNav .SuperNavMenu {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .SuperNav .SuperNavMenu > .MenuButton {
   --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z'/%3E%3Cpath d='M9 10V7a3 3 0 0 1 6 0v3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
   position: relative;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 8px;
-  height: 36px !important;
-  padding: 0 16px !important;
+  justify-content: center !important;
+  gap: 7px;
+  width: auto !important;
+  height: 32px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  box-sizing: border-box;
   border: none !important;
   border-radius: 999px !important;
   background: transparent !important;
-  color: rgba(255, 255, 255, 0.62) !important;
-  font-size: 14.5px !important;
+  color: rgba(255, 255, 255, 0.66) !important;
+  font-size: 13.5px !important;
+  line-height: 1 !important;
   font-weight: 600 !important;
-  letter-spacing: 0 !important;
+  letter-spacing: 0.005em !important;
   text-transform: none !important;
   text-shadow: none !important;
-  transition: color 180ms var(--ps5-ease), background 180ms var(--ps5-ease) !important;
+  white-space: nowrap;
+  transition: color 180ms var(--ps5-ease), background 180ms var(--ps5-ease), box-shadow 180ms var(--ps5-ease) !important;
 }
 .SuperNav .SuperNavMenu:nth-of-type(2) > .MenuButton { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='black'%3E%3Crect x='3.5' y='3.5' width='7' height='7' rx='1.6'/%3E%3Crect x='13.5' y='3.5' width='7' height='7' rx='1.6'/%3E%3Crect x='3.5' y='13.5' width='7' height='7' rx='1.6'/%3E%3Crect x='13.5' y='13.5' width='7' height='7' rx='1.6'/%3E%3C/g%3E%3C/svg%3E"); }
 .SuperNav .SuperNavMenu:nth-of-type(3) > .MenuButton { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3'/%3E%3C/g%3E%3C/svg%3E"); }
@@ -214,46 +235,57 @@ body.DesktopUI,
 .SuperNav .SuperNavMenu > .MenuButton:has(> span) { --ps5-tab-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='8.5' r='4'/%3E%3Cpath d='M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
 .SuperNav .SuperNavMenu > .MenuButton::before {
   content: "";
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   flex: none;
   background: currentColor;
   -webkit-mask: var(--ps5-tab-icon) center / contain no-repeat;
   mask: var(--ps5-tab-icon) center / contain no-repeat;
-  transition: transform 220ms var(--ps5-ease);
 }
 .SuperNav .SuperNavMenu:hover > .MenuButton { color: #fff !important; background: rgba(255, 255, 255, 0.08) !important; }
-.SuperNav .SuperNavMenu:hover > .MenuButton::before { transform: translateY(-1px); }
 .SuperNav .SuperNavMenu.Selected > .MenuButton {
   color: #0b0b0f !important;
   background: #fff !important;
-  box-shadow: 0 4px 18px -6px rgba(255, 255, 255, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.4) !important;
 }
-/* Steam's own selection line lives in ::after; ours is a blue dot under the pill */
+/* Steam's selection line lives in ::after — a small blue dot under the active label instead */
 .SuperNav .SuperNavMenu > .MenuButton::after {
   content: "" !important;
   position: absolute !important;
   left: 50% !important;
-  bottom: -8px !important;
   top: auto !important;
-  width: 18px !important;
-  height: 3px !important;
+  bottom: -6px !important;
+  width: 4px !important;
+  height: 4px !important;
   margin: 0 !important;
   border: none !important;
-  border-radius: 99px !important;
+  border-radius: 50% !important;
   background: var(--ps5-accent) !important;
-  box-shadow: 0 0 10px var(--ps5-accent-glow) !important;
-  transform: translateX(-50%) scaleX(0) !important;
-  transition: transform 260ms var(--ps5-ease) !important;
+  box-shadow: 0 0 8px var(--ps5-accent-glow) !important;
+  transform: translateX(-50%) scale(0) !important;
+  transition: transform 220ms var(--ps5-ease) !important;
 }
-.SuperNav .SuperNavMenu.Selected > .MenuButton::after { transform: translateX(-50%) scaleX(1) !important; }
+.SuperNav .SuperNavMenu.Selected > .MenuButton::after { transform: translateX(-50%) scale(1) !important; }
 .SuperNav .SuperNavMenu > .MenuButton > span {
-  max-width: 160px;
+  display: inline-block;
+  max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: middle;
 }
-/* back / forward arrows beside the tabs */
+/* narrower windows: labels stay, icons go first, then padding tightens */
+@media (max-width: 1180px) {
+  .SuperNav .SuperNavMenu > .MenuButton::before { display: none; }
+  .SuperNav .SuperNavMenu > .MenuButton { padding: 0 12px !important; }
+}
+@media (max-width: 900px) {
+  .SuperNav .SuperNavMenu > .MenuButton { padding: 0 10px !important; font-size: 13px !important; }
+  .SuperNav .SuperNavMenu > .MenuButton > span { max-width: 96px; }
+}
+/* Steam's own back / forward arrows: the PS5 address panel (#ps5-addr) drives them */
+html.ps5-addr-on .SuperNav svg.Arrow,
+html.ps5-addr-on .SuperNavBar svg.Arrow { display: none !important; }
 .SuperNav svg.Arrow,
 .SuperNavBar svg.Arrow {
   width: 30px !important;
@@ -262,11 +294,78 @@ body.DesktopUI,
   box-sizing: border-box;
   border-radius: 50% !important;
   color: rgba(255, 255, 255, 0.7) !important;
-  transition: background 160ms ease, color 160ms ease !important;
 }
-.SuperNav svg.Arrow.Enabled:hover,
-.SuperNavBar svg.Arrow.Enabled:hover { background: rgba(255, 255, 255, 0.12) !important; color: #fff !important; }
-.SuperNav svg.Arrow.Disabled { opacity: 0.3 !important; }
+
+/* ═══════════════ the PS5 address panel (#ps5-addr, js/ps5.js) ═══════════════
+   A compact capsule at the left of the top strip: back · forward · reload (web pages)
+   · where you are. It replaces Steam's wide address strip over web pages (hidden while
+   the panel runs) — the strip's own buttons are what the panel presses. */
+html.ps5-addr-on .BrowserWrapper > .URLBar { display: none !important; }
+#ps5-addr {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  max-width: 340px;
+  min-width: 0;
+  flex: 0 1 auto;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: rgba(4, 12, 30, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  -webkit-app-region: no-drag;
+  animation: ps5-addr-in 260ms var(--ps5-ease);
+}
+@keyframes ps5-addr-in { from { opacity: 0; transform: translateY(-4px); } }
+#ps5-addr .ps5-addr-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+#ps5-addr .ps5-addr-btn svg { width: 15px; height: 15px; }
+#ps5-addr .ps5-addr-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--ps5-accent) 75%, transparent); color: #fff; }
+#ps5-addr .ps5-addr-btn:disabled { opacity: 0.3; cursor: default; }
+#ps5-addr .ps5-addr-btn[hidden] { display: none; }
+#ps5-addr .ps5-addr-sep { width: 1px; height: 16px; margin: 0 4px; background: rgba(255, 255, 255, 0.12); flex: none; }
+#ps5-addr .ps5-addr-where {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: default;
+  transition: background 140ms ease;
+}
+#ps5-addr .ps5-addr-where.copyable { cursor: pointer; }
+#ps5-addr .ps5-addr-where.copyable:hover { background: rgba(255, 255, 255, 0.08); }
+#ps5-addr .ps5-addr-where svg { width: 14px; height: 14px; flex: none; color: color-mix(in srgb, var(--ps5-accent) 45%, #fff); }
+#ps5-addr .ps5-addr-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ps5-addr .ps5-addr-text b { font-weight: 700; color: #fff; }
+#ps5-addr .ps5-addr-text i { font-style: normal; color: rgba(255, 255, 255, 0.55); }
+#ps5-addr.loading .ps5-addr-reload svg { animation: ps5-spin 900ms linear infinite; }
+@keyframes ps5-spin { to { transform: rotate(360deg); } }
+@media (max-width: 1000px) { #ps5-addr { max-width: 220px; } }
+@media (max-width: 760px) { #ps5-addr .ps5-addr-where { display: none; } }
 
 /* the address bar of web pages: a quiet glass rail */
 .BrowserWrapper > .URLBar {
@@ -450,6 +549,15 @@ html.ps5-on-app .AppDetailsMain .ActivityFeedContainer .Panel {
   box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
   border-radius: var(--ps5-r) !important;
 }
+/* v1.3.0: one glass layer per section — Steam nests .Panel inside these blocks, and each
+   nested panel took the glass again (darker, doubled corners in the lower sections) */
+html.ps5-on-app .AppDetailsMain :is(.AppDetailsSectionContainer, .AppDetailsSection.Panel, .GameStat, .ActivityFeedContainer .Panel) :is(.Panel, .AppDetailsSectionContainer, .GameStat) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* room under the last section, so it never sits on the bottom bar */
+html.ps5-on-app .AppDetailsMain .Body.ScrollContainer,
+html.ps5-on-app .AppDetailsMain > .Container > .Body { padding-bottom: 40px !important; box-sizing: border-box; }
 html.ps5-on-app .AppDetailsMain .SectionHeader {
   color: #fff !important;
   text-transform: none !important;

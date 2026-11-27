@@ -44,7 +44,7 @@
   window.collectionStore = { BIsHidden: id => id === 110 };
   window.appDetailsStore = { GetAppDetails: () => ({}), RequestAppDetails: () => Promise.resolve() };
   window.appAchievementProgressCache = { m_achievementProgress: { mapCache: new Map([[101, { unlocked: 34, total: 50, percentage: 68 }], [103, { unlocked: 12, total: 40 }]]) } };
-  window.MainWindowBrowserManager = { m_browser: { SetVisible: v => calls.push(['SetVisible', v]) } };
+  window.MainWindowBrowserManager = { m_URL: 'https://store.steampowered.com/app/101/Starfall_Odyssey/', m_browser: { SetVisible: v => calls.push(['SetVisible', v]), Reload: () => calls.push(['Reload']) } };
   window.SteamUIStore = { Navigate: p => { calls.push(['Navigate', p]); history.push(p); }, WindowStore: { MainWindowInstance: { m_history: history } } };
   let dlCb = null;
   window.SteamClient = {

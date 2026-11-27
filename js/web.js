@@ -199,7 +199,7 @@
     art.src = arts[0];
 
     const logo = el('img', 'ps5-hero-logo', { alt: '', decoding: 'async' });
-    const title = el('h1', 'ps5-hero-title', { text: name });
+    const title = el('h1', 'ps5-hero-title' + (name.length > 42 ? ' is-long' : ''), { text: name, title: name });
 
     // chips
     const chips = el('ul', 'ps5-hero-chips');
@@ -291,23 +291,392 @@
       el('div', 'ps5-hero-shade'),
       el('div', 'ps5-hero-inner', {}, [
         el('div', 'ps5-hero-main', {}, [logo, title, chips.children.length ? chips : null, desc ? el('p', 'ps5-hero-desc', { text: desc }) : null, buy]),
-        thumbs.length ? el('div', 'ps5-hero-shots', {}, thumbs) : null,
+        thumbs.length > 1 ? el('div', 'ps5-hero-shots', {}, thumbs) : null,
       ]),
     ]);
     logo.onload = () => { if (logo.naturalWidth > 40) hero.classList.add('has-logo'); };
     logo.src = `${CDN(id)}/logo.png`;
 
-    // facts: Steam's own nodes, moved (not copied)
-    const factNodes = $$('.glance_ctn .release_date, .glance_ctn .dev_row');
-    const tags = $('.glance_ctn .glance_tags_ctn');
-    const facts = factNodes.length || tags ? el('div', 'ps5-facts', {}, [...factNodes, tags]) : null;
-
-    anchor.before(...[hero, facts].filter(Boolean));
+    const about = buildAbout();
+    anchor.before(...[hero, about].filter(Boolean));
     root.classList.add('ps5-hero-on');
-    const sbw = () => root.style.setProperty('--ps5-sbw', Math.max(0, innerWidth - root.clientWidth) + 'px');
-    sbw();
-    addEventListener('resize', sbw, { passive: true });
+    widenGallery(shots);
+    // one width system: the hero's content lines up with Steam's page column
+    const fit = () => {
+      root.style.setProperty('--ps5-sbw', Math.max(0, innerWidth - root.clientWidth) + 'px');
+      const col = $('.page_content_ctn .page_content') || $('.page_content') || anchor.parentElement;
+      const cs = col && getComputedStyle(col);
+      const w = col ? Math.round(col.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) : 0;
+      if (w > 400) root.style.setProperty('--ps5-content-w', w + 'px');
+    };
+    fit();
+    addEventListener('resize', fit, { passive: true });
   };
+
+  /* ───────────── "About this game": two balanced columns + compact reviews ─────────────
+     Left: release date · developer · publisher. Right: genres · tags. Values are Steam's
+     own: developer / publisher / genre links are cloned anchors (plain links), the tag row
+     is MOVED so its "+" keeps working. Rows with no data are not drawn. Reviews: the
+     score rows Steam already prints (#userReviews) — label, share, count, link. */
+  const ICO = {
+    date: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g></svg>',
+    dev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8.5 8 4.5 12l4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></svg>',
+    pub: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20.5V8l8-4.5L20 8v12.5"/><path d="M9 20.5v-6h6v6M4 20.5h16"/></g></svg>',
+    genre: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><circle cx="17" cy="17" r="3.5"/></g></svg>',
+    tag: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-6.6 6.6a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8.3" cy="8.3" r="1.6"/></g></svg>',
+    full: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg>',
+  };
+  const L = SR
+    ? { about: 'Об игре', release: 'Дата выхода', dev: 'Разработчик', pub: 'Издатель', genres: 'Жанры', tags: 'Метки', reviews: 'Обзоры пользователей', recent: 'Недавние', all: 'Все', count: n => `${n} обзоров`, read: 'Читать обзоры', full: 'Во весь экран' }
+    : { about: 'About this game', release: 'Release date', dev: 'Developer', pub: 'Publisher', genres: 'Genres', tags: 'Tags', reviews: 'User reviews', recent: 'Recent', all: 'All', count: n => `${n} reviews`, read: 'Read reviews', full: 'Full screen' };
+  const links = nodes => {
+    const out = [];
+    const seen = new Set();
+    for (const a of nodes) {
+      const t = text(a);
+      if (!t || seen.has(t)) continue;
+      seen.add(t);
+      const c = el('a', 'ps5-info-link', { href: a.getAttribute('href') || '#', text: t });
+      out.push(c);
+    }
+    return out;
+  };
+  const buildAbout = () => {
+    const glance = $('.glance_ctn');
+    const devRows = $$('.glance_ctn .dev_row');
+    const isPub = r => /publisher|издател|editeur|verleger|editor/i.test(text(r.querySelector('.subtitle')));
+    const devRow = devRows.find(r => !isPub(r)) || devRows[0];
+    const pubRow = devRows.find(isPub);
+    const rowsL = [
+      ['date', L.release, text($('.glance_ctn .release_date .date')) ? [document.createTextNode(text($('.glance_ctn .release_date .date')))] : []],
+      ['dev', L.dev, devRow ? links(devRow.querySelectorAll('a')) : []],
+      ['pub', L.pub, pubRow ? links(pubRow.querySelectorAll('a')) : []],
+    ];
+    const genreLinks = links($$('#genresAndManufacturer a[href*="/genre/"], .details_block a[href*="/genre/"]'));
+    const tagsNode = $('.glance_ctn .glance_tags_ctn');
+    const rowsR = [
+      ['genre', L.genres, genreLinks],
+      ['tag', L.tags, tagsNode ? [tagsNode] : []],
+    ];
+    const row = ([ico, label, vals]) => vals.length ? el('div', 'ps5-info-row', {}, [
+      el('span', 'ps5-info-ico', { svg: ICO[ico] }),
+      el('span', 'ps5-info-label', { text: label }),
+      el('span', 'ps5-info-value', {}, vals.flatMap((v, i) => (i && v.nodeType === 1 && v.classList.contains('ps5-info-link') ? [document.createTextNode(', '), v] : [v]))),
+    ]) : null;
+    const left = rowsL.map(row).filter(Boolean);
+    const right = rowsR.map(row).filter(Boolean);
+
+    // reviews: Steam's summary rows
+    const revRows = $$('#userReviews .user_reviews_summary_row').map(r => {
+      const summary = r.querySelector('.game_review_summary');
+      if (!summary || !text(summary)) return null;
+      const tone = summary.classList.contains('positive') ? 'ok' : summary.classList.contains('mixed') ? 'warn' : summary.classList.contains('negative') ? 'bad' : '';
+      const share = ((r.getAttribute('data-tooltip-html') || '').match(/(\d+)\s?%/) || [])[1] || '';
+      const count = (text(r.querySelector('.responsive_hidden')) || '').replace(/[()]/g, '').trim();
+      const sub = text(r.querySelector('.subtitle')).replace(/:$/, '');
+      const all = r.matches('[itemprop=aggregateRating]') || /all|все/i.test(sub);
+      return { tone, share, count, label: text(summary), sub, all };
+    }).filter(Boolean);
+    const main = revRows.find(r => r.all) || revRows[revRows.length - 1];
+    const other = revRows.filter(r => r !== main);
+    const reviews = main ? el('section', 'ps5-reviews', { 'data-tone': main.tone }, [
+      el('h3', 'ps5-about-title', { text: L.reviews }),
+      el('div', 'ps5-rev-main', {}, [
+        main.share ? el('span', 'ps5-rev-share', { text: main.share + '%' }) : null,
+        el('div', 'ps5-rev-text', {}, [
+          el('span', 'ps5-rev-label', { text: main.label }),
+          main.count ? el('span', 'ps5-rev-count', { text: /\d/.test(main.count) && !/[a-zа-я]/i.test(main.count) ? L.count(main.count) : main.count }) : null,
+        ]),
+      ]),
+      main.share ? el('div', 'ps5-rev-bar', {}, [el('i', '', { style: `width:${Math.max(0, Math.min(100, +main.share))}%` })]) : null,
+      ...other.map(o => el('div', 'ps5-rev-other', { 'data-tone': o.tone }, [
+        el('span', 'ps5-rev-sub', { text: o.sub || L.recent }),
+        el('span', 'ps5-rev-small', { text: o.label + (o.share ? ` · ${o.share}%` : '') }),
+      ])),
+      el('a', 'ps5-rev-link', { href: '#app_reviews_hash', text: L.read + ' →' }),
+    ]) : null;
+
+    if (!left.length && !right.length && !reviews) return null;
+    const info = left.length || right.length ? el('section', 'ps5-info', {}, [
+      el('h3', 'ps5-about-title', { text: L.about }),
+      el('div', 'ps5-info-cols', {}, [el('div', 'ps5-info-col', {}, left), el('div', 'ps5-info-col', {}, right)]),
+    ]) : null;
+    // the glance box is now fully represented (art, snippet, reviews, facts, tags): it steps back
+    if (glance) root.classList.add('ps5-glance-off');
+    return el('div', 'ps5-about' + (reviews && info ? '' : ' single'), {}, [info, reviews]);
+  };
+
+  /* the gallery: Steam's own React carousel (trailers keep Steam's player), given the
+     whole column once the glance box steps back, plus a full-screen button for the
+     screenshots (our viewer) */
+  const widenGallery = shots => {
+    const box = $('#game_highlights');
+    if (!box) return;
+    const glance = $('.glance_ctn');
+    const right = glance && (glance.closest('.rightcol') || glance.parentElement);
+    if (right && right !== box && [...right.children].every(c => c === glance || !c.offsetHeight)) root.classList.add('ps5-gallery-wide');
+    if (shots.length && !box.querySelector('.ps5-gal-full')) {
+      const b = el('button', 'ps5-gal-full', { type: 'button', title: L.full, 'aria-label': L.full, svg: ICO.full });
+      b.addEventListener('click', () => Viewer.open(shots, 0));
+      (box.querySelector('.highlight_ctn') || box).appendChild(b);
+    }
+  };
+
+  /* ───────────── store arrows: one compact control everywhere ─────────────
+     React carousels (.CarouselBtnLeft/Right), the game page gallery's paging arrows and its
+     thumbnail-scrollbar arrows (hashed classes captured from the live store, plus a
+     structural fallback: a lone svg button sitting on the gallery). Marked once with
+     data-ps5-arrow; the stylesheet draws the same 36 px disc on all of them. */
+  const ARROWS = '.CarouselBtnLeft, .CarouselBtnRight, #game_highlights ._258hIVgneRO0dUbgnPZh_R';
+  const SMALL_ARROWS = '#game_highlights ._2lIBEOcXRC3KKhDamcV9t';
+  const markArrows = () => {
+    for (const n of document.querySelectorAll(`:is(${ARROWS}):not([data-ps5-arrow])`)) {
+      n.setAttribute('data-ps5-arrow', '');
+      if (getComputedStyle(n).position === 'static') n.style.position = 'relative';
+    }
+    for (const n of document.querySelectorAll(`:is(${SMALL_ARROWS}):not([data-ps5-arrow])`)) n.setAttribute('data-ps5-arrow', 'small');
+    const car = document.querySelector('.gamehighlight_desktopcarousel');
+    if (car && !car.dataset.ps5Scanned) {
+      for (const svg of car.querySelectorAll('svg')) {
+        const b = svg.parentElement;
+        if (!b || b === car || b.hasAttribute('data-ps5-arrow') || b.children.length !== 1 || text(b)) continue;
+        const cs = getComputedStyle(b);
+        const r = b.getBoundingClientRect();
+        if (cs.position === 'absolute' && r.width > 0 && r.width <= 90 && r.height <= 120 && !b.closest('img, video')) b.setAttribute('data-ps5-arrow', '');
+      }
+      if (car.querySelector('img')) car.dataset.ps5Scanned = '1';
+    }
+  };
+
+  /* ───────────── WISHLIST: a PS5 grid on Steam's real wishlist ─────────────
+     Steam's own wishlist is a virtual list (rows placed by a fixed row height), so it
+     cannot be re-laid as a grid without breaking its scrolling. The grid is therefore a
+     view of its own, fed by Steam's public Web API and acting through Steam:
+       data    IWishlistService/GetWishlist (appid, rank, date added) — with the page's
+               own web API token when it has one — and IStoreBrowseService/GetItems
+               (name, art, Steam's formatted prices and discount, reviews, release)
+       remove  POST store.steampowered.com/api/removefromwishlist {sessionid, appid}
+               (the call Steam's store script makes)
+       buy     Steam's own addToCart(packageid) when the page has it, else the game's
+               store page (its real Add to Cart)
+     Safety: built only when the API list matches the rows Steam renders on this page
+     (so another user's wishlist is never replaced by yours); if anything fails or comes
+     back empty, Steam's list simply stays. A button switches between grid and Steam's list. */
+  const Wish = (() => {
+    let built = false, busy = false, items = [], store = new Map(), node = null, listEl = null, shown = 0, io = null;
+    let sort = 'rank', query = '', onSale = false;
+    const W = SR
+      ? { search: 'Поиск в списке желаемого', rank: 'Ваш порядок', name: 'Название', discount: 'Скидка', price: 'Цена', added: 'Дата добавления', release: 'Дата выхода', reviews: 'Обзоры', sale: 'Со скидкой', games: n => `Игр: ${n}`, cart: 'В корзину', buy: 'В магазин', remove: 'Удалить', confirm: 'Удалить?', removed: 'Удалено из списка желаемого', failed: 'Не удалось — попробуйте на странице игры', added: d => `Добавлено ${d}`, soon: 'Скоро', free: 'Бесплатно', view: 'Список Steam', grid: 'Сетка PS5', empty: 'Ничего не найдено' }
+      : { search: 'Search your wishlist', rank: 'Your rank', name: 'Name', discount: 'Discount', price: 'Price', added: 'Date added', release: 'Release date', reviews: 'Reviews', sale: 'On sale', games: n => `${n} games`, cart: 'Add to Cart', buy: 'View in store', remove: 'Remove', confirm: 'Remove?', removed: 'Removed from your wishlist', failed: 'Could not remove — try on the game page', added: d => `Added ${d}`, soon: 'Coming soon', free: 'Free', view: 'Steam list', grid: 'PS5 grid', empty: 'Nothing found' };
+    const cfg = () => {
+      const c = document.getElementById('application_config');
+      const parse = v => { try { return JSON.parse(v || 'null'); } catch (e) { return null; } };
+      const config = (c && parse(c.dataset.config)) || {};
+      return { user: (c && parse(c.dataset.userinfo)) || {}, token: (c && parse(c.dataset.loyalty_webapi_token)) || '', lang: config.LANGUAGE || 'english', country: config.COUNTRY || '' };
+    };
+    const sessionId = () => window.g_sessionID || (document.cookie.match(/(?:^|; )sessionid=([^;]+)/) || [])[1] || '';
+    const nativeRows = () => $$('[data-rfd-draggable-id^="WishlistItem-"]');
+    const nativeIds = () => new Set(nativeRows().map(r => +(r.getAttribute('data-rfd-draggable-id') || '').split('-')[1]).filter(Boolean));
+    const waitRows = () => new Promise(res => {
+      const t0 = Date.now();
+      const tick = () => { const ids = nativeIds(); if (ids.size || Date.now() - t0 > 8000) res(ids); else setTimeout(tick, 300); };
+      tick();
+    });
+    const api = (path, params) => {
+      const u = new URL('https://api.steampowered.com/' + path);
+      for (const [k, v] of Object.entries(params)) if (v !== '' && v != null) u.searchParams.set(k, v);
+      return fetch(u.toString(), { credentials: 'omit' }).then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+    };
+    const assetUrl = (it, file) => {
+      const fmt = it && it.assets && it.assets.asset_url_format;
+      return fmt && file ? 'https://shared.akamai.steamstatic.com/store_item_assets/' + fmt.replace('${FILENAME}', file) : '';
+    };
+    const fmtDate = unix => { try { return new Date(unix * 1000).toLocaleDateString(SR ? 'ru-RU' : undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
+    const price = it => {
+      const o = it && it.best_purchase_option;
+      if (it && it.is_free) return { final: W.free, cents: 0, pct: 0 };
+      if (!o) return { final: (it && it.release && it.release.is_coming_soon) ? W.soon : '', cents: Infinity, pct: 0 };
+      return { final: o.formatted_final_price || '', orig: o.discount_pct ? (o.formatted_original_price || '') : '', pct: +o.discount_pct || 0, cents: +o.final_price_in_cents || 0, pkg: o.packageid };
+    };
+    const compute = () => {
+      const q = query.toLowerCase();
+      let l = items.filter(w => {
+        const it = store.get(w.appid);
+        if (q && !String((it && it.name) || '').toLowerCase().includes(q)) return false;
+        if (onSale && !(price(it).pct > 0)) return false;
+        return true;
+      });
+      const name = w => String((store.get(w.appid) || {}).name || '');
+      const by = {
+        rank: (a, b) => (a.priority || 0) - (b.priority || 0),
+        name: (a, b) => name(a).localeCompare(name(b)),
+        discount: (a, b) => price(store.get(b.appid)).pct - price(store.get(a.appid)).pct,
+        price: (a, b) => price(store.get(a.appid)).cents - price(store.get(b.appid)).cents,
+        added: (a, b) => (b.date_added || 0) - (a.date_added || 0),
+        release: (a, b) => (((store.get(b.appid) || {}).release || {}).steam_release_date || 0) - (((store.get(a.appid) || {}).release || {}).steam_release_date || 0),
+        reviews: (a, b) => ((((store.get(b.appid) || {}).reviews || {}).summary_filtered || {}).percent_positive || 0) - ((((store.get(a.appid) || {}).reviews || {}).summary_filtered || {}).percent_positive || 0),
+      }[sort];
+      return by ? l.slice().sort(by) : l;
+    };
+    const card = w => {
+      const it = store.get(w.appid) || {};
+      const p = price(it);
+      const rv = it.reviews && it.reviews.summary_filtered;
+      const href = `https://store.steampowered.com/app/${w.appid}/`;
+      const canCart = typeof window.addToCart === 'function' && p.pkg;
+      const c = el('article', 'ps5-wcard', { 'data-app': String(w.appid) });
+      const img = el('img', '', { alt: '', loading: 'lazy', decoding: 'async' });
+      const srcs = [assetUrl(it, it.assets && it.assets.library_capsule), `${CDN(w.appid)}/library_600x900.jpg`, assetUrl(it, it.assets && it.assets.header), `${CDN(w.appid)}/header.jpg`].filter(Boolean);
+      let k = 0;
+      img.onerror = () => { if (++k < srcs.length) img.src = srcs[k]; else img.remove(); };
+      img.onload = () => c.classList.add('loaded');
+      img.src = srcs[0];
+      c.append(
+        el('a', 'ps5-wcard-art', { href }, [img, el('span', 'ps5-wcard-fallback', { text: it.name || '#' + w.appid }), p.pct ? el('span', 'ps5-wcard-pct', { text: `-${p.pct}%` }) : null]),
+        el('div', 'ps5-wcard-body', {}, [
+          el('a', 'ps5-wcard-name', { href, text: it.name || '#' + w.appid, title: it.name || '' }),
+          el('div', 'ps5-wcard-meta', {}, [
+            rv && rv.review_score_label ? el('span', 'ps5-wcard-rev', { text: rv.review_score_label + (rv.percent_positive ? ` · ${rv.percent_positive}%` : '') }) : null,
+            w.date_added ? el('span', '', { text: W.added(fmtDate(w.date_added)) }) : null,
+          ]),
+          el('div', 'ps5-wcard-price', {}, [
+            p.orig ? el('s', '', { text: p.orig }) : null,
+            p.final ? el('b', '', { text: p.final }) : null,
+          ]),
+          el('div', 'ps5-wcard-actions', {}, [
+            el('button', 'ps5-wbtn primary', { type: 'button', 'data-act': canCart ? 'cart' : 'open', text: canCart ? W.cart : W.buy }),
+            el('button', 'ps5-wbtn icon', { type: 'button', 'data-act': 'remove', title: W.remove, 'aria-label': W.remove, svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l1 12.5h9l1-12.5M10 11v5M14 11v5"/></svg>' }),
+          ]),
+        ]),
+      );
+      return c;
+    };
+    const renderMore = () => {
+      const grid = node.querySelector('.ps5-wgrid');
+      const slice = listEl.slice(shown, shown + 48);
+      for (const w of slice) grid.appendChild(card(w));
+      shown += slice.length;
+    };
+    const refresh = () => {
+      listEl = compute();
+      shown = 0;
+      const grid = node.querySelector('.ps5-wgrid');
+      grid.textContent = '';
+      node.querySelector('.ps5-wcount').textContent = W.games(listEl.length);
+      if (!listEl.length) grid.appendChild(el('div', 'ps5-wempty', { text: W.empty }));
+      renderMore();
+    };
+    const remove = (btn, appid) => {
+      if (!btn.classList.contains('confirm')) {
+        btn.classList.add('confirm');
+        btn.title = W.confirm;
+        setTimeout(() => { btn.classList.remove('confirm'); btn.title = W.remove; }, 3000);
+        return;
+      }
+      btn.disabled = true;
+      const body = new URLSearchParams({ sessionid: sessionId(), appid: String(appid) });
+      fetch('https://store.steampowered.com/api/removefromwishlist', { method: 'POST', body, credentials: 'include' })
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !d.success) throw new Error('refused');
+          items = items.filter(w => w.appid !== appid);
+          const c = btn.closest('.ps5-wcard');
+          c.classList.add('gone');
+          setTimeout(() => { c.remove(); node.querySelector('.ps5-wcount').textContent = W.games(compute().length); }, 260);
+          toast(W.removed);
+        })
+        .catch(() => { btn.disabled = false; btn.classList.remove('confirm'); toast(W.failed); });
+    };
+    const toast = msg => {
+      let t = document.getElementById('ps5-wtoast');
+      if (!t) { t = el('div', '', { id: 'ps5-wtoast' }); document.body.appendChild(t); }
+      t.textContent = msg;
+      t.classList.add('on');
+      clearTimeout(t._h);
+      t._h = setTimeout(() => t.classList.remove('on'), 2400);
+    };
+    const setMode = grid => {
+      root.classList.toggle('ps5-wish-grid', grid);
+      try { localStorage.setItem('ps5-wish-view', grid ? 'grid' : 'list'); } catch (e) { /* not kept */ }
+      const t = node.querySelector('.ps5-wview');
+      t.textContent = grid ? W.view : W.grid;
+    };
+    const build = () => {
+      const first = nativeRows()[0];
+      const list = first && (first.closest('[data-rfd-droppable-id]') || first.parentElement);
+      if (!list) return false;
+      list.setAttribute('data-ps5-wnative', '');
+      // Steam's own search / sort / filter bar above the list: our toolbar replaces it in
+      // grid mode (it comes back with "Steam list"); and the page column it all sits in,
+      // widened in grid mode so the title and the grid share one edge
+      for (let n = list.previousElementSibling; n; n = n.previousElementSibling) {
+        if (/^H[1-3]$/.test(n.tagName) || n.querySelector('h1, h2')) break;
+        if (n.querySelector('input, button, select')) n.setAttribute('data-ps5-wnative', 'tools');
+      }
+      const col = list.closest('section') || list.parentElement;
+      if (col) col.setAttribute('data-ps5-wcol', '');
+      const opt = (v, l) => el('option', '', { value: v, text: l });
+      const sel = el('select', 'ps5-wsort', {}, [opt('rank', W.rank), opt('added', W.added), opt('discount', W.discount), opt('price', W.price), opt('name', W.name), opt('release', W.release), opt('reviews', W.reviews)]);
+      const search = el('input', 'ps5-wsearch', { type: 'search', placeholder: W.search, spellcheck: 'false' });
+      const sale = el('button', 'ps5-wchip', { type: 'button', 'aria-pressed': 'false', text: W.sale });
+      const view = el('button', 'ps5-wview', { type: 'button' });
+      node = el('div', '', { id: 'ps5-wish' }, [
+        el('div', 'ps5-wtools', {}, [search, sel, sale, el('span', 'ps5-wcount'), view]),
+        el('div', 'ps5-wgrid', { role: 'list' }),
+        el('div', 'ps5-wmore'),
+      ]);
+      list.before(node);
+      let qt = 0;
+      search.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { query = search.value.trim(); refresh(); }, 140); });
+      sel.addEventListener('change', () => { sort = sel.value; refresh(); });
+      sale.addEventListener('click', () => { onSale = !onSale; sale.setAttribute('aria-pressed', String(onSale)); refresh(); });
+      view.addEventListener('click', () => setMode(!root.classList.contains('ps5-wish-grid')));
+      node.addEventListener('click', e => {
+        const b = e.target.closest('[data-act]');
+        if (!b) return;
+        const c = b.closest('.ps5-wcard');
+        const appid = +c.dataset.app;
+        if (b.dataset.act === 'remove') remove(b, appid);
+        else if (b.dataset.act === 'cart') {
+          const p = price(store.get(appid));
+          try { window.addToCart(p.pkg); } catch (err) { location.href = `https://store.steampowered.com/app/${appid}/`; }
+        } else if (b.dataset.act === 'open') location.href = `https://store.steampowered.com/app/${appid}/`;
+      });
+      io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting) && shown < listEl.length) renderMore(); }, { rootMargin: '800px' });
+      io.observe(node.querySelector('.ps5-wmore'));
+      let saved = 'grid';
+      try { saved = localStorage.getItem('ps5-wish-view') || 'grid'; } catch (e) { /* default */ }
+      refresh();
+      setMode(saved !== 'list');
+      return true;
+    };
+    const init = async () => {
+      if (built || busy || state.kind !== 'wishlist' || !isStore) return;
+      busy = true;
+      try {
+        const c = cfg();
+        const m = /\/wishlist\/profiles\/(\d+)/.exec(location.pathname);
+        const owner = m ? m[1] : (c.user && c.user.steamid) || '';
+        if (!owner) return;
+        const data = await api('IWishlistService/GetWishlist/v1/', { steamid: owner, access_token: c.token || '' });
+        const list = (data && data.response && data.response.items) || [];
+        if (!list.length) return;
+        const onPage = await waitRows();
+        if (!onPage.size || ![...onPage].some(id => list.some(w => w.appid === id))) return;   // not this list
+        for (let i = 0; i < list.length; i += 100) {
+          const ids = list.slice(i, i + 100).map(w => ({ appid: w.appid }));
+          const input = { ids, context: { language: c.lang, country_code: c.country || (c.user && c.user.country_code) || 'US', steam_realm: 1 }, data_request: { include_assets: true, include_reviews: true, include_release: true, include_basic_info: true } };
+          const r = await api('IStoreBrowseService/GetItems/v1/', { input_json: JSON.stringify(input) });
+          for (const it of (r && r.response && r.response.store_items) || []) store.set(it.appid || it.id, it);
+        }
+        items = list;
+        built = build();
+      } catch (e) {
+        console.warn('[PS5] wishlist grid unavailable, Steam list kept', e);
+      } finally { busy = false; }
+    };
+    return { init };
+  })();
 
   let last = 0, timer = 0, observer = null;
   const pass = () => {
@@ -327,6 +696,8 @@
     markMounts();
     paintArt();
     try { buildHero(); } catch (e) { console.warn('[PS5] store hero', e); }
+    try { markArrows(); } catch (e) { /* arrows keep Steam's look */ }
+    Wish.init();
   };
   const soon = () => {
     if (timer) return;

@@ -20,10 +20,12 @@ glass panels and smooth motion — while every Steam function keeps working unde
 | ![Game Library](assets/preview-library.jpg) | ![Control Center](assets/preview-control-center.jpg) |
 | **PlayStation Store** | **PS Store product page** |
 | ![Store](assets/preview-store.jpg) | ![Store product page](assets/preview-store-hero.jpg) |
+| **About this game + reviews + gallery** | **Wishlist grid** |
+| ![About](assets/preview-store-about.jpg) | ![Wishlist](assets/preview-wishlist.jpg) |
 | **Game actions menu ("…")** | **Store arrows** |
 | ![Game menu](assets/preview-game-menu.jpg) | ![Arrows](assets/preview-store-arrows.jpg) |
-| **Wishlist** | **PSN-style profile** |
-| ![Wishlist](assets/preview-wishlist.jpg) | ![Profile](assets/preview-profile-psn.jpg) |
+| **Long titles (second game)** | **PSN-style profile** |
+| ![Store hero 2](assets/preview-store-hero-2.jpg) | ![Profile](assets/preview-profile-psn.jpg) |
 | **What's New + bottom bar** | **Profile panel over the Store** |
 | ![What's New](assets/preview-whatsnew.jpg) | ![Profile panel](assets/preview-profile-store.jpg) |
 | **Game hub** | **Steam menus** |
@@ -52,8 +54,10 @@ glass panels and smooth motion — while every Steam function keeps working unde
 - **Game actions menu** — "…" on the Home Screen: Play, Game hub, Store page, Achievements,
   Screenshots, Community hub, Controller layout, Desktop shortcut, Properties, Uninstall — all
   real Steam actions.
-- **Wishlist** — every game a PS5 card with cover, price, discount and Add to Cart; Steam's
-  search, sort, filters, reordering and remove keep working.
+- **Wishlist** — a PS5 grid on your real wishlist (Steam's Web API): covers, prices,
+  discounts, reviews, date added, Add to Cart and remove through Steam, search, sorting,
+  "On sale" filter; one click back to Steam's own list.
+- **Address panel** — compact capsule at the top left: back, forward, reload, where you are.
 - **Community & PSN profile** — round glowing avatar, level, showcases, games, achievements,
   friends, badges, inventory; hubs, Workshop, Discussions, Guides, Screenshots, Market.
 - **One profile button** — the PS5 avatar replaces Steam's account button; account details,
@@ -151,7 +155,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 116 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 166 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

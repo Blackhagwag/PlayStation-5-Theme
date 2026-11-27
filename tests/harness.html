@@ -11,6 +11,8 @@
  #popup_target{display:flex;flex-direction:column;height:100%}
  .TitleBar{height:32px;display:flex;align-items:center;padding:0 8px;flex:none}
  .URLBarReplacement{height:32px;background:#171d25;flex:none}
+ .SuperNavMenu{width:101px;overflow:hidden}.SuperNavMenu .MenuButton{font-size:20px;text-transform:uppercase}
+ .BrowserWrapper .URLBar{height:32px;background:#222;display:flex;align-items:center}
  .LocalContentContainer{flex-direction:column}.LibraryInner{flex:1;display:flex;min-height:0}
  .DownloadStatus{flex:1;display:flex;justify-content:center}.DetailedDownloadProgress{width:720px;display:flex}
  .TitleBarControls{display:flex;gap:4px}.TitleBarControls .Button{width:28px;height:24px;display:grid;place-items:center;opacity:.6}
@@ -34,7 +36,7 @@
 <div id="popup_target">
   <div class="OuterFrame"><div class="TopBar">
   <div class="TitleBar"><div class="RootMenuBar"><div class="RootMenuButton"><div>Steam</div></div><div class="RootMenuButton"><div>View</div></div><div class="RootMenuButton"><div>Friends</div></div><div class="RootMenuButton"><div>Games</div></div><div class="RootMenuButton"><div>Help</div></div></div><div style="flex:1"></div><div class="TitleBarControls"><div class="AccountMenu" id="acct"><span>Vasya_PS5</span> <span class="WalletBalance">12,50€</span></div><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
-  <div class="SuperNavBar"><div class="SuperNav"><svg class="Arrow Enabled" viewBox="0 0 10 10"><path d="M6 2L3 5l3 3"/></svg><div class="MenuWrapper">
+  <div class="SuperNavBar"><div class="SuperNav"><svg class="Arrow Enabled" id="steam-back" viewBox="0 0 10 10" onclick="window.__back=(window.__back||0)+1"><path d="M6 2L3 5l3 3"/></svg><svg class="Arrow Disabled" id="steam-fwd" viewBox="0 0 10 10"><path d="M4 2l3 3-3 3"/></svg><div class="MenuWrapper">
     <div class="SuperNavMenu"><div class="MenuButton">Store</div></div>
     <div class="SuperNavMenu Selected"><div class="MenuButton">Library</div></div>
     <div class="SuperNavMenu"><div class="MenuButton">Community</div></div>
@@ -62,7 +64,7 @@
    document.querySelector('.LocalContentContainer').style.display = web ? 'none' : '';
    document.querySelectorAll('.SuperNavMenu').forEach((m, k) => m.classList.toggle('Selected', web ? k === 0 : k === 1));
    let bw = document.querySelector('.BrowserWrapper');
-   if (web && !bw) { bw = document.createElement('div'); bw.className = 'BrowserWrapper'; bw.innerHTML = '<div style="padding:40px;color:#000;background:#c6d4df;height:100%">STORE WEB VIEW (native CEF view in real Steam)</div>'; document.querySelector('.ContentFrame').appendChild(bw); }
+   if (web && !bw) { bw = document.createElement('div'); bw.className = 'BrowserWrapper'; bw.innerHTML = '<div class="URLBar"><div class="ReloadButton" onclick="window.__reload=(window.__reload||0)+1">⟳</div><div class="URLBarText"><span class="URL">https://store.steampowered.com/app/101/Starfall_Odyssey/</span></div></div><div style="padding:40px;color:#000;background:#c6d4df;height:100%">STORE WEB VIEW (native CEF view in real Steam)</div>'; document.querySelector('.ContentFrame').appendChild(bw); }
    if (bw) bw.style.display = web ? '' : 'none';
  };
  window.__mockRoute('/library/home');

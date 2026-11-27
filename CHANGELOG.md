@@ -4,6 +4,55 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.3.0] — 2026-11-27 — Visual Polish & Store Redesign
+
+### Fixed
+- **Navigation tabs had uneven sizes** — Steam fixes each tab at ~101 px with its own type
+  size; the icon, padding and longer labels (Сообщество, a long user name) were squeezed into
+  that box. Tabs now size to their label: one height (32 px), one type size (13.5 px), one
+  capsule, white active pill with a small blue dot; icons drop first in narrow windows.
+- **Store arrows: the white circles** — v1.2.0 only covered the legacy carousel. The React
+  carousels (`.CarouselBtnLeft/Right`) and the game gallery's paging arrows (Steam's own white
+  50 % discs) and thumbnail-scrollbar arrows are now marked by the script (with a structural
+  fallback) and all draw the same 36 px glass disc, blue on hover, unchanged in active/focus;
+  hit areas keep Steam's size.
+- **Wishlist and store home pushed to the left** — a `max-width` added in v1.2.0 without
+  centring. Removed.
+- **Profile text cut off** — v1.1.0 enlarged the nickname to 32 px and gave text blocks
+  `overflow: hidden` with large radii and 1 px borders that add width to Steam's fixed-pixel
+  layout. Steam's own sizes are back, no clipping, 12 px radius, hairlines drawn as inset shadows
+  (no extra width) across store and community, long names wrap.
+- **Settings icon** — now the standard cog (Lucide "settings"), same size as the other icons,
+  rotates and turns blue on hover.
+- Library game pages: one glass layer per section (nested panels were doubled), room under the
+  last section above the bottom bar.
+
+### Added
+- **Address panel** (top left): back · forward · reload (web pages) · where you are — "Library ·
+  Home", "Library · <game>", or host › path on web pages (click copies the URL). It presses
+  Steam's own arrows and reload, replacing Steam's wide address strip over web pages.
+- **Store game page redesign** — hero tuned (lower, aligned to the page column, smaller logo,
+  long titles reduced to three lines, thumbnails only when there are at least two); new **About
+  this game** card in two balanced columns (release date · developer · publisher | genres ·
+  tags, with icons; rows without data are not drawn); a compact **User reviews** card (share,
+  label, count, recent score, link); Steam's glance box steps back and the **gallery** (Steam's
+  own carousel, trailers included) takes the full column in a PS5 frame with rounded media,
+  lit thumbnails, slim scrollbar and a full-screen viewer.
+- **Wishlist grid** — a PS5 grid on Steam's real wishlist: covers, name, reviews, date added,
+  Steam's prices and discount, Add to Cart (Steam's own `addToCart`) and remove (Steam's
+  `/api/removefromwishlist`, with confirmation), search, 7 sort orders, "On sale" filter, count,
+  and a button back to Steam's list. Data from Steam's Web API (GetWishlist + GetItems); built
+  only when that list matches the rows Steam renders, otherwise Steam's list stays.
+- **Home background blur** — the selected game's art is softly blurred (12 px by default,
+  slider 0–40) with a crossfade; tiles and covers stay sharp.
+- Tests: 166 checks (was 116) — tabs, address panel, blur, all arrow kinds and states, the about
+  and reviews cards, a second game (long title, no logo, one screenshot, no reviews), wishlist
+  grid actions and fallback, long nicknames.
+
+### Notes
+- The two videos mentioned for this version did not reach the session (no video file was
+  attached), so fixes follow the written report and an audit of the code.
+
 ## [1.2.0] — 2026-11-27 — Major UI Rework & Bug Fixes
 
 ### Fixed (each one traced to its cause)

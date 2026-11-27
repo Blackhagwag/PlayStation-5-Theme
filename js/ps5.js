@@ -28,7 +28,7 @@
     try { window.__ps5Theme.destroy(); } catch (e) { /* old instance already gone */ }
   }
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.3.0';
   const doc = document;
   const root = doc.documentElement;
 
@@ -383,8 +383,12 @@
     mic: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></g></svg>',
     music: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17.5V6l10-2v11.5" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></g></svg>',
     download: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" d="M12 3.5v11m-4.5-4.5L12 14.5 16.5 10M4.5 19.5h15"/></svg>',
-    // a cog with eight teeth (v1.1.0's circle with rays read as a sun)
-    gear: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M10.3 2.8h3.4l.5 2.4a7.3 7.3 0 0 1 1.8 1l2.3-.8 1.7 2.9-1.8 1.7a7.4 7.4 0 0 1 0 2l1.8 1.7-1.7 2.9-2.3-.8a7.3 7.3 0 0 1-1.8 1l-.5 2.4h-3.4l-.5-2.4a7.3 7.3 0 0 1-1.8-1l-2.3.8-1.7-2.9 1.8-1.7a7.4 7.4 0 0 1 0-2L4 8.3l1.7-2.9 2.3.8a7.3 7.3 0 0 1 1.8-1z"/><circle cx="12" cy="12" r="2.9"/></g></svg>',
+    // Lucide "settings" (ISC licence): the cog people read as Settings at any size
+    gear: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></g></svg>',
+    back: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M14.5 5.5 8 12l6.5 6.5"/></svg>',
+    fwd: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M9.5 5.5 16 12l-6.5 6.5"/></svg>',
+    reload: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4"/></svg>',
+    globe: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.2 3.5 8.5s-1.1 6.1-3.5 8.5M12 3.5C9.6 5.9 8.5 8.7 8.5 12s1.1 6.1 3.5 8.5"/></g></svg>',
     bag: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke-linecap="round"/></g></svg>',
     image: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3 3-2.5L20 17"/></g></svg>',
     link: '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></g></svg>',
@@ -511,6 +515,109 @@
     n.addEventListener('animationend', e => { if (e.target === n) done(); });
     setTimeout(done, 3000);   // in case animations are disabled
   };
+
+  /* ───────────────────────── address panel (top-left) ─────────────────────────
+     A compact capsule: back · forward · reload (web pages) · where you are.
+     Back / forward press Steam's own arrows (.SuperNav svg.Arrow), reload presses the
+     web strip's own reload button, so Steam's navigation history stays the only one.
+     On a web page the address shows as host › path (a click copies the full URL);
+     in the library it names the section ("Library · Home", "Library · <game>"). */
+  const Address = (() => {
+    let node = null, lastSig = '';
+    const steamArrows = () => [...doc.querySelectorAll('.SuperNav svg.Arrow, .SuperNavBar svg.Arrow')];
+    const press = n => {
+      if (!n) return false;
+      try { n.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); return true; } catch (e) { return false; }
+    };
+    const webURL = () => safe(() => S().MainWindowBrowserManager.m_URL, '') || ((doc.querySelector('.BrowserWrapper .URLBar .URL') || {}).textContent || '');
+    const sectionLabel = path => {
+      const t = T();
+      const ru = lang() === 'ru';
+      let m;
+      if ((m = /^\/library\/app\/(\d+)/.exec(path))) {
+        const app = appById(m[1]);
+        return [ru ? 'Библиотека' : 'Library', app ? app.display_name : '#' + m[1]];
+      }
+      if (/^\/library\/home/.test(path) || path === '/library' || path === '/library/') return [ru ? 'Библиотека' : 'Library', ru ? 'Главная' : 'Home'];
+      if (/downloads/.test(path)) return [t.downloads, ''];
+      if (/^\/library\/collection/.test(path)) return [ru ? 'Библиотека' : 'Library', ru ? 'Коллекции' : 'Collections'];
+      if (/^\/library/.test(path)) return [ru ? 'Библиотека' : 'Library', ''];
+      if (/^\/(settings|millennium)/i.test(path)) return [t.settings, ''];
+      const seg = (path.split('/').filter(Boolean)[0] || 'Steam');
+      return [seg.charAt(0).toUpperCase() + seg.slice(1), ''];
+    };
+    const build = () => {
+      node = h('div', '', `
+        <button class="ps5-addr-btn ps5-addr-back" type="button">${I.back}</button>
+        <button class="ps5-addr-btn ps5-addr-fwd" type="button">${I.fwd}</button>
+        <button class="ps5-addr-btn ps5-addr-reload" type="button" hidden>${I.reload}</button>
+        <span class="ps5-addr-sep" aria-hidden="true"></span>
+        <button class="ps5-addr-where" type="button" tabindex="-1"><span class="ps5-addr-ico"></span><span class="ps5-addr-text"></span></button>`);
+      node.id = 'ps5-addr';
+      node.setAttribute('role', 'navigation');
+      node.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        const [backA, fwdA] = steamArrows();
+        if (b.classList.contains('ps5-addr-back')) {
+          if (!press(backA)) safe(() => S().SteamUIStore.WindowStore.MainWindowInstance.m_history.goBack());
+        } else if (b.classList.contains('ps5-addr-fwd')) {
+          if (!press(fwdA)) safe(() => S().SteamUIStore.WindowStore.MainWindowInstance.m_history.goForward());
+        } else if (b.classList.contains('ps5-addr-reload')) {
+          const btn = doc.querySelector('.BrowserWrapper .URLBar .ReloadButton, .BrowserWrapper .URLBar [class*="Reload"]');
+          if (btn) btn.click();
+          else safe(() => S().MainWindowBrowserManager.m_browser.Reload());
+          node.classList.add('loading');
+          setTimeout(() => node && node.classList.remove('loading'), 1200);
+        } else if (b.classList.contains('ps5-addr-where') && b.classList.contains('copyable')) {
+          const url = webURL();
+          if (url && navigator.clipboard) navigator.clipboard.writeText(url).then(() => snack(lang() === 'ru' ? 'Адрес скопирован' : 'Address copied'), () => {});
+        }
+      });
+    };
+    const update = () => {
+      const bar = doc.querySelector('.SuperNavBar');
+      if (!bar) { if (node) node.remove(); root.classList.remove('ps5-addr-on'); return; }
+      if (!node) build();
+      if (node.parentElement !== bar || bar.firstElementChild !== node) bar.insertBefore(node, bar.firstElementChild);
+      root.classList.add('ps5-addr-on');
+      const [backA, fwdA] = steamArrows();
+      const en = a => !a || !a.classList.contains('Disabled');
+      node.querySelector('.ps5-addr-back').disabled = !en(backA);
+      node.querySelector('.ps5-addr-fwd').disabled = !en(fwdA);
+      const web = WebView.onWebPage();
+      const where = node.querySelector('.ps5-addr-where');
+      let html, title;
+      if (web) {
+        const url = webURL();
+        let host = '', rest = '';
+        try { const u = new URL(url); host = u.hostname.replace(/^www\./, ''); rest = (u.pathname + u.search).replace(/\/$/, ''); } catch (e) { host = url; }
+        html = `<b>${esc(host)}</b>${rest ? `<i> › ${esc(rest.replace(/^\//, ''))}</i>` : ''}`;
+        title = url;
+      } else {
+        const [a, b] = sectionLabel(currentPath());
+        html = `<b>${esc(a)}</b>${b ? `<i> · ${esc(b)}</i>` : ''}`;
+        title = b ? `${a} · ${b}` : a;
+      }
+      const t = T();
+      const sig = html + web + lang();
+      if (sig !== lastSig) {
+        lastSig = sig;
+        node.querySelector('.ps5-addr-text').innerHTML = html;
+        node.querySelector('.ps5-addr-ico').innerHTML = web ? I.globe : I.home;
+        where.title = web ? `${title}\n${lang() === 'ru' ? 'Нажмите, чтобы скопировать' : 'Click to copy'}` : title;
+        where.classList.toggle('copyable', web);
+        node.querySelector('.ps5-addr-reload').hidden = !web;
+        const lbl = { back: lang() === 'ru' ? 'Назад' : 'Back', fwd: lang() === 'ru' ? 'Вперёд' : 'Forward', reload: lang() === 'ru' ? 'Обновить' : 'Reload' };
+        for (const [cls, l] of [['back', lbl.back], ['fwd', lbl.fwd], ['reload', lbl.reload]]) {
+          const b = node.querySelector('.ps5-addr-' + cls); b.title = l; b.setAttribute('aria-label', l);
+        }
+        void t;
+      }
+    };
+    onCleanup(() => { if (node) node.remove(); node = null; root.classList.remove('ps5-addr-on'); });
+    return { update };
+  })();
 
   /* ───────────────────────── top bar: library / control center / avatar / clock ───────────────────────── */
 
@@ -1403,6 +1510,7 @@
       root.classList.toggle('ps5-account-show', cssVar('--ps5-account') === 'show');
       root.classList.toggle('ps5-bb-steam', cssVar('--ps5-bottombar') === 'steam');
       BottomBar.update();
+      Address.update();
       WebView.enforce();
     };
     const soon = () => {

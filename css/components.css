@@ -41,11 +41,13 @@ ps5-details, #ps5-lightbox, #ps5-snack)radial-gradient(50% 35% at 55% 95%, rgba(
 }
 #ps5-bg .ps5-bg-layer {
   position: absolute;
-  inset: 0;
-  background: center top / cover no-repeat;
+  /* bleeds past the window so the blur has no dark rim at the edges */
+  inset: calc(-2 * var(--ps5-bg-blur, 12px));
+  background: center 30% / cover no-repeat;
   opacity: 0;
-  transform: scale(1.04);
-  filter: blur(var(--ps5-bg-blur, 0px));
+  transform: scale(1.03);
+  /* v1.3.0: a light blur by default — the art stays recognisable, the text reads better */
+  filter: blur(var(--ps5-bg-blur, 12px)) saturate(1.08);
   transition: opacity 700ms var(--ps5-ease), transform 1400ms var(--ps5-ease);
   will-change: opacity, transform;
 }
@@ -61,7 +63,7 @@ ps5-details, #ps5-lightbox, #ps5-snack)linear-gradient(180deg, rgba(0, 0, 0, 0.4
 }
 #ps5-bg.has-art .ps5-bg-shade { opacity: 1; }
 /* game pages: Steam draws its own hero there, so ours sits back */
-html.ps5-on-app #ps5-bg .ps5-bg-layer.on { opacity: 0.55; filter: blur(calc(var(--ps5-bg-blur, 0px) + 40px)); }
+html.ps5-on-app #ps5-bg .ps5-bg-layer.on { opacity: 0.55; filter: blur(calc(var(--ps5-bg-blur, 12px) + 30px)); }
 /* web pages cover the window anyway */
 html.ps5-on-web:not(.ps5-web-hidden) #ps5-bg { display: none; }
 
