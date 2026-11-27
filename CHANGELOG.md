@@ -4,6 +4,22 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.5.0] — 2026-11-27 — Millennium Store Release
+
+### Added
+- **Millennium's own interface in the PS5 design** (`css/millennium.css`): the settings route
+  (Themes, Plugins, Updates, Logs…), the library-manager sidebar where theme options are edited
+  (rows as PS5 cards, label and control on one line, description below, white tab pills), colour
+  swatches of the Colors tab, the Quick CSS window.
+- **Theme options reorganised** for the store release: five tabs — *Home Screen* (Layout,
+  Background, Steam shelves), *Look* (Colours, Background, Motion), *Bars* (Top bar, Bottom bar),
+  *Store & Web*, *Language* — with rewritten descriptions. Option keys and values are unchanged,
+  so saved settings carry over.
+- **Real preview image**: `header_image` / `splash_image` now show a capture of the theme in a real
+  Steam client (`assets/real/header.jpg`); the README opens with it.
+- **Store listing files**: `PUBLISHING.md` (the ThemeDatabase pull request, step by step);
+  `scripts/validate.mjs` now checks the store's rules (github block, https images that exist).
+
 ## [1.4.0] — 2026-11-27 — Library Game Page Rebuild & Store Fixes
 
 Based on the screenshots sent with the report (Cyberpunk 2077 in the library, an "over the hill"

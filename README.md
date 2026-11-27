@@ -5,7 +5,9 @@ A PlayStation 5 style shell for the Steam desktop client, built for
 real games, a **Game Library**, a **Control Center**, PS5 **game hubs**, a PSN-style profile,
 glass panels and smooth motion — while every Steam function keeps working underneath.
 
-![Home Screen](assets/preview-home.jpg)
+![PlayStation 5 theme in a real Steam client](assets/real/header.jpg)
+
+*Real capture from a Steam client running the theme. The gallery below is rendered by the test harness with placeholder art.*
 
 > Unofficial fan project. Not affiliated with or endorsed by Sony Interactive Entertainment or
 > Valve. "PlayStation" and "PS5" are trademarks of Sony Interactive Entertainment. No Sony logos
@@ -14,6 +16,9 @@ glass panels and smooth motion — while every Steam function keeps working unde
 **[⬇ Download the latest ZIP from GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases/latest)**
 
 ## Screenshots
+
+![Home Screen](assets/preview-home.jpg)
+
 
 | Game Library | Control Center |
 |---|---|
@@ -70,7 +75,8 @@ glass panels and smooth motion — while every Steam function keeps working unde
   blue highlight — all items and commands untouched.
 - **Everywhere else** — PS5 top tabs with clock and avatar, glass game list, downloads page,
   friends & chat, notifications, settings and properties dialogs.
-- **Options** in Millennium → Themes → PlayStation 5: accent colour (5 presets or your own),
+- **Options** in Millennium → Themes → PlayStation 5, in five tabs — *Home Screen*, *Look*,
+  *Bars*, *Store & Web*, *Language* — and a *Colors* tab: accent colour (5 presets or your own),
   background (game art / PS5 waves / black), blur, reduced motion, boot animation, clock
   format, home layout, store styling, theme language (English / Русский).
 
@@ -86,7 +92,12 @@ glass panels and smooth motion — while every Steam function keeps working unde
 The theme only adds CSS and one script to Steam's windows through Millennium. It does not
 modify Steam's files, does not change login, purchases or downloads, and has no installer.
 
-## Installation (manual, through Millennium)
+## Installation
+
+**From the Millennium theme store** (once listed on [steambrew.app](https://steambrew.app/)): open
+Millennium → Themes, find **PlayStation 5**, install, select it.
+
+### Manual installation (ZIP)
 
 No installer, no Node.js, no Python — just the ZIP.
 

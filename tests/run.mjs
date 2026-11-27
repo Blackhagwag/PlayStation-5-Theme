@@ -290,6 +290,17 @@ try {
   await page.waitForTimeout(300);
   check('navigation closes Control Center', await page.locator('#ps5-cc.open').count() === 0);
 
+  // ---- v1.5.0: Millennium's own UI (options sidebar, swatches)
+  await page.evaluate(() => {
+    const sb = document.createElement('div');
+    sb.className = 'MillenniumDesktopSidebar';
+    sb.innerHTML = '<div class="MillenniumDesktopSidebar_Title Panel">PlayStation 5</div><div class="PanelSectionTitle">Theme settings</div><div role="tablist"><button aria-selected="true">Home Screen</button><button>Look</button></div><div class="Field" style="display:flex"><div class="FieldLeftColumn"><div class="FieldLabelRow"><div class="FieldLabel">Home Screen</div></div><div class="FieldDescription">The PS5 Home Screen…</div></div><div class="FieldRightColumn"><select><option>PlayStation 5</option></select></div></div><input type="color" class="MillenniumColorPicker" value="#0070d1">';
+    document.body.appendChild(sb);
+  });
+  const ms = await page.evaluate(() => { const f = document.querySelector('.MillenniumDesktopSidebar .Field'), t = document.querySelector('.MillenniumDesktopSidebar [role=tablist] button[aria-selected=true]'), d = document.querySelector('.MillenniumDesktopSidebar .FieldDescription'); return [getComputedStyle(f).borderTopLeftRadius, getComputedStyle(t).backgroundColor, getComputedStyle(d).flexBasis, getComputedStyle(document.querySelector('.MillenniumColorPicker')).borderTopLeftRadius]; });
+  check('Millennium options sidebar: PS5 cards, white active tab, description on its own line, round swatches', ms[0] === '12px' && ms[1] === 'rgb(255, 255, 255)' && ms[2] === '100%' && ms[3] === '10px', ms.join(' | '));
+  await page.evaluate(() => document.querySelector('.MillenniumDesktopSidebar').remove());
+
   await page.evaluate(() => window.__ps5Theme.destroy());
   await page.waitForTimeout(100);
   const left = await page.evaluate(() => document.querySelectorAll('[id^="ps5-"]').length);

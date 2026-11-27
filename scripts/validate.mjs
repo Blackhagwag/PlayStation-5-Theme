@@ -14,6 +14,13 @@ try { skin = JSON.parse(fs.readFileSync(path.join(ROOT, 'skin.json'), 'utf8')); 
 catch (e) { console.error('skin.json is not valid JSON:', e.message); process.exit(1); }
 
 for (const key of ['name', 'author', 'version', 'description', 'github']) if (!skin[key]) errors.push(`skin.json: missing "${key}"`);
+// Millennium ThemeDatabase listing rules
+if (!skin.github || !skin.github.owner || !skin.github.repo_name) errors.push('skin.json: github.owner / github.repo_name required for the Millennium store');
+for (const k of ['header_image', 'splash_image']) {
+  if (!/^https:\/\//.test(skin[k] || '')) { errors.push(`skin.json: ${k} must be an https URL`); continue; }
+  const m = /raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)$/.exec(skin[k]);
+  if (m && fs.existsSync(path.join(ROOT, 'assets')) && !fs.existsSync(path.join(ROOT, m[1]))) errors.push(`skin.json: ${k} points to ${m[1]}, which is not in the repository`);
+}
 if (!/^\d+\.\d+\.\d+$/.test(skin.version || '')) errors.push('skin.json: version must be MAJOR.MINOR.PATCH');
 
 const referenced = new Set();

@@ -1,8 +1,8 @@
 {
   "name": "PlayStation 5",
-  "description": "A PlayStation 5 style shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, PSN-style profile, glass panels and smooth motion. Not affiliated with Sony Interactive Entertainment.",
+  "description": "A PlayStation 5 shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, a PS Store look for the store and wishlist, glass menus and smooth motion — every Steam function kept. Not affiliated with Sony Interactive Entertainment.",
   "author": "Blackhagwag",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "source": "https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme",
   "github": {
     "owner": "Blackhagwag",
@@ -16,8 +16,8 @@
     "Animated",
     "Blue"
   ],
-  "header_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
-  "splash_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
+  "header_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/real/header.jpg",
+  "splash_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/real/header.jpg",
   "RootColors": "css/root.css",
   "webkitCSS": "css/webkit/web.css",
   "webkitJS": "js/web.js",
@@ -29,7 +29,8 @@
         "css/shared.css",
         "css/menus.css",
         "css/main.css",
-        "css/components.css"
+        "css/components.css",
+        "css/millennium.css"
       ],
       "TargetJs": "js/ps5.js"
     },
@@ -37,14 +38,16 @@
       "MatchRegexString": ".DesktopUI",
       "TargetCss": [
         "css/shared.css",
-        "css/menus.css"
+        "css/menus.css",
+        "css/millennium.css"
       ]
     },
     {
       "MatchRegexString": "ModalDialogBody",
       "TargetCss": [
         "css/shared.css",
-        "css/menus.css"
+        "css/menus.css",
+        "css/millennium.css"
       ]
     },
     {
@@ -94,22 +97,24 @@
       "MatchRegexString": ".ModalDialogPopup",
       "TargetCss": [
         "css/shared.css",
-        "css/menus.css"
+        "css/menus.css",
+        "css/millennium.css"
       ]
     },
     {
       "MatchRegexString": ".FullModalOverlay",
       "TargetCss": [
         "css/shared.css",
-        "css/menus.css"
+        "css/menus.css",
+        "css/millennium.css"
       ]
     }
   ],
   "Conditions": {
     "Home Screen": {
-      "description": "The PS5 Home Screen on top of the library home: a row of your recently played games, the art of the selected game behind everything, Play and activity cards. Steam's own shelves stay below it.",
-      "tab": "Home",
-      "section": "Home Screen",
+      "description": "The PS5 Home Screen on top of the library home: your recently played games in a row, the selected game's art behind everything, Play, the \"…\" game menu and activity cards. Steam's own shelves stay below it.",
+      "tab": "Home Screen",
+      "section": "Layout",
       "default": "PlayStation 5",
       "values": {
         "PlayStation 5": {},
@@ -124,9 +129,9 @@
       }
     },
     "Home games": {
-      "description": "Which games fill the Home Screen row.",
-      "tab": "Home",
-      "section": "Home Screen",
+      "description": "Which games fill the row: what is installed on this PC, or everything in your library.",
+      "tab": "Home Screen",
+      "section": "Layout",
       "default": "Recently played (installed)",
       "values": {
         "Recently played (installed)": {},
@@ -140,43 +145,9 @@
         }
       }
     },
-    "Steam shelves under Home": {
-      "description": "Steam's own home shelves (recent games, What's New, your shelves) under the PS5 Home Screen.",
-      "tab": "Home",
-      "section": "Home Screen",
-      "default": "Show",
-      "values": {
-        "Show": {},
-        "Hide": {
-          "TargetCss": {
-            "affects": [
-              "^Steam$"
-            ],
-            "src": "css/options/shelves-hide.css"
-          }
-        }
-      }
-    },
-    "What's New": {
-      "description": "Steam's What's New shelf on the library home as a row of PS5 content cards, or hidden.",
-      "tab": "Home",
-      "section": "Home Screen",
-      "default": "PS5 cards",
-      "values": {
-        "PS5 cards": {},
-        "Hidden": {
-          "TargetCss": {
-            "affects": [
-              "^Steam$"
-            ],
-            "src": "css/options/whatsnew-hide.css"
-          }
-        }
-      }
-    },
     "Game list on Home": {
-      "description": "Steam's game list (left sidebar). PS5 mode hides it on the Home Screen and on game pages, so a game opens as one full PS5 page; the Game Library (grid button, Ctrl+Shift+L) lists every game.",
-      "tab": "Home",
+      "description": "Steam's game list on the left. PS5 mode hides it on the Home Screen and on game pages, so a game opens as one full page; the Game Library (grid button or Ctrl+Shift+L) lists every game.",
+      "tab": "Home Screen",
       "section": "Layout",
       "default": "Hidden on Home and game pages",
       "values": {
@@ -199,10 +170,57 @@
         }
       }
     },
+    "Home art blur": {
+      "description": "How soft the selected game's art behind the Home Screen is. A light blur keeps it recognisable and the text easy to read; 0 is sharp.\n[i]Default: 10px[/i]",
+      "tab": "Home Screen",
+      "section": "Background",
+      "default": 10,
+      "slider": {
+        "cssVariable": "--ps5-art-blur",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px"
+      }
+    },
+    "Steam shelves under Home": {
+      "description": "Steam's own shelves (recent games, your collections) under the PS5 Home Screen.",
+      "tab": "Home Screen",
+      "section": "Steam shelves",
+      "default": "Show",
+      "values": {
+        "Show": {},
+        "Hide": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/shelves-hide.css"
+          }
+        }
+      }
+    },
+    "What's New": {
+      "description": "Steam's What's New shelf as PS5 content cards, or hidden.",
+      "tab": "Home Screen",
+      "section": "Steam shelves",
+      "default": "PS5 cards",
+      "values": {
+        "PS5 cards": {},
+        "Hidden": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/whatsnew-hide.css"
+          }
+        }
+      }
+    },
     "Accent color": {
-      "description": "Highlight color for buttons, focus and progress bars. 'Colors tab' uses the Accent value from the Colors tab of this theme.",
+      "description": "Highlight colour for buttons, focus, discounts and progress bars, in every window and on Steam's web pages. \"Colors tab\" uses the Accent from this theme's Colors tab.",
       "tab": "Look",
-      "section": "Colors",
+      "section": "Colours",
       "default": "Colors tab",
       "values": {
         "Colors tab": {},
@@ -304,7 +322,7 @@
       }
     },
     "Background": {
-      "description": "What sits behind the glass in the main window.",
+      "description": "What sits behind the glass in the main window when no game art is shown.",
       "tab": "Look",
       "section": "Background",
       "default": "Game art",
@@ -328,21 +346,8 @@
         }
       }
     },
-    "Home art blur": {
-      "description": "How soft the selected game's art behind the Home Screen is. A light blur keeps it recognisable and the text easy to read; 0 is sharp.\n[i]Default: 10px[/i]",
-      "tab": "Look",
-      "section": "Background",
-      "default": 10,
-      "slider": {
-        "cssVariable": "--ps5-art-blur",
-        "min": 0,
-        "max": 40,
-        "step": 2,
-        "unit": "px"
-      }
-    },
     "Animations": {
-      "description": "Full: PS5 motion for cards, panels and the background. Reduced: almost instant, for slow machines.",
+      "description": "Full: PS5 motion for cards, panels, menus and the background. Reduced: near-instant, for slower PCs.",
       "tab": "Look",
       "section": "Motion",
       "default": "Full",
@@ -369,7 +374,7 @@
       }
     },
     "Boot animation": {
-      "description": "The short PS5-style start-up fade when the Steam window opens.",
+      "description": "The short PS5-style fade when the Steam window opens.",
       "tab": "Look",
       "section": "Motion",
       "default": "On",
@@ -386,8 +391,8 @@
       }
     },
     "Clock": {
-      "description": "The clock in the top bar, as on the PS5.",
-      "tab": "Look",
+      "description": "The clock in the top-right corner, as on the PS5.",
+      "tab": "Bars",
       "section": "Top bar",
       "default": "24-hour",
       "values": {
@@ -411,8 +416,8 @@
       }
     },
     "Steam account button": {
-      "description": "Steam's own account button in the top bar. Hidden: the PS5 avatar is the single profile button; account details, wallet, store preferences, status and sign-in options are in its panel (Control Center → Profile).",
-      "tab": "Look",
+      "description": "Steam's own account button. Hidden: the PS5 avatar is the single profile button — status, wallet, account details, store preferences and change account are in its panel (Control Center → Profile).",
+      "tab": "Bars",
       "section": "Top bar",
       "default": "Hidden (PS5 profile)",
       "values": {
@@ -428,8 +433,8 @@
       }
     },
     "Bottom bar": {
-      "description": "Downloads, Add a Game and Friends & Chat at the bottom of the window: PS5 pills with icons, or Steam's own look.",
-      "tab": "Look",
+      "description": "Add a Game, Downloads (with live progress) and Friends & Chat as compact PS5 capsules, or Steam's own look.",
+      "tab": "Bars",
       "section": "Bottom bar",
       "default": "PS5",
       "values": {
@@ -445,8 +450,8 @@
       }
     },
     "Store and Community": {
-      "description": "PS5 design for the Store (home, game pages, search, wishlist), Community, Workshop, guides, discussions and the PlayStation Network-style profile. Steam default leaves every web page as Steam draws it.",
-      "tab": "Web pages",
+      "description": "PS5 design for the Store (home, game pages with the PS Store header, search, wishlist grid), Workshop, discussions and the rest of the Community. User profiles always stay as Steam draws them. Steam default leaves every web page untouched.",
+      "tab": "Store & Web",
       "section": "Store and Community",
       "default": "PS5 style",
       "values": {
@@ -462,8 +467,8 @@
       }
     },
     "Theme language": {
-      "description": "Language of the text this theme draws itself (Home Screen, Control Center, Game Library). Auto follows your system language.",
-      "tab": "General",
+      "description": "Language of the text the theme draws itself (Home Screen, Control Center, Game Library, store panels). Auto follows your system.",
+      "tab": "Language",
       "section": "Language",
       "default": "Auto",
       "values": {
