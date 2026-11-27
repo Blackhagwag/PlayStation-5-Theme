@@ -1,0 +1,10 @@
+/* "Privacy blur: On" — the wallet balance (PS5 profile panel and Steam's account button) is
+   blurred until you hover it: for streams and screenshots. */
+html:root .ps5-cc-wallet,
+html:root .TitleBarControls .AccountMenu .WalletBalance {
+  filter: blur(6px);
+  transition: filter 220ms ease;
+}
+html:root .ps5-cc-wallet:hover,
+html:root .ps5-cc-subhead:hover .ps5-cc-wallet,
+html:root .TitleBarControls .AccountMenu:hover .WalletBalance { filter: none; }

@@ -50,6 +50,12 @@
       const label = row.querySelector('.richPresenceLabel, .gameName');
       setArt(row, id, label ? label.textContent.trim() : '');
     }
+    // offline friends: the name, for the "Faces" option's hover label
+    for (const row of document.querySelectorAll('.friendGroup.offlineFriends .friend')) {
+      const n = row.querySelector('.playerName');
+      const name = n ? n.textContent.trim() : '';
+      if (name && row.getAttribute('data-ps5-name') !== name) row.setAttribute('data-ps5-name', name);
+    }
     // a game group (two friends or more in one game): the header carries the art
     for (const g of document.querySelectorAll('.friendGroup.gameGroup:not(.OtherGamesGroup)')) {
       const head = g.querySelector(':scope > .groupName');

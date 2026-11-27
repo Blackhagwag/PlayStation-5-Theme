@@ -1,0 +1,13 @@
+<!doctype html>
+<!-- Test harness only: the "Sign in to Steam" window (structure only). ?chooser shows the account chooser. -->
+<html><head><meta charset="utf-8"><title>Sign in to Steam</title>
+<link rel="stylesheet" href="../css/root.css"><link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/login.css">
+<style>html,body{margin:0;height:100%;font:13px Arial}.Login{position:absolute;inset:0;background:#171a21;display:flex;align-items:center;justify-content:center}
+.LoginStatusContainer{display:flex;align-items:center;justify-content:center}.SpinnerLoaderContainer{display:flex;flex-direction:column;align-items:center;gap:20px}
+.UserList{display:flex;gap:24px}.User .Icon{width:120px;height:120px;background:#333}.User .Icon img{width:100%;height:100%}[hidden]{display:none!important}</style></head>
+<body>
+<div class="LoginAnimatedBackground" style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#58f 0 40px,#f80 40px 80px)"></div>
+<div class="Login AnimatedBackground" id="status"><div class="LoginStatusContainer Panel"><div class="StatusThrobber Container"><div class="SpinnerLoaderContainer"><img class="Small" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%2306f'/%3E%3C/svg%3E"><div class="LoadingStatus"><div class="LoginStatus">Signing in…</div><div class="Progress"><div class="ProgressBar" style="width:200px;height:8px;background:#333"><div class="Percent" style="width:40%;height:100%;background:#1a9fff"></div></div></div><div class="UserContainer"><div class="Avatar" style="width:32px;height:32px"><img src="" style="width:32px;height:32px"></div><div class="PersonaName">Vasya</div></div></div></div></div></div></div>
+<div class="Login DesktopUI" id="chooser" hidden><div class="UserChooser"><div class="Content"><div class="AvatarContainer"><div class="WhosPlaying">Who's playing?</div></div><div class="CachedUsers"><div class="UserList"><div><div class="User Existing" id="u1"><div class="Icon"><img src=""></div><div class="Name Persona">Vasya</div><div class="Name Account">vasya_77</div></div></div><div><div class="User New"><div class="Icon"></div><div class="Name Persona">Add account</div></div></div></div></div></div></div></div>
+<script>if (location.search.includes('chooser')) { document.getElementById('status').hidden = true; document.getElementById('chooser').hidden = false; }</script>
+</body></html>

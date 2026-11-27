@@ -36,12 +36,32 @@ body.DesktopUI .contextMenu.DropDown:not(:has(> .contextMenuContents)) {
   box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.3) !important;
   color: #fff !important;
   padding: 6px !important;
-  animation: ps5-menu-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: ps5-menu-unfold 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
   transform-origin: top left;
 }
-@keyframes ps5-menu-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+/* v1.7.0: the panel unfolds from its top edge, then its rows rise in one after another */
+@keyframes ps5-menu-unfold {
+  from { opacity: 0; clip-path: inset(0 0 100% 0 round 14px); transform: translateY(-6px); }
+  to { opacity: 1; clip-path: inset(0 0 0 0 round 14px); transform: none; }
+}
+@keyframes ps5-menu-row {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
+}
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :is(.MenuItem, .contextMenuItem),
+body.ContextMenuPopupBody .MenuPopup > .MenuItem {
+  animation: ps5-menu-row 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(2) { animation-delay: 20ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(3) { animation-delay: 40ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(4) { animation-delay: 60ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(5) { animation-delay: 80ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(6) { animation-delay: 100ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(7) { animation-delay: 115ms; }
+:is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > :nth-child(n + 8) { animation-delay: 130ms; }
+@media (prefers-reduced-motion: reduce) {
+  :is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents,
+  :is(body.ContextMenuPopupBody, body.DesktopUI, .friendsui-container) .contextMenuContents > * { animation: none !important; }
 }
 
 /* rows */

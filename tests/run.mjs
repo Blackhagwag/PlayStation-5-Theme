@@ -258,6 +258,9 @@ try {
   check('Settings icon is the standard cog (Lucide "settings"), not a sun', gear.includes('M12.22 2h-.44') && gear.includes('r="3"') && !gear.includes('M12 2.8v2.4'));
   const gearBox = await page.locator('.ps5-cc-icon[data-sec="settings"] .ps5-ico').boundingBox();
   check('Settings icon size matches the other Control Center icons', Math.round(gearBox.width) === 26 && Math.round(gearBox.height) === 26, JSON.stringify(gearBox));
+  await page.addStyleTag({ path: path.join(DIR, '..', 'css', 'options', 'privacy-blur.css') });
+  await page.mouse.move(2, 2); await page.waitForTimeout(350);
+  check('option «Privacy blur»: wallet blurred until hovered', /blur\(6px\)/.test(await page.locator('.ps5-cc-wallet').evaluate(n => getComputedStyle(n).filter)));
   check('profile panel has the account section (replaces Steam account menu)', await page.locator('[data-act="account"]').count() === 1 && await page.locator('[data-act="store-prefs"]').count() === 1);
   await page.waitForTimeout(450);   // let the opening animation finish
   const box = await page.locator('.ps5-cc-panel').boundingBox();
@@ -348,18 +351,58 @@ try {
   await fp.waitForTimeout(300);
   check('friends: hover = PS5 white focus ring', /rgba\(255, 255, 255, 0\.9\) 0px 0px 0px 2px/.test(await fp.locator('#fr-on').evaluate(n => getComputedStyle(n).boxShadow)));
   if (SHOTS) { await fp.mouse.move(0, 0); await fp.waitForTimeout(300); await fp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-friends-list.jpg'), type: 'jpeg', quality: 85 }); }
+  await fp.addStyleTag({ path: path.join(DIR, '..', 'css', 'options', 'friends-faces.css') });
+  await fp.waitForTimeout(100);
+  const face = await fp.locator('.offlineFriends .friend').evaluate(n => [getComputedStyle(n).width, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.querySelector('.labelHolder')).display, n.dataset.ps5Name]);
+  check('option «Offline friends: Faces»: round faces, name kept for the hover label', face[0] === '46px' && face[1] === '50%' && face[2] === 'none' && face[3] === 'Ghost', face.join(' '));
   await fp.setViewportSize({ width: 520, height: 560 });
   await fp.goto(`http://localhost:${PORT}/tests/friends.html?chat`);
   await fp.waitForTimeout(200);
   check('chat: window marked (.ps5-chat)', await fp.evaluate(() => document.documentElement.classList.contains('ps5-chat')));
-  const fbub = await fp.evaluate(() => [...document.querySelectorAll('.ChatMessageBlock .msgText')].map(n => [getComputedStyle(n).borderTopRightRadius, getComputedStyle(n).backgroundColor]));
-  check('chat: messages as bubbles, yours in the accent', fbub[0][0] === '16px' && fbub[0][1] !== fbub[1][1] && /rgb\(|color/.test(fbub[1][1]), JSON.stringify(fbub));
-  const fent = await fp.evaluate(() => [getComputedStyle(document.querySelector('.chatEntry')).borderTopLeftRadius, getComputedStyle(document.querySelector('.chatSubmitButton')).borderTopLeftRadius, getComputedStyle(document.querySelector('.chatSubmitButton')).backgroundColor]);
-  check('chat: pill entry + round accent send button', fent[0] === '24px' && fent[1] === '50%' && fent[2] === 'rgb(0, 112, 209)', fent.join(' '));
-  check('chat: active tab white pill', (await fp.locator('.ChatTab.Active').evaluate(n => getComputedStyle(n).borderTopLeftRadius)) === '999px');
+  const ch = await fp.evaluate(() => {
+    const cs = (q, p) => getComputedStyle(document.querySelector(q), p);
+    return {
+      bubble: cs('.ChatMessageBlock .msgText').backgroundColor, disp: cs('.ChatMessageBlock .msgText').display,
+      tab: cs('.ChatTab.Active').boxShadow, tabH: cs('.ChatTab.Active').height,
+      area: cs('.chatEntry textarea').borderTopLeftRadius, send: cs('.chatSubmitButton').backgroundColor,
+      entry: cs('.chatEntry').boxShadow, strip: cs('.chatWindow .avatarHolder .avatarStatus').display,
+      bg: cs('.chatWindow').backgroundImage,
+    };
+  });
+  check('chat: Steam\'s layout kept — no bubbles or forced sizes on messages and tabs', ch.bubble === 'rgba(0, 0, 0, 0)' && ch.disp === 'block' && ch.tabH === '30px', `${ch.bubble} ${ch.disp} ${ch.tabH}`);
+  check('chat: active tab = soft pill with a white hairline', /rgba\(255, 255, 255, 0\.28\)/.test(ch.tab), ch.tab);
+  check('chat: rounded field, Send in the accent, hairline over the entry row', ch.area === '12px' && ch.send === 'rgb(0, 112, 209)' && /inset/.test(ch.entry), `${ch.area} ${ch.send}`);
+  check('chat: Steam\'s status strip hidden, PS5 ground', ch.strip === 'none' && /radial-gradient/.test(ch.bg));
   if (SHOTS) await fp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-chat.jpg'), type: 'jpeg', quality: 85 });
   check('friends/chat: no script errors', ferr.length === 0, ferr.join(' | '));
   await fp.close();
+
+  // ---- v1.7.0: sign-in window + Settings window
+  const lp = await ctx.newPage();
+  await lp.setViewportSize({ width: 700, height: 440 });
+  await lp.goto(`http://localhost:${PORT}/tests/login.html`);
+  await lp.waitForTimeout(200);
+  const lg = await lp.evaluate(() => { const c = s => document.querySelector(s); return [getComputedStyle(c('.SpinnerLoaderContainer > img.Small')).opacity, getComputedStyle(c('.SpinnerLoaderContainer'), '::before').borderTopColor, getComputedStyle(c('.SpinnerLoaderContainer'), '::before').animationName, getComputedStyle(c('.Percent')).backgroundColor, getComputedStyle(c('.UserContainer')).borderTopLeftRadius, getComputedStyle(c('#status')).backgroundImage]; });
+  check('sign-in: Steam\'s blue spinner replaced by a white PS5 ring', lg[0] === '0' && lg[1] === 'rgb(255, 255, 255)' && lg[2] === 'ps5-login-spin', lg.slice(0, 3).join(' '));
+  check('sign-in: white progress bar, account as a pill, PS5 ground', lg[3] === 'rgb(255, 255, 255)' && lg[4] === '999px' && /linear-gradient/.test(lg[5]), lg.slice(3, 5).join(' '));
+  if (SHOTS) await lp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-login.jpg'), type: 'jpeg', quality: 85 });
+  await lp.goto(`http://localhost:${PORT}/tests/login.html?chooser`);
+  await lp.waitForTimeout(200);
+  const ch2 = await lp.evaluate(() => [getComputedStyle(document.querySelector('#u1 .Icon')).borderTopLeftRadius, getComputedStyle(document.querySelector('.WhosPlaying')).fontSize]);
+  check('sign-in: "Who\'s playing?" with round avatars (PS5 user select)', ch2[0] === '50%' && ch2[1] === '30px', ch2.join(' '));
+  await lp.hover('#u1');
+  await lp.waitForTimeout(350);
+  check('sign-in: hovered account gets the white PS5 ring', /rgb\(255, 255, 255\) 0px 0px 0px 3px/.test(await lp.locator('#u1 .Icon').evaluate(n => getComputedStyle(n).boxShadow)));
+  if (SHOTS) await lp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-login-chooser.jpg'), type: 'jpeg', quality: 85 });
+  await lp.setViewportSize({ width: 900, height: 560 });
+  await lp.goto(`http://localhost:${PORT}/tests/settings.html`);
+  await lp.waitForTimeout(200);
+  const st = await lp.evaluate(() => { const c = s => getComputedStyle(document.querySelector(s)); return [c('#pi-a').backgroundColor, c('#pi-a').textTransform, c('#fd-1').borderTopLeftRadius, c('#dd-1').borderTopLeftRadius, c('#db-1').borderTopLeftRadius, c('.PagedSettingsDialog_PageListColumn').backgroundColor]; });
+  check('settings window: selected page white, no caps', st[0] === 'rgb(255, 255, 255)' && st[1] === 'none', st.slice(0, 2).join(' '));
+  check('settings window: rows as rounded cards, pill dropdowns and buttons', st[2] === '14px' && st[3] === '999px' && st[4] === '999px', st.slice(2, 5).join(' '));
+  check('settings window: Steam\'s grey column gone', st[5] !== 'rgb(42, 45, 52)', st[5]);
+  if (SHOTS) await lp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-settings.jpg'), type: 'jpeg', quality: 85 });
+  await lp.close();
 
   // ---- web pages on the real hostnames, injected the way Millennium does
   const wp = await ctx.newPage();

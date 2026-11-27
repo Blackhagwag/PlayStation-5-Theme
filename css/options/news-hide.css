@@ -1,0 +1,4 @@
+/* "Steam news button: Hidden" — the megaphone button in the top bar goes, with its tooltip
+   wrapper, so no gap is left. */
+html:root .TitleBarControls .tool-tip-source:has(> .AnnouncementsButton),
+html:root .TitleBarControls .AnnouncementsButton { display: none !important; }

@@ -1,0 +1,208 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   settings.css: Steam's Settings window and a game's Properties window (both a
+   .PagedSettingsDialog in a dialog window: html.ModalDialogPopup, Millennium marks
+   them .MillenniumWindow_Settings / .MillenniumWindow_GameProperties), plus the
+   small dialog windows built the same way — as PS5 Settings.
+
+   Steam markup (readable classes, each with a hashed twin up to (0,3,1), hence the
+   .PagedSettingsDialog prefix and !important):
+     .PagedSettingsDialog_PageListColumn > .PagedSettingsDialog_Title,
+       .PagedSettingsDialog_PageList > .PagedSettingsDialog_PageListItem(.Active)
+         (.PageListItem_Icon svg + .PageListItem_Title), .PagedSettingsDialog_PageListSeparator
+     .DialogContent / .DialogBody: .SettingsDialogSubHeader, .Field (.FieldLabelRow >
+       .FieldLabel, .FieldDescription, .FieldChildren), .SettingsDialogFatButton,
+       .DialogToggle, .DialogDropDown, .DialogInput, .DialogButton, .DialogSlider
+     Storage: .DriveUsageBar (.DriveUsage*), .AppInfoItem, .AppActionBar
+     Properties: .BetaRadioButton, .DlcGrid (.DlcHeader, .DlcArt)
+     Launch options: .LaunchOptionDialog (.ListContainer > .ListItem, .PlayButton)
+   Millennium's own settings route keeps css/millennium.css (it wins by its scope).
+   ========================================================================== */
+
+/* --- the window ground --- */
+html.ModalDialogPopup body,
+body.ModalDialogBody {
+  background:
+    radial-gradient(90% 60% at 0% 0%, color-mix(in srgb, var(--ps5-accent) 22%, transparent), transparent 60%),
+    linear-gradient(180deg, #08173a 0%, #040a1a 60%, #01030a 100%) !important;
+}
+html .PagedSettingsDialog,
+html .PagedSettingsDialog .DialogBody,
+html .PagedSettingsDialog .DialogContent,
+html .PagedSettingsDialog .PagedSettingsDialog_PageContent,
+html .PagedSettingsDialog .DialogContentTransition,
+html .PagedSettingsDialog .ModalPosition_Content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html.ModalDialogPopup .ModalPosition_Content:has(.PagedSettingsDialog) { border-radius: 0 !important; }
+
+/* --- left column: categories as PS5 settings rows --- */
+html .PagedSettingsDialog .PagedSettingsDialog_PageListColumn {
+  background: rgba(255, 255, 255, 0.025) !important;
+  border: none !important;
+  box-shadow: inset -1px 0 0 0 var(--ps5-line) !important;
+}
+html .PagedSettingsDialog .PagedSettingsDialog_Title {
+  padding-left: 22px !important;
+  color: #fff !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 26px !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+html .PagedSettingsDialog .PagedSettingsDialog_PageList { background: transparent !important; padding: 4px 0 16px !important; }
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem {
+  position: relative;
+  min-height: 40px;
+  margin: 2px 12px !important;
+  padding-left: 12px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: var(--ps5-text-2) !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #fff !important;
+}
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem.Active {
+  background: #fff !important;
+  color: #0b0b0f !important;
+  box-shadow: 0 8px 22px -10px rgba(255, 255, 255, 0.45) !important;
+}
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem.Active * { color: #0b0b0f !important; }
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem svg { color: currentColor !important; fill: currentColor; opacity: 0.9; }
+html .PagedSettingsDialog .PagedSettingsDialog_PageListItem.Active svg :is(path, rect, circle, polygon) { fill: #0b0b0f !important; }
+html .PagedSettingsDialog .PagedSettingsDialog_PageListSeparator {
+  height: 1px !important;
+  margin: 8px 22px !important;
+  background: var(--ps5-line) !important;
+  border: none !important;
+}
+
+/* --- right side: headings and setting rows as cards --- */
+html .PagedSettingsDialog .DialogBody { color: var(--ps5-text-2) !important; font-family: var(--ps5-font) !important; }
+html .PagedSettingsDialog :is(.DialogHeader, .SettingsDialogHeader) {
+  color: #fff !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+html .PagedSettingsDialog .SettingsDialogSubHeader,
+html .PagedSettingsDialog .DialogSubHeader {
+  margin-top: 22px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+html .PagedSettingsDialog .Field,
+html .PagedSettingsDialog .FakeContainer,
+html .PagedSettingsDialog .InfoRow {
+  margin: 0 0 6px !important;
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+html .PagedSettingsDialog .Field:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line-strong) !important;
+}
+html .PagedSettingsDialog .Field:focus-within { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px var(--ps5-accent-glow) !important; }
+html .PagedSettingsDialog .Field .Field { background: transparent !important; box-shadow: none !important; padding: 6px 0 !important; }
+html .PagedSettingsDialog .FieldLabel { color: #fff !important; font-size: 14px !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+html .PagedSettingsDialog .FieldDescription,
+html .PagedSettingsDialog .SettingsDialogDescriptionText,
+html .PagedSettingsDialog .SettingsDialogBodyText { color: var(--ps5-text-3) !important; font-size: 12.5px !important; }
+html .PagedSettingsDialog a:not(.DialogButton) { color: #8fd4ff !important; }
+
+/* controls: PS5 toggles, pill dropdowns and buttons */
+html .PagedSettingsDialog .DialogToggle,
+html .PagedSettingsDialog .ToggleSwitch,
+html .PagedSettingsDialog [class*="Toggle"][class*="Switch"] { border-radius: 999px !important; }
+html .PagedSettingsDialog :is(.DialogToggle_On, .DialogToggle.On, .Toggle.On) { background: var(--ps5-accent) !important; }
+html .PagedSettingsDialog .DialogDropDown,
+html .PagedSettingsDialog .DialogInput,
+html .PagedSettingsDialog input.DialogInput,
+html .PagedSettingsDialog .DialogTextInputBase {
+  min-height: 34px;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  color: #fff !important;
+}
+html .PagedSettingsDialog :is(.DialogDropDown, .DialogInput, .DialogTextInputBase):focus,
+html .PagedSettingsDialog .DialogDropDown:hover { box-shadow: 0 0 0 2px #fff !important; }
+html .PagedSettingsDialog .DialogButton,
+html .PagedSettingsDialog .SettingsDialogButton,
+html .PagedSettingsDialog .SettingsDialogFatButton {
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+html .PagedSettingsDialog :is(.DialogButton, .SettingsDialogButton, .SettingsDialogFatButton):not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 0 0 2px #fff !important;
+}
+html .PagedSettingsDialog .DialogButton.Primary { background: #fff !important; color: #0b0b0f !important; }
+html .PagedSettingsDialog .SettingsDialogFatButton { border-radius: 16px !important; }
+html .PagedSettingsDialog :is(.SliderTrack, .DialogSlider_Track, [class*="SliderTrack"]) { border-radius: 99px !important; background: rgba(255, 255, 255, 0.14) !important; }
+html .PagedSettingsDialog :is(.SliderHandle, .DialogSlider_Handle, [class*="SliderHandle"]) { background: #fff !important; box-shadow: 0 0 12px var(--ps5-accent-glow) !important; }
+html .PagedSettingsDialog :is(.SliderTrackFill, [class*="SliderFill"]) { background: var(--ps5-accent) !important; }
+html .PagedSettingsDialog .DialogCheckbox { border-radius: 6px !important; }
+
+/* storage page */
+html .PagedSettingsDialog .DriveUsageBar { border-radius: 99px !important; overflow: hidden; }
+html .PagedSettingsDialog .AppInfoItem { border-radius: 12px !important; }
+html .PagedSettingsDialog .AppActionBar button.ActionButton { border-radius: 999px !important; }
+
+/* properties: the selected beta, DLC grid */
+html .PagedSettingsDialog .BetaRadioButton {
+  border-radius: 12px !important;
+  border-left: none !important;
+}
+html .PagedSettingsDialog .BetaRadioButton.Selected,
+html .PagedSettingsDialog .BetaRadioButton[aria-checked="true"] {
+  background: color-mix(in srgb, var(--ps5-accent) 22%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-accent) !important;
+}
+html .PagedSettingsDialog .DlcGrid { border-radius: 14px !important; overflow: hidden; background: rgba(255, 255, 255, 0.04) !important; }
+html .PagedSettingsDialog .DlcHeader { background: rgba(255, 255, 255, 0.08) !important; color: #fff !important; }
+html .PagedSettingsDialog .DlcArt { border-radius: 8px !important; overflow: hidden; }
+
+/* --- the launch option picker (its own small window) --- */
+html.ModalDialogPopup .LaunchOptionDialog .ListContainer {
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+}
+html.ModalDialogPopup .LaunchOptionDialog .ListItem {
+  border-radius: 12px !important;
+  margin: 4px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+html.ModalDialogPopup .LaunchOptionDialog .ListItem:hover { box-shadow: 0 0 0 2px #fff !important; }
+html.ModalDialogPopup .LaunchOptionDialog .PlayButton { border-radius: 999px !important; background: #fff !important; color: #0b0b0f !important; }
+html.ModalDialogPopup .LaunchOptionDialog .CancelButton { border-radius: 999px !important; }
+html.ModalDialogPopup .LaunchOptionDialog .AppNameHeader { color: #fff !important; font-weight: 700 !important; }

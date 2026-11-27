@@ -2,7 +2,7 @@
   "name": "PlayStation 5",
   "description": "A PlayStation 5 shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, a PS Store look for the store and wishlist, glass menus and smooth motion — every Steam function kept. Not affiliated with Sony Interactive Entertainment.",
   "author": "Blackhagwag",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "source": "https://github.com/Blackhagwag/PlayStation-5-Theme",
   "github": {
     "owner": "Blackhagwag",
@@ -47,7 +47,8 @@
       "TargetCss": [
         "css/shared.css",
         "css/menus.css",
-        "css/millennium.css"
+        "css/millennium.css",
+        "css/settings.css"
       ]
     },
     {
@@ -99,7 +100,8 @@
       "TargetCss": [
         "css/shared.css",
         "css/menus.css",
-        "css/millennium.css"
+        "css/millennium.css",
+        "css/settings.css"
       ]
     },
     {
@@ -108,6 +110,13 @@
         "css/shared.css",
         "css/menus.css",
         "css/millennium.css"
+      ]
+    },
+    {
+      "MatchRegexString": "^(تسجيل الدخول إلى Steam|Iniciar a sessão no Steam|Вписване в Steam|Přihlášení do služby Steam|Log på Steam|Aanmelden bij Steam|Sign in to Steam|Kirjaudu Steamiin|Se connecter à Steam|Bei Steam anmelden|Σύνδεση στο Steam|Bejelentkezés a Steambe|Login ke Steam|Accedi a Steam|Steamにサインイン|Steam 로그인|Iniciar sesión en Steam|Daftar masuk ke Steam|Logg inn på Steam|Zaloguj się do Steam|Iniciar sessão no Steam|Conectează-te la Steam|Войти в Steam|登录 Steam|登录蒸汽平台|Logga in på Steam|登入 Steam|เข้าสู่ระบบ Steam|Steam'e Giriş Yap|Вхід до Steam|Đăng nhập vào Steam)$",
+      "TargetCss": [
+        "css/shared.css",
+        "css/login.css"
       ]
     }
   ],
@@ -433,6 +442,40 @@
         }
       }
     },
+    "Privacy blur": {
+      "description": "Blurs your wallet balance (in the PS5 profile panel and in Steam's account button) until you hover it — for streams and screenshots.",
+      "tab": "Bars",
+      "section": "Top bar",
+      "default": "Off",
+      "values": {
+        "Off": {},
+        "On": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/privacy-blur.css"
+          }
+        }
+      }
+    },
+    "Steam news button": {
+      "description": "Steam's news (megaphone) button in the top bar.",
+      "tab": "Bars",
+      "section": "Top bar",
+      "default": "Visible",
+      "values": {
+        "Visible": {},
+        "Hidden": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/news-hide.css"
+          }
+        }
+      }
+    },
     "Bottom bar": {
       "description": "Add a Game, Downloads (with live progress) and Friends & Chat as compact PS5 capsules, or Steam's own look.",
       "tab": "Bars",
@@ -446,6 +489,23 @@
               "^Steam$"
             ],
             "src": "css/options/bottombar-steam.css"
+          }
+        }
+      }
+    },
+    "Offline friends": {
+      "description": "The Offline group of the friends list: Steam's rows, or a grid of round faces (the name shows on hover).",
+      "tab": "Friends",
+      "section": "Friends list",
+      "default": "List",
+      "values": {
+        "List": {},
+        "Faces": {
+          "TargetCss": {
+            "affects": [
+              ".friendsui-container"
+            ],
+            "src": "css/options/friends-faces.css"
           }
         }
       }

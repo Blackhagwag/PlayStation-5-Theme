@@ -1,0 +1,239 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   login.css: the "Sign in to Steam" window (skin.json patch by the window's title in
+   every Steam language) — the start-up "Signing in…" screen, the account chooser
+   ("Who's playing?") and the sign-in form, as the PS5 user select screen.
+
+   Steam markup (readable classes):
+     .Login.AnimatedBackground (+ sibling .LoginAnimatedBackground — the cover grid)
+       .LoginStatusContainer.Panel > .StatusThrobber.Container > .SpinnerLoaderContainer
+         img.Small (Steam's APNG spinner), .LoadingStatus > .LoginStatus,
+         .Progress > .ProgressBar > .Percent, .UserContainer > .Avatar > img + .PersonaName
+     .Login.DesktopUI > .UserChooser > .Content: .LogoContainer, .AvatarContainer >
+       .WhosPlaying, .CachedUsers > .UserList > div > .User(.Existing|.New) > .Icon,
+       .Name.Persona, .Name.Account; .Toggle.Field
+     .Login > .EmbeddedRoot: .LogoContainer > .BackArrowContainer, form.LoginForm >
+       .TextField > label.FieldLabel + input.TextInput, .CheckboxField, button.SubmitButton,
+       .FormError; .QRSection > .QR; .EmbeddedRootFooter > .TextLink
+   Millennium adds this stylesheet a few frames after the window paints, so nothing
+   here rises in from nothing: the PS5 look replaces Steam's at once, and only the
+   loading ring and the light move.
+   ========================================================================== */
+
+@keyframes ps5-login-spin { to { transform: rotate(1turn); } }
+@keyframes ps5-login-breathe {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.08); }
+}
+@keyframes ps5-login-wave {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 600px 0, -400px 0; }
+}
+
+html:has(.Login),
+html:has(.Login) body {
+  background: #00040f !important;
+  font-family: var(--ps5-font) !important;
+}
+
+/* --- the ground: PS5 deep blue with slow light waves; Steam's cover grid sinks under it --- */
+html :is(.Login.AnimatedBackground, .LoginStaticBackground > .Login, .Login.DesktopUI) {
+  background:
+    radial-gradient(120% 80% at 50% 120%, color-mix(in srgb, var(--ps5-accent) 45%, transparent), transparent 60%),
+    linear-gradient(180deg, #071640 0%, #030a22 55%, #00040f 100%) !important;
+  color: #fff !important;
+}
+html :is(.Login.AnimatedBackground, .LoginStaticBackground > .Login, .Login.DesktopUI)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(140% 60% at 30% 130%, transparent 0 38px, rgba(120, 170, 255, 0.05) 39px 41px, transparent 42px 80px),
+    repeating-radial-gradient(120% 50% at 80% 140%, transparent 0 52px, rgba(255, 255, 255, 0.035) 53px 54px, transparent 55px 104px);
+  animation: ps5-login-wave 40s linear infinite;
+  z-index: -1;
+}
+html .LoginAnimatedBackground { filter: grayscale(1) brightness(0.35) !important; opacity: 0.25 !important; }
+html .LoginAnimatedBackground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3, 10, 34, 0.75), rgba(0, 4, 15, 0.95));
+}
+html :is(.Login.AnimatedBackground, .LoginStaticBackground > .Login, .Login.DesktopUI) { isolation: isolate; }
+
+/* --- "Signing in…": a white PS5 loading ring in place of Steam's blue spinner --- */
+html .Login .LoginStatusContainer { background: transparent !important; }
+html .Login .SpinnerLoaderContainer { position: relative; }
+html .Login .SpinnerLoaderContainer > img.Small { opacity: 0 !important; }
+html .Login .SpinnerLoaderContainer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 54px;
+  height: 54px;
+  margin-left: -27px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.14);
+  border-top-color: #fff;
+  box-sizing: border-box;
+  animation: ps5-login-spin 900ms linear infinite;
+  filter: drop-shadow(0 0 10px var(--ps5-accent-glow, rgba(0, 112, 209, 0.55)));
+}
+html .Login .SpinnerLoaderContainer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 27px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--ps5-accent) 35%, transparent), transparent 65%);
+  animation: ps5-login-breathe 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+html .Login .LoadingStatus > .LoginStatus {
+  color: #fff !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+html .Login .LoadingStatus > .Progress > .ProgressBar {
+  height: 4px !important;
+  border: none !important;
+  border-radius: 99px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  overflow: hidden;
+}
+html .Login .LoadingStatus > .Progress .Percent { border-radius: 99px !important; background: #fff !important; }
+html .Login .LoadingStatus > .UserContainer {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 6px 16px 6px 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+}
+html .Login .UserContainer > .Avatar { border-radius: 50% !important; overflow: hidden; box-shadow: 0 0 0 2px #fff !important; }
+html .Login .UserContainer > .Avatar > img { border-radius: 50% !important; }
+html .Login .UserContainer > .PersonaName { color: #fff !important; font-weight: 700 !important; }
+
+/* --- account chooser: "Who's playing?" with big round avatars, the PS5 user select --- */
+html .Login .UserChooser .WhosPlaying {
+  color: #fff !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 30px !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+html .Login .CachedUsers .UserList .User {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 260ms var(--ps5-ease, ease) !important;
+}
+html .Login .CachedUsers .UserList .User:is(:hover, :focus-within) { transform: translateY(-4px) scale(1.04); }
+html .Login .CachedUsers .UserList .User .Icon {
+  border: none !important;
+  border-radius: 50% !important;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 18px 34px -16px rgba(0, 0, 0, 0.9) !important;
+  transition: box-shadow 260ms var(--ps5-ease, ease) !important;
+}
+html .Login .CachedUsers .UserList .User .Icon img { border-radius: 50% !important; }
+html .Login .CachedUsers .UserList .User:is(:hover, :focus-within) .Icon {
+  box-shadow: 0 0 0 3px #fff, 0 0 30px 6px color-mix(in srgb, var(--ps5-accent) 60%, transparent) !important;
+}
+html .Login .CachedUsers .UserList .User.New .Icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25) !important;
+}
+html .Login .CachedUsers .UserList .User.New .Icon svg * { fill: #fff !important; stroke: #fff !important; }
+html .Login .CachedUsers .UserList .User .Name.Persona { color: #fff !important; font-weight: 700 !important; font-size: 15px !important; }
+html .Login .CachedUsers .UserList .User .Name.Account { color: rgba(255, 255, 255, 0.55) !important; }
+html .Login .UserChooser .Toggle .FieldLabel { color: rgba(255, 255, 255, 0.7) !important; }
+
+/* --- sign-in form --- */
+html .Login .EmbeddedRoot {
+  background: rgba(9, 20, 46, 0.72) !important;
+  border-radius: 22px !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 30px 60px -24px rgba(0, 0, 0, 0.9) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+html .Login :is(.LoginForm, .QRSection) .FieldLabel {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-family: var(--ps5-font) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+html .Login :is(.LoginForm, .QRSection) .FieldLabel.Highlight { color: #fff !important; }
+html .Login .LoginForm input.TextInput {
+  height: 44px !important;
+  padding: 0 18px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 15px !important;
+  transition: box-shadow 200ms ease, background 200ms ease;
+}
+html .Login .LoginForm input.TextInput:focus {
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 20px 3px color-mix(in srgb, var(--ps5-accent) 55%, transparent) !important;
+}
+html .Login .LoginForm button.SubmitButton,
+html .Login .LoginForm button[type="submit"] {
+  height: 46px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #0b0b0f !important;
+  font-family: var(--ps5-font) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  box-shadow: 0 10px 26px -12px rgba(255, 255, 255, 0.6) !important;
+  transition: transform 200ms ease;
+}
+html .Login .LoginForm button.SubmitButton:hover { transform: scale(1.02); }
+html .Login .LoginForm button.SubmitButton:disabled { opacity: 0.5 !important; }
+html .Login .LoginForm .Checkbox {
+  border: none !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+html .Login .LoginForm .CheckboxFieldLabel { color: rgba(255, 255, 255, 0.75) !important; }
+html .Login .LoginForm .FormError { color: #ff8a8a !important; }
+html .Login .QRSection .QR {
+  padding: 10px !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+html .Login .EmbeddedRoot :is(.TextLink, .AccountCreationPrompt) { color: rgba(255, 255, 255, 0.7) !important; }
+html .Login .EmbeddedRoot .TextLink:hover { color: #fff !important; }
+html .Login .EmbeddedRoot .BackArrowContainer {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transition: background 200ms ease;
+}
+html .Login .EmbeddedRoot .BackArrowContainer:hover { background: rgba(255, 255, 255, 0.18) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html :is(.Login.AnimatedBackground, .LoginStaticBackground > .Login, .Login.DesktopUI)::before,
+  html .Login .SpinnerLoaderContainer::after { animation: none !important; }
+}

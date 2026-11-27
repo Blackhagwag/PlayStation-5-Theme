@@ -71,7 +71,7 @@ body.fullheight #popup_target.popup_chat_frame {
   border: none !important;
 }
 .friendsui-container .avatarHolder:is(.online, .ingame, .offline) > .avatarStatus { display: none !important; }
-.friendsui-container .avatarHolder:is(.online, .ingame, .offline)::after {
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder:is(.online, .ingame, .offline)::after {
   content: "";
   position: absolute;
   right: -1px;
@@ -89,9 +89,9 @@ body.fullheight #popup_target.popup_chat_frame {
   pointer-events: none;
   z-index: 2;
 }
-.friendsui-container .avatarHolder.ingame::after { background: var(--ps5-st-ingame); }
-.friendsui-container .avatarHolder.awayOrSnooze::after { background: var(--ps5-st-away); }
-.friendsui-container .avatarHolder.offline::after { background: transparent; border: 2px solid var(--ps5-st-off); }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.ingame::after { background: var(--ps5-st-ingame); }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.awayOrSnooze::after { background: var(--ps5-st-away); }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.offline::after { background: transparent; border: 2px solid var(--ps5-st-off); }
 .friendsui-container .avatarFrame { border-radius: 50%; overflow: hidden; }
 
 /* names by status */
@@ -568,191 +568,189 @@ body.fullheight #popup_target.popup_chat_frame {
 }
 
 /* ==========================================================================
-   CHAT WINDOW
+   CHAT WINDOW (v1.7.0 rewrite)
+   Steam's chat layout is left exactly as it is: tab bar (it is also the window's
+   title bar), header, history, entry row. Only surfaces, colours, corners and type
+   change — no heights, margins or bubbles forced onto Steam's boxes (1.6.0 did that
+   and the window fell apart). Captured structure: .titleBarContainer.ChatTabs >
+   .ChatTab(.Active) > .ChatTabRow; .chatWindow > .chatHeader, .displayRow >
+   .chatHistoryScroll > .chatHistory > .msg.timeDivision (.preHorizDivider,
+   .horizDivider), .ChatMessageBlock > .ChatSpeaker + .msg > .msgText;
+   .chatEntry > form.chatEntryControls (textarea.chatTextarea, .chatSubmitButton)
+   + .chatEntryActionsGroup + .VoiceToggle; group chats: .MemberListColumn.
    ========================================================================== */
-.friendsui-container .ChatTabs {
-  display: flex !important;
-  gap: 6px !important;
-  padding: 8px 10px 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
-.friendsui-container .ChatTab {
-  height: 34px !important;
-  min-width: 0;
-  padding: 0 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  border: none !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.07) !important;
-  color: var(--ps5-text-2) !important;
-  transition: background var(--ps5-t) var(--ps5-ease);
-  overflow: hidden;
-}
-.friendsui-container .ChatTab:hover { background: rgba(255, 255, 255, 0.14) !important; }
-.friendsui-container .ChatTab.Active { background: rgba(255, 255, 255, 0.92) !important; }
-.friendsui-container .ChatTab.Active :is(.ChatTabContent_ChatRoomName, .playerName, span, div) { color: #0b0b0f !important; }
-.friendsui-container .ChatTab .ChatTabRow { background: transparent !important; height: 100%; display: flex; align-items: center; gap: 6px; }
-.friendsui-container .ChatTab .CloseButton { border-radius: 50% !important; }
-.friendsui-container .ChatTab .CloseButton:hover { background: rgba(0, 0, 0, 0.12) !important; }
-
-/* header */
-.friendsui-container .chatHeader {
-  margin: 8px 10px 0 !important;
-  padding: 10px 12px !important;
-  border: none !important;
-  border-radius: var(--ps5-r-l) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
-}
-.friendsui-container .chatHeader .playerName { font-size: 16px !important; font-weight: 700 !important; }
-.friendsui-container .chatHeader :is(.chatHeaderActions, .chatHeaderButtons) button,
-.friendsui-container .chatHeader .ContextMenuButton {
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) {
+  --ps5-chat-bg: #060c1d;
+  --ps5-chat-raised: rgba(255, 255, 255, 0.06);
+  --ps5-chat-raised-2: rgba(255, 255, 255, 0.11);
 }
 
-/* history */
-.friendsui-container .chatHistoryScroll { scrollbar-width: thin; padding: 0 6px !important; }
-.friendsui-container .chatHistory { padding: 8px 6px 12px !important; }
-.friendsui-container .msg.timeDivision,
-.friendsui-container .timeDivision {
-  display: flex;
-  justify-content: center;
-  margin: 12px 0 !important;
+/* the window: the PS5 ground with a soft accent light at the top */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatWindow,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatRoomGroupDialog,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatDialogs {
+  background:
+    radial-gradient(70% 45% at 12% 0%, color-mix(in srgb, var(--ps5-accent) 20%, transparent), transparent 70%),
+    radial-gradient(60% 40% at 100% 0%, rgba(30, 90, 200, 0.14), transparent 70%),
+    var(--ps5-chat-bg) !important;
+}
+
+/* tabs: soft pills on the window's own bar (sizes stay Steam's) */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTabs,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .titleBarContainer.ChatTabs {
+  align-items: center;
+  background: var(--ps5-chat-bg) !important;
+  box-shadow: inset 0 -1px 0 0 var(--ps5-line) !important;
   border: none !important;
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTabs .ChatTab {
+  margin: 4px 0 4px 4px !important;
+  border: none !important;
+  border-radius: 12px !important;
   background: transparent !important;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
 }
-.friendsui-container .msg.timeDivision .msgText,
-.friendsui-container .timeDivision span {
-  padding: 4px 12px !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: var(--ps5-text-2) !important;
-  font-size: 11.5px !important;
-  font-weight: 600 !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTabs .ChatTab:hover { background: var(--ps5-chat-raised) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTabs .ChatTab.Active {
+  background: var(--ps5-chat-raised-2) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28) !important;
 }
-.friendsui-container .ChatMessageBlock {
-  margin: 6px 0 !important;
-  padding: 8px 10px !important;
-  border-radius: var(--ps5-r) !important;
-  transition: background var(--ps5-t) var(--ps5-ease);
-}
-.friendsui-container .ChatMessageBlock:hover { background: rgba(255, 255, 255, 0.04) !important; }
-.friendsui-container .ChatSpeaker .speakerName,
-.friendsui-container .speakerName { color: #fff !important; font-weight: 700 !important; font-size: 13.5px !important; }
-.friendsui-container .ChatSpeaker.online .speakerName { color: #fff !important; }
-.friendsui-container .ChatSpeaker.ingame .speakerName { color: #b9f5c2 !important; }
-.friendsui-container .ChatSpeaker.offline .speakerName { color: var(--ps5-text-2) !important; }
-.friendsui-container .speakerTimeStamp { color: var(--ps5-text-3) !important; font-size: 11px !important; }
-.friendsui-container .ChatMessageBlock .msg { padding: 1px 0 !important; }
-.friendsui-container .ChatMessageBlock .msgText {
-  display: inline-block;
-  max-width: 100%;
-  margin: 2px 0 !important;
-  padding: 7px 12px !important;
-  border-radius: 4px 16px 16px 16px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTabs .ChatTab .ChatTabRow { background: transparent !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab :is(.ChatTabContent_ChatRoomName, .playerName) { color: #fff !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab:not(.Active) :is(.ChatTabContent_ChatRoomName, .playerName) { color: var(--ps5-text-2) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab .CloseButton { border-radius: 50% !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab .CloseButton:hover { background: rgba(255, 255, 255, 0.14) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab .FriendMessageCount,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatTab .chatUnreadCount {
+  background: var(--ps5-accent) !important;
   color: #fff !important;
-  font-size: 13.5px !important;
-  line-height: 1.4 !important;
-  box-sizing: border-box;
+  border-radius: 99px !important;
 }
-.friendsui-container .ChatMessageBlock.isCurrentUser .msgText,
-.friendsui-container .ChatSpeaker.isCurrentUser + .msg .msgText,
-.friendsui-container .msg.isCurrentUser .msgText {
-  background: color-mix(in srgb, var(--ps5-accent) 55%, rgba(255, 255, 255, 0.04)) !important;
-}
-.friendsui-container .msgText a { color: #8fd4ff !important; }
-.friendsui-container .msg.serverMsg .msgText,
-.friendsui-container .serverMsg {
+
+/* round avatars; Steam's 2 px status strip goes — the name's colour says it */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) :is(.ChatTabs, .ChatSpeaker, .chatHeader) img.avatar,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder img { border-radius: 50% !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder > .avatarStatus { display: none !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder::after { content: none !important; }
+
+/* header: Steam's strip without its grey, a hairline under it */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHeader {
   background: transparent !important;
-  color: var(--ps5-text-3) !important;
-  font-size: 12px !important;
+  border: none !important;
+  box-shadow: inset 0 -1px 0 0 var(--ps5-line) !important;
 }
-.friendsui-container :is(.gameInviteSelf, .gameInviteDismissed, .ChatMessageInvite, .bbcode_inviteurl) {
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHeader .playerName { font-weight: 700 !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHeader :is(button, .ContextMenuButton, .chatHeaderButton) { border-radius: 10px !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHeader :is(button, .ContextMenuButton, .chatHeaderButton):hover { background: var(--ps5-chat-raised-2) !important; }
+
+/* history: names a step stronger, the text plain and readable (no bubbles) */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHistory { background: transparent !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatMessageBlock {
+  border-radius: 12px;
+  transition: background var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatMessageBlock:hover { background: rgba(255, 255, 255, 0.035) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatSpeaker .speakerName { font-weight: 700 !important; color: #fff !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatSpeaker.ingame .speakerName { color: #b9f5c2 !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatSpeaker.offline .speakerName { color: var(--ps5-text-2) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatSpeaker .speakerTimeStamp { color: var(--ps5-text-3) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .msgText { color: rgba(255, 255, 255, 0.92) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .msgText a { color: #8fd4ff !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .msg.serverMsg .msgText,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .serverMsg { color: var(--ps5-text-3) !important; }
+/* game invites, links with previews: small cards */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatMessageBlock .msgText:has(> :is(.gameInviteSelf, .gameInviteDismissed)) {
+  display: inline-flex;
+  max-width: 100%;
+  margin-block: 2px;
+  padding: 8px 12px;
+  border-radius: var(--ps5-r);
+  background: var(--ps5-chat-raised);
+  box-shadow: inset 0 0 0 1px var(--ps5-line);
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .msgText :is(.gameInviteSelf, .gameInviteDismissed) { font-style: normal; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .msgText img.productImage { border-radius: 8px; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) :is(.bbcode_inviteurl, .ChatMessageInvite, .OpenGraphEmbed, .bbcode_url_preview) {
   border-radius: var(--ps5-r) !important;
-  background: rgba(255, 255, 255, 0.07) !important;
+  background: var(--ps5-chat-raised) !important;
   box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
-  overflow: hidden;
 }
-.friendsui-container img.productImage { border-radius: 10px !important; }
-.friendsui-container .ScrollToBottomButton {
+/* time dividers: thin fading lines, the date between them */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHistory .msg.timeDivision :is(.preHorizDivider, .horizDivider) {
+  height: 1px !important;
+  border: none !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent) !important;
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHistory .msg.timeDivision { color: var(--ps5-text-3) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ScrollToBottomButton {
   border-radius: 999px !important;
   background: var(--ps5-accent) !important;
   color: #fff !important;
 }
-.friendsui-container .FriendChatTypingNotification { color: var(--ps5-text-2) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .FriendChatTypingNotification { color: var(--ps5-text-2) !important; }
 
-/* entry */
-.friendsui-container .chatEntry {
-  margin: 0 10px 10px !important;
-  padding: 6px !important;
-  border: none !important;
-  border-radius: 24px !important;
-  background: rgba(255, 255, 255, 0.07) !important;
+/* "invite a friend": a round glass button */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .inviteAnotherFriendButton {
+  background: var(--ps5-chat-raised) !important;
   box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
-  transition: box-shadow var(--ps5-t) var(--ps5-ease);
+  transition: background var(--ps5-t) var(--ps5-ease);
 }
-.friendsui-container .chatEntry:focus-within { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px var(--ps5-accent-glow) !important; }
-.friendsui-container .chatEntry .chatEntryControls { background: transparent !important; align-items: center !important; }
-.friendsui-container .chatEntry textarea,
-.friendsui-container textarea.chatTextarea,
-.friendsui-container .chatentry_chatTextarea {
-  resize: none !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .inviteAnotherFriendButton:hover { background: var(--ps5-chat-raised-2) !important; }
+
+/* entry row: no grey strip — a hairline above; the field a soft rounded box with a
+   white PS5 focus ring; Send in the accent */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry {
+  background: var(--ps5-chat-bg) !important;
   border: none !important;
-  border-radius: 18px !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  box-shadow: inset 0 1px 0 0 var(--ps5-line) !important;
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatEntryControls { background: transparent !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry textarea.chatTextarea,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry textarea {
+  border: none !important;
+  border-radius: 12px !important;
+  background: var(--ps5-chat-raised) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
   color: #fff !important;
   font-family: inherit !important;
-  font-size: 13.5px !important;
+  transition: box-shadow var(--ps5-t) var(--ps5-ease), background var(--ps5-t) var(--ps5-ease);
 }
-.friendsui-container .chatEntry textarea::placeholder { color: var(--ps5-text-3) !important; }
-.friendsui-container .chatSubmitButton,
-.friendsui-container .chatEntry .submitButton {
-  width: 36px !important;
-  min-width: 36px !important;
-  height: 36px !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry textarea:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 16px 2px var(--ps5-accent-glow) !important;
+  outline: none !important;
+}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry textarea::placeholder { color: var(--ps5-text-3) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatSubmitButton {
   border: none !important;
-  border-radius: 50% !important;
+  border-radius: 12px !important;
   background: var(--ps5-accent) !important;
-  box-shadow: 0 6px 16px -6px var(--ps5-accent-glow) !important;
-  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+  transition: filter var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
 }
-.friendsui-container .chatSubmitButton:hover { transform: scale(1.06); box-shadow: 0 0 0 2px #fff, 0 6px 18px -4px var(--ps5-accent-glow) !important; }
-.friendsui-container .chatSubmitButton svg * { fill: #fff !important; stroke: #fff !important; }
-.friendsui-container .chatEntryActionsGroup button,
-.friendsui-container .VoiceToggle {
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatSubmitButton:hover { filter: brightness(1.12); box-shadow: 0 0 0 2px #fff !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatSubmitButton svg * { fill: #fff !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatEntryActionsGroup {
+  border-radius: 12px !important;
+  background: var(--ps5-chat-raised) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
 }
-.friendsui-container .chatEntryActionsGroup button:hover,
-.friendsui-container .VoiceToggle:hover { background: rgba(255, 255, 255, 0.18) !important; }
-.friendsui-container .chatEntryActionsGroup svg *,
-.friendsui-container .VoiceToggle svg * { fill: #fff !important; }
-.friendsui-container .inviteAnotherFriendButton {
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
-}
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatEntry .chatEntryActionsGroup :is(button, div[role="button"]):hover { background: var(--ps5-chat-raised-2) !important; border-radius: 10px; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .VoiceToggle { border-radius: 12px !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .VoiceToggle:hover { background: var(--ps5-chat-raised-2) !important; }
 
-/* group chat member list */
-.friendsui-container .MemberListColumn,
-.friendsui-container .MultiUserChat .MemberListColumn {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-left: 1px solid var(--ps5-line) !important;
+/* group chats: the member list a quiet column with rounded rows */
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .MemberListColumn {
+  background: rgba(255, 255, 255, 0.025) !important;
+  box-shadow: inset 1px 0 0 0 var(--ps5-line) !important;
+  border: none !important;
 }
-.friendsui-container .MemberListColumn .friend { border-radius: 12px !important; margin: 2px 6px !important; }
-.friendsui-container .MemberListColumn .friend:hover { background: var(--ps5-fl-row) !important; }
-
-/* voice */
-.friendsui-container .VoiceControlPanel,
-.friendsui-container .activeVoiceControls {
-  background: color-mix(in srgb, var(--ps5-accent) 22%, transparent) !important;
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .MemberListColumn .friend { border-radius: 10px !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .MemberListColumn .friend:hover { background: var(--ps5-chat-raised) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatRoomGroupHeader,
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .ChatRoomGroupHeader { background: transparent !important; box-shadow: inset 0 -1px 0 0 var(--ps5-line) !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatRoomGroupHeaderName { color: #fff !important; font-weight: 700 !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) :is(.VoiceControlPanel, .activeVoiceControls) {
+  background: color-mix(in srgb, var(--ps5-accent) 18%, transparent) !important;
   border-radius: var(--ps5-r) !important;
 }
 

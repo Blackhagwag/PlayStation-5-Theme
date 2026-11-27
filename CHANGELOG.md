@@ -4,6 +4,39 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases).
 
+## [1.7.0] — 2026-11-27 — Chat Redo, Sign-in & Settings Windows
+
+Following the Aika theme's approach (studied, not copied: Aika has no licence), adapted to PS5.
+
+### Fixed
+- **Chat window rebuilt** — 1.6.0 forced bubbles, heights and margins onto Steam's chat boxes
+  and the window fell apart. Now Steam's own layout stays exactly as it is and only the look
+  changes: PS5 ground with a soft accent light, tabs as soft pills (active one with a white
+  hairline), header and entry row without Steam's grey strips (hairlines instead), plain
+  readable messages with stronger names, game invites and link previews as small cards,
+  fading lines around the day, a rounded field with the white PS5 focus ring, Send in the
+  accent, round avatars without Steam's status strip, a quiet member list in group chats.
+  Status dots are now only drawn in the friends list.
+
+### Added
+- **"Sign in to Steam" window as the PS5 user select** (`css/login.css`, matched by the window
+  title in every Steam language): deep-blue ground with slow light waves over Steam's dimmed
+  cover grid, a white PS5 loading ring instead of Steam's blue spinner, a white progress bar,
+  the account as a pill; the account chooser as "Who's playing?" with big round avatars and the
+  white ring on hover; the sign-in form as a glass card with pill fields and a white button.
+- **Steam Settings and game Properties windows as PS5 Settings** (`css/settings.css`): a quiet
+  category column with a white pill for the selected page, every setting a rounded card with
+  the PS5 focus ring, pill dropdowns, fields and buttons, accent toggles and sliders, storage
+  bar, betas, DLC grid, the launch-option picker.
+- **Menus unfold**: the panel opens from its top edge and its rows rise in one after another
+  (off with reduced motion).
+- **Store search page**: no blue band, capsule search field with a white button, filters as
+  glass cards with rounded checkboxes, accent price slider, rounded result rows, pill paging.
+- New options: *Privacy blur* (wallet balance blurred until hovered), *Steam news button*
+  (hide the megaphone), *Offline friends* (a grid of round faces with the name on hover —
+  new *Friends* tab).
+- Tests: sign-in window, account chooser, Settings window, the new options — 215 checks.
+
 ## [1.6.0] — 2026-11-27 — Friends & Profile Tabs
 
 ### Added

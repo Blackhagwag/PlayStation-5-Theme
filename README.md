@@ -46,8 +46,10 @@ Rendered by the test harness (placeholder game art):
 | ![Store hero 2](assets/preview-store-hero-2.jpg) | ![Buy](assets/preview-store-buy.jpg) |
 | **Friends list (Game Base)** | **Chat** |
 | ![Friends list](assets/preview-friends-list.jpg) | ![Chat](assets/preview-chat.jpg) |
-| **Profile tab: Friends** | |
-| ![Community friends](assets/preview-community-friends.jpg) | |
+| **Profile tab: Friends** | **Steam Settings** |
+| ![Community friends](assets/preview-community-friends.jpg) | ![Settings](assets/preview-settings.jpg) |
+| **Sign in: "Who's playing?"** | **Signing in** |
+| ![Account chooser](assets/preview-login-chooser.jpg) | ![Signing in](assets/preview-login.jpg) |
 | **What's New + bottom bar** | **Profile panel over the Store** |
 | ![What's New](assets/preview-whatsnew.jpg) | ![Profile panel](assets/preview-profile-store.jpg) |
 | **Game hub** | **Steam menus** |
@@ -81,8 +83,8 @@ Rendered by the test harness (placeholder game art):
   "On sale" filter; one click back to Steam's own list.
 - **Address panel** — compact capsule at the top left: back, forward, reload, where you are.
 - **Friends list as PS5 Game Base** — profile card, pill tabs, friends in game as cards with the
-  game's art, round avatars with status dots, requests and group chats as cards; **chat** with
-  bubbles, pill tabs and a pill entry field.
+  game's art, round avatars with status dots, requests and group chats as cards, offline friends
+  as faces (option); the **chat** keeps Steam's layout in PS5 colours.
 - **Community** — hubs, Workshop, Discussions, Guides, Market and every profile tab (Activity,
   Friends, Groups, Badges, Inventory, Screenshots, Workshop items, Reviews) in the PS5 style;
   the profile page itself stays exactly as Steam (and its owner) draws it.
@@ -94,10 +96,12 @@ Rendered by the test harness (placeholder game art):
   Game, Friends & Chat with online count) as PS5 pills; **every Steam menu** (Steam / View /
   Friends / Games / Help, right-click, account, notifications) as dark-blue rounded panels with
   blue highlight — all items and commands untouched.
+- **Sign-in window** as the PS5 user select ("Who's playing?", white loading ring), **Steam
+  Settings / game Properties** as PS5 Settings, menus that unfold.
 - **Everywhere else** — PS5 top tabs with clock and avatar, glass game list, downloads page,
   friends & chat, notifications, settings and properties dialogs.
-- **Options** in Millennium → Themes → PlayStation 5, in five tabs — *Home Screen*, *Look*,
-  *Bars*, *Store & Web*, *Language* — and a *Colors* tab: accent colour (5 presets or your own),
+- **Options** in Millennium → Themes → PlayStation 5, in six tabs — *Home Screen*, *Look*,
+  *Bars*, *Friends*, *Store & Web*, *Language* — and a *Colors* tab: accent colour (5 presets or your own),
   background (game art / PS5 waves / black), blur, reduced motion, boot animation, clock
   format, home layout, store styling, theme language (English / Русский).
 
@@ -159,7 +163,8 @@ css/shared.css       tokens, font, buttons, inputs, dialogs (all desktop windows
 css/main.css         main window: top bar, game list, home shelves, game page, downloads
 css/components.css   the PS5 components built by the script
 css/friends.css      friends list & chat (Game Base)     css/menus.css   all Steam menus
-css/toasts.css       notifications      css/webkit/web.css  Store, Wishlist, Community, Profile
+css/toasts.css       notifications      css/login.css   sign-in window
+css/settings.css     Settings / Properties windows      css/webkit/web.css  Store, Wishlist, Community, Profile
 css/options/         one small file per option value
 js/ps5.js            runtime for the main window (Home, Library, Control Center, game hub, bottom bar)
 js/web.js            runtime for store / community pages (page detection, marks for web.css)
@@ -188,7 +193,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 205 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 215 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

@@ -75,18 +75,20 @@
     </div>
   </div>
 </div>
-<div id="chat" class="chatWindow" hidden>
-  <div class="ChatTabs"><div class="ChatTab Active"><div class="ChatTabRow"><span class="playerName">Nova</span></div></div><div class="ChatTab"><div class="ChatTabRow"><span class="playerName">Kira</span></div></div></div>
-  <div class="chatHeader"><div class="playerName">Nova</div></div>
-  <div class="chatHistoryScroll"><div class="chatHistory">
-    <div class="msg timeDivision"><span class="msgText">Today</span></div>
-    <div class="ChatMessageBlock"><div class="ChatSpeaker online"><span class="speakerName">Nova</span> <span class="speakerTimeStamp">12:01</span></div><div class="msg"><div class="msgText">ready for raid?</div></div></div>
-    <div class="ChatMessageBlock isCurrentUser"><div class="ChatSpeaker isCurrentUser"><span class="speakerName">Vasya</span></div><div class="msg"><div class="msgText">5 min</div></div></div>
-  </div></div>
-  <div class="chatEntry"><form class="chatEntryControls"><textarea class="chatTextarea" placeholder="Message"></textarea><button type="button" class="chatSubmitButton"></button></form></div>
+<div id="chat" hidden>
+  <div class="titleBarContainer ChatTabs" style="display:flex;height:38px;background:#22252b"><div class="ChatTab Active" style="height:30px;padding:0 10px;display:flex;align-items:center;background:#3d4450"><div class="ChatTabRow"><span class="playerName">Nova</span></div></div><div class="ChatTab" style="height:30px;padding:0 10px;display:flex;align-items:center"><div class="ChatTabRow"><span class="playerName">Kira</span></div></div></div>
+  <div class="chatWindow" style="height:calc(100% - 38px);background:radial-gradient(#3b414b,#1e2329)">
+  <div class="chatHeader" style="padding:8px 12px;background:#2c3038"><div class="playerName">Nova</div></div>
+  <div class="displayRow" style="flex:1;display:flex;min-height:0"><div class="chatHistoryScroll" style="flex:1"><div class="chatHistory" style="padding:8px 14px">
+    <div class="msg timeDivision" style="display:flex;align-items:center;gap:8px"><div class="preHorizDivider" style="flex:1;height:1px;background:#555"></div>Today<div class="horizDivider" style="flex:1;height:1px;background:#555"></div></div>
+    <div class="ChatMessageBlock" style="display:flex;gap:10px;padding:4px 0"><div class="avatarHolder online"><img class="avatar" src=""><div class="avatarStatus"></div></div><div><div class="ChatSpeaker online"><span class="speakerName">Nova</span> <span class="speakerTimeStamp">12:01</span></div><div class="msg"><div class="msgText">ready for raid?</div></div><div class="msg"><div class="msgText">bring the healer</div></div></div></div>
+    <div class="ChatMessageBlock" style="display:flex;gap:10px;padding:4px 0"><div class="avatarHolder online"><img class="avatar" src=""></div><div><div class="ChatSpeaker online"><span class="speakerName">Vasya</span> <span class="speakerTimeStamp">12:02</span></div><div class="msg"><div class="msgText">5 min</div></div></div></div>
+  </div></div></div>
+  <div class="chatEntry" style="display:flex;gap:6px;padding:8px;background:#22252b"><form class="chatEntryControls" style="flex:1;display:flex;gap:6px"><textarea class="chatTextarea" placeholder="Message" style="flex:1;height:36px;background:#3d4450;border:none"></textarea><button type="button" class="chatSubmitButton" style="width:36px;height:36px;background:#2d73ff;border:none"></button></form><div class="chatEntryActionsGroup" style="display:flex;width:70px;height:36px;background:#3d4450"></div></div>
+  </div>
 </div>
 <script>
-  if (location.search.includes('chat')) { document.getElementById('friends').hidden = true; document.getElementById('chat').hidden = false; }
+  if (location.search.includes('chat')) { document.getElementById('friends').hidden = true; document.getElementById('chat').hidden = false; document.querySelector('#chat .chatWindow').style.display='flex'; document.querySelector('#chat .chatWindow').style.flexDirection='column'; }
 </script>
 <script src="../js/friends.js"></script>
 </body></html>

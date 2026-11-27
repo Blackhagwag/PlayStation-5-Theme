@@ -171,8 +171,7 @@ body.ModalDialogBody .PagedSettingsDialog_PageListColumn {
 body.ModalDialogBody .PagedSettingDialog_ContentColumn,
 body.ModalDialogBody .DialogContentTransition,
 body.ModalDialogBody .ModalPosition_Content { background: transparent !important; }
-body.ModalDialogBody .Field,
-body.ModalDialogBody .SettingsDialogSubHeader + .Field {
+body.ModalDialogBody .Field {
   border-radius: var(--ps5-r-s) !important;
 }
 body.ModalDialogBody .SettingsDialogSubHeader,
