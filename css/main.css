@@ -1,0 +1,284 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   main.css: the main Steam window (title bar, navigation, library, game
+   pages, downloads). Steam's own elements are restyled, never removed, so
+   every native function keeps working.
+   Class names are the readable names Millennium adds to Steam's modules.
+   ========================================================================== */
+
+/* ---------- the ground: PS5 navy → black, with the art layer from js/ps5.js ---------- */
+body.DesktopUI {
+  background: #000 !important;
+  color: var(--ps5-text);
+}
+body.DesktopUI::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(140% 90% at 85% -10%, color-mix(in srgb, var(--ps5-bg-top, #0A1C46) 100%, transparent) 0%, transparent 60%),
+    radial-gradient(90% 70% at 0% 100%, rgba(0, 60, 160, 0.22) 0%, transparent 70%),
+    linear-gradient(180deg, var(--ps5-bg-top, #0A1C46) 0%, var(--ps5-bg-bottom, #000) 78%);
+}
+#popup_target { position: relative; z-index: 1; }
+
+/* Steam's opaque layers step aside so the background shows through */
+body.DesktopUI,
+#popup_target,
+.FocusNavigationRoot,
+.ForceOpaqueBackground,
+.OuterFrame,
+.TopBar,
+.TitleBar,
+.SuperNavBar,
+.ContentFrame,
+.LocalContentContainer,
+.Library,
+[class*="LibraryDisplaySize"],
+.LeftListSizableContainer,
+.MainPanel,
+.AppDetailsTransitionGroup,
+.AppDetailsMain,
+.AppDetailsMain > .Container,
+.AppDetailsOverviewPanel,
+.LibraryHome,
+.LibraryHome .Container.Panel,
+.BottomBarContainer,
+.BottomBar {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.StickyHeaderShadow { display: none !important; }
+
+/* ---------- title bar ---------- */
+.TitleBar { -webkit-app-region: drag; }
+.TitleBarControls .Button,
+.AccountMenu,
+.RootMenuButton {
+  border-radius: 999px !important;
+  transition: background var(--ps5-t) var(--ps5-ease) !important;
+}
+.TitleBarControls .Button:hover,
+.AccountMenu:hover { background: var(--ps5-glass-hover) !important; }
+.TitleBarControls .AnnouncementsButton.Active { background: var(--ps5-accent) !important; color: #fff !important; }
+.closeButton:hover .title-area-icon-inner { background: #d0263f !important; }
+
+/* ---------- PS5 top navigation: "Games  Media" style text tabs ---------- */
+.SuperNavBar {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 52px !important;
+  padding: 0 28px !important;
+  gap: 4px;
+}
+.SuperNavMenu .MenuButton {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 19px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: rgba(255, 255, 255, 0.56) !important;
+  border: none !important;
+  border-radius: 999px !important;
+  transition: color var(--ps5-t) var(--ps5-ease), background var(--ps5-t) var(--ps5-ease) !important;
+}
+.SuperNavMenu:hover .MenuButton { color: #fff !important; }
+.SuperNavMenu.Selected .MenuButton {
+  color: #fff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+}
+.SuperNavMenu .MenuButton::first-letter { text-transform: uppercase; }
+
+/* the address bar of web pages: a quiet glass rail */
+.URLBar {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-bottom: 1px solid var(--ps5-line) !important;
+}
+.URLBarText {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: none !important;
+  border-radius: 999px !important;
+}
+.URLBar .URL { color: var(--ps5-text-2) !important; }
+
+/* ---------- the game list (left): a rounded glass pane ---------- */
+.LeftListSizableContainer > .Container {
+  background: var(--ps5-glass) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  backdrop-filter: blur(22px) saturate(1.2);
+  border: 1px solid var(--ps5-line);
+  border-radius: var(--ps5-r-l);
+  margin: 6px 10px 14px 14px;
+  width: calc(100% - 24px) !important;
+  height: calc(100% - 20px) !important;
+  overflow: hidden;
+}
+.LibraryWindowDivider { background: transparent !important; }
+.GameListHomeAndSearch { background: transparent !important; }
+.GameListHomeAndSearch .SearchInput,
+.LeftListSizableContainer input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 999px !important;
+  border: none !important;
+}
+.LeftListSizableContainer .GameIconAndName,
+.LeftListSizableContainer .ReactVirtualized__Grid__innerScrollContainer > div > div {
+  border-radius: 10px !important;
+  transition: background 160ms var(--ps5-ease) !important;
+}
+.LeftListSizableContainer .ReactVirtualized__Grid__innerScrollContainer > div > div:hover { background: var(--ps5-glass-hover) !important; }
+.LeftListSizableContainer .Selected,
+.LeftListSizableContainer .Selected:hover {
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+}
+.LeftListSizableContainer .Collection,
+.LeftListSizableContainer [class*="CollapseIcon"] { background: transparent !important; }
+
+/* sidebar hidden on the PS5 Home Screen (switch «Game list on Home») */
+html.ps5-hide-list .LeftListSizableContainer,
+html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
+
+/* ---------- main panel ---------- */
+.MainPanel > .AppDetailsTransitionGroup { border-radius: var(--ps5-r-l) var(--ps5-r-l) 0 0; overflow: hidden; }
+
+/* ---------- Steam's home shelves, under the PS5 Home Screen ---------- */
+.LibraryHome .Showcase,
+.LibraryHome .ShowcaseOuter { background: transparent !important; }
+.LibraryHome .SectionHeader,
+.LibraryHome .ShowcaseHeader {
+  color: #fff !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.LibraryHome .LandscapeImage,
+.LibraryHome .PortraitImage,
+.LibraryHome .LibraryItemBox,
+.LibraryHome .FeaturedCapsule,
+.LibraryHome img {
+  border-radius: var(--ps5-r) !important;
+}
+.LibraryHome .LibraryItemBox,
+.LibraryHome .FeaturedCapsule {
+  overflow: hidden;
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+.LibraryHome .LibraryItemBox:hover,
+.LibraryHome .FeaturedCapsule:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: var(--ps5-focus), var(--ps5-shadow) !important;
+}
+
+/* ---------- game page: PS5 game hub ---------- */
+.AppDetailsMain .Header { padding: 0 !important; }
+.Header .TopCapsule { min-height: 52vh !important; }
+.Header .TopCapsule .HeaderBackgroundImage img {
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+}
+.Header .TopCapsule::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, transparent 55%),
+    linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* play bar: a glass rail under the art */
+.AppDetailsMain .PlayBar,
+.AppDetailsMain .PlayBar.Glassy {
+  background: var(--ps5-glass) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+  border-top: 1px solid var(--ps5-line) !important;
+  border-bottom: 1px solid var(--ps5-line) !important;
+}
+.PlayBarLabel { color: var(--ps5-text-3) !important; text-transform: none !important; letter-spacing: 0 !important; }
+.PlayBarDetailLabel { color: #fff !important; font-weight: 600 !important; }
+
+/* the Play button: the PS5 white button */
+.PlayButtonContainer .PlayButton,
+.PlayBar .PlayButton {
+  background: #fff !important;
+  background-image: none !important;
+  color: #0b0b0f !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  min-width: 168px;
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.18) !important;
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+.PlayButtonContainer .PlayButton svg,
+.PlayBar .PlayButton svg { color: #0b0b0f !important; fill: currentColor; }
+.PlayButtonContainer .PlayButton:hover,
+.PlayBar .PlayButton:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 32px 6px var(--ps5-accent-glow) !important;
+}
+.PlayBar .MenuButtonContainer > *,
+.PlayBar .AppButtonsContainer > * { border-radius: 999px !important; }
+
+/* sections of the game page: rounded glass cards */
+.AppDetailsMain .AppDetailsSectionContainer,
+.AppDetailsMain .AppDetailsSection.Panel,
+.AppDetailsMain .GameStat,
+.AppDetailsMain .PartnerEventLargeUpdate,
+.AppDetailsMain .ActivityFeedContainer .Panel {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+}
+.AppDetailsMain .AppDetailsSection > .SectionHeader,
+.AppDetailsMain .SectionHeader {
+  color: #fff !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+}
+.AppDetailsMain .Body.ScrollContainer { background: none !important; }
+
+/* achievements page */
+.AchievementsPageContainer { background: transparent !important; }
+
+/* ---------- downloads page ---------- */
+.DownloadsPage {
+  background: transparent !important;
+}
+.DownloadsPage .Panel,
+.DownloadsPage [class*="DownloadItem"] {
+  border-radius: var(--ps5-r) !important;
+}
+.DownloadsPage .ProgressBar > div,
+.BottomBar .ProgressBar > div { background: var(--ps5-accent) !important; box-shadow: 0 0 10px var(--ps5-accent-glow); }
+
+/* ---------- bottom bar (downloads + friends & chat) ---------- */
+.BottomBar {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent) !important;
+  border-top: none !important;
+}
+.BottomBar .DownloadStatus,
+.BottomBar [class*="FriendsButton"],
+.BottomBar [class*="Button"] {
+  border-radius: 999px !important;
+  transition: background var(--ps5-t) var(--ps5-ease) !important;
+}
+.BottomBar [class*="Button"]:hover,
+.BottomBar .DownloadStatus:hover { background: var(--ps5-glass-hover) !important; }
+
+/* ---------- web pages inside the main window ---------- */
+.BrowserWrapper { background: transparent !important; }
+
+/* ---------- Millennium's own settings page in the main window ---------- */
+.MillenniumSettings { background: transparent !important; }

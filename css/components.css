@@ -1,0 +1,734 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   components.css: the PS5 elements built by js/ps5.js
+   (#ps5-bg, #ps5-boot, #ps5-top, #ps5-home, #ps5-library, #ps5-cc,
+    #ps5-details, #ps5-lightbox, #ps5-snack)
+   ========================================================================== */
+
+.ps5-ico { display: inline-flex; width: 22px; height: 22px; flex: none; }
+.ps5-ico svg { width: 100%; height: 100%; display: block; }
+
+.ps5-bar { height: 4px; border-radius: 99px; background: rgba(255, 255, 255, 0.16); overflow: hidden; margin-top: 8px; }
+.ps5-bar.big { height: 6px; }
+.ps5-bar i { display: block; height: 100%; border-radius: inherit; background: var(--ps5-accent); box-shadow: 0 0 10px var(--ps5-accent-glow); transition: width 400ms var(--ps5-ease); }
+
+/* ───────────── background art ───────────── */
+#ps5-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+#ps5-bg .ps5-bg-waves {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.85;
+  background:
+    radial-gradient(40% 30% at 20% 70%, rgba(0, 112, 209, 0.35), transparent 70%),
+    radial-gradient(35% 28% at 80% 30%, rgba(40, 90, 255, 0.28), transparent 70%),
+    radial-gradient(50% 35% at 55% 95%, rgba(0, 170, 255, 0.18), transparent 70%);
+  animation: ps5-waves 38s ease-in-out infinite alternate;
+  will-change: transform;
+  transition: opacity 600ms var(--ps5-ease);
+}
+#ps5-bg.has-art .ps5-bg-waves { opacity: 0; }
+@keyframes ps5-waves {
+  0% { transform: translate3d(-3%, 2%, 0) scale(1); }
+  50% { transform: translate3d(3%, -2%, 0) scale(1.08); }
+  100% { transform: translate3d(-1%, -3%, 0) scale(1.02); }
+}
+#ps5-bg .ps5-bg-layer {
+  position: absolute;
+  inset: 0;
+  background: center top / cover no-repeat;
+  opacity: 0;
+  transform: scale(1.04);
+  filter: blur(var(--ps5-bg-blur, 0px));
+  transition: opacity 700ms var(--ps5-ease), transform 1400ms var(--ps5-ease);
+  will-change: opacity, transform;
+}
+#ps5-bg .ps5-bg-layer.on { opacity: 1; transform: scale(1); }
+#ps5-bg .ps5-bg-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.05) 75%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 22%, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
+  opacity: 0;
+  transition: opacity 700ms var(--ps5-ease);
+}
+#ps5-bg.has-art .ps5-bg-shade { opacity: 1; }
+/* game pages: Steam draws its own hero there, so ours sits back */
+html.ps5-on-app #ps5-bg .ps5-bg-layer.on { opacity: 0.55; filter: blur(calc(var(--ps5-bg-blur, 0px) + 40px)); }
+/* web pages cover the window anyway */
+html.ps5-on-web #ps5-bg { display: none; }
+
+/* ───────────── boot fade ───────────── */
+#ps5-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  background: #000;
+  pointer-events: none;
+  animation: ps5-boot-out 1500ms var(--ps5-ease) 700ms forwards;
+}
+#ps5-boot .ps5-boot-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(45% 40% at 50% 55%, rgba(0, 112, 209, 0.45), transparent 70%);
+  animation: ps5-boot-glow 1600ms var(--ps5-ease) forwards;
+}
+#ps5-boot .ps5-boot-mark { display: flex; gap: 18px; position: relative; }
+#ps5-boot .ps5-boot-mark i {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  animation: ps5-boot-shape 900ms var(--ps5-ease) forwards;
+}
+#ps5-boot .ps5-boot-mark i:nth-child(1) { border: none; width: 0; height: 0; border-left: 19px solid transparent; border-right: 19px solid transparent; border-bottom: 32px solid rgba(255, 255, 255, 0.9); }
+#ps5-boot .ps5-boot-mark i:nth-child(2) { border-radius: 50%; animation-delay: 90ms; }
+#ps5-boot .ps5-boot-mark i:nth-child(3) { border: none; position: relative; animation-delay: 180ms; background:
+    linear-gradient(45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.9) 56%, transparent 56%); }
+#ps5-boot .ps5-boot-mark i:nth-child(4) { border-radius: 4px; animation-delay: 270ms; }
+@keyframes ps5-boot-shape { from { opacity: 0; transform: translateY(10px) scale(0.8); } to { opacity: 1; transform: none; } }
+@keyframes ps5-boot-glow { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1.1); } }
+@keyframes ps5-boot-out { to { opacity: 0; visibility: hidden; } }
+
+/* ───────────── top bar extras ───────────── */
+#ps5-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 5;
+}
+#ps5-top.floating { position: fixed; top: 40px; right: 18px; z-index: 800; }
+.ps5-top-btn,
+.ps5-top-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-top-btn:hover,
+.ps5-top-btn:focus-visible { background: var(--ps5-glass-hover); color: #fff; outline: none; }
+.ps5-top-btn:focus-visible,
+.ps5-top-avatar:focus-visible { box-shadow: var(--ps5-focus); }
+.ps5-top-avatar { position: relative; margin-left: 6px; }
+.ps5-top-avatar img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.12);
+}
+.ps5-top-avatar img:not([src]) { visibility: hidden; }
+.ps5-top-avatar:hover img { box-shadow: 0 0 0 2px #fff; }
+.ps5-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7a7f8c;
+  border: 2px solid #050a18;
+}
+[data-state="1"] > .ps5-dot, .ps5-dot[data-state="1"],
+[data-state="5"] > .ps5-dot, .ps5-dot[data-state="5"],
+[data-state="6"] > .ps5-dot, .ps5-dot[data-state="6"] { background: #3fd15a; }
+[data-state="2"] > .ps5-dot, .ps5-dot[data-state="2"] { background: #e2384d; }
+[data-state="3"] > .ps5-dot, .ps5-dot[data-state="3"],
+[data-state="4"] > .ps5-dot, .ps5-dot[data-state="4"] { background: #f0b232; }
+#ps5-clock {
+  margin-left: 10px;
+  font-size: 19px;
+  font-weight: 500;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  min-width: 52px;
+}
+
+/* ───────────── PS5 Home Screen ───────────── */
+#ps5-home {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+  padding: 18px 56px 40px;
+  box-sizing: border-box;
+  color: #fff;
+  outline: none;
+}
+.ps5-home-rail {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  height: 196px;
+  padding: 12px 6px 24px;
+  margin: 0 -6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.ps5-home-rail::-webkit-scrollbar { display: none; }
+.ps5-tile {
+  position: relative;
+  flex: none;
+  width: 104px;
+  height: 104px;
+  padding: 0;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  overflow: visible;
+  transition: width 320ms var(--ps5-ease), height 320ms var(--ps5-ease), box-shadow 320ms var(--ps5-ease), transform 200ms var(--ps5-ease);
+}
+.ps5-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+.ps5-tile:hover { transform: translateY(-2px); }
+.ps5-tile:focus-visible { outline: none; box-shadow: var(--ps5-focus); }
+.ps5-tile.selected {
+  width: 164px;
+  height: 164px;
+  box-shadow: 0 0 0 3px #fff, 0 0 34px 6px var(--ps5-accent-glow), 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.ps5-tile-name {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 240ms var(--ps5-ease), transform 240ms var(--ps5-ease);
+  pointer-events: none;
+}
+.ps5-tile.selected .ps5-tile-name { opacity: 1; transform: none; }
+.ps5-tile-library {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--ps5-line-strong);
+}
+.ps5-tile-library .ps5-ico { width: 36px; height: 36px; }
+.ps5-tile-library:hover { background: rgba(255, 255, 255, 0.18); box-shadow: var(--ps5-focus); }
+.ps5-tile-library .ps5-tile-name { opacity: 0.8; transform: none; }
+
+.ps5-home-info { margin-top: auto; padding-top: 8px; max-width: 980px; }
+#ps5-home.swap .ps5-home-info { animation: ps5-info-in 420ms var(--ps5-ease); }
+@keyframes ps5-info-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.ps5-home-title { min-height: 96px; display: flex; align-items: flex-end; }
+.ps5-home-logo {
+  display: none;
+  max-width: 460px;
+  max-height: 120px;
+  object-fit: contain;
+  object-position: left bottom;
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.6));
+}
+#ps5-home.has-logo .ps5-home-logo { display: block; }
+#ps5-home.has-logo .ps5-home-name { display: none; }
+.ps5-home-name {
+  margin: 0;
+  font-size: 46px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+}
+.ps5-home-sub { margin-top: 12px; color: var(--ps5-text-2); font-size: 15px; font-weight: 500; }
+.ps5-home-actions { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+.ps5-btn-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 200px;
+  height: 52px;
+  padding: 0 34px;
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  color: #0b0b0f;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-btn-play:hover,
+.ps5-btn-play:focus-visible { outline: none; transform: scale(1.04); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4), 0 0 36px 8px var(--ps5-accent-glow); }
+.ps5-btn-play[data-state="stop"],
+.ps5-btn-play[data-state="cancel"] { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.ps5-btn-play[data-state="install"] { background: var(--ps5-accent); color: #fff; }
+.ps5-btn-round {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-btn-round:hover,
+.ps5-btn-round:focus-visible { outline: none; background: rgba(255, 255, 255, 0.26); box-shadow: var(--ps5-focus); }
+.ps5-home-desc {
+  max-width: 640px;
+  margin: 20px 0 0;
+  color: var(--ps5-text-2);
+  font-size: 15px;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 400ms var(--ps5-ease);
+}
+.ps5-home-desc.on { opacity: 1; }
+.ps5-home-hint { margin-top: 26px; font-size: 12px; color: var(--ps5-text-3); }
+
+/* activity cards (home + game hub) */
+.ps5-cards { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; }
+.ps5-card {
+  position: relative;
+  width: 190px;
+  min-height: 108px;
+  padding: 16px 18px;
+  box-sizing: border-box;
+  border-radius: var(--ps5-r);
+  background: var(--ps5-glass);
+  border: 1px solid var(--ps5-line);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease), background var(--ps5-t) var(--ps5-ease);
+  animation: ps5-card-in 460ms var(--ps5-ease) backwards;
+}
+.ps5-card:nth-child(2) { animation-delay: 50ms; }
+.ps5-card:nth-child(3) { animation-delay: 100ms; }
+.ps5-card:nth-child(4) { animation-delay: 150ms; }
+@keyframes ps5-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ps5-card:hover { transform: translateY(-3px); background: color-mix(in srgb, var(--ps5-glass-tint, #0B1630) 60%, rgba(255, 255, 255, 0.12)); box-shadow: var(--ps5-shadow); }
+.ps5-card > .ps5-ico { color: var(--ps5-text-2); width: 20px; height: 20px; }
+.ps5-card-label { margin-top: 10px; font-size: 12px; color: var(--ps5-text-3); font-weight: 600; }
+.ps5-card-value { margin-top: 2px; font-size: 20px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+.ps5-card-note { margin-top: 4px; font-size: 12px; color: var(--ps5-text-2); }
+
+/* ───────────── PS5 Game Library ───────────── */
+#ps5-library {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--ps5-top, 32px);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 48px 0;
+  box-sizing: border-box;
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 80% -10%, rgba(0, 80, 190, 0.35), transparent 60%),
+    linear-gradient(180deg, rgba(6, 16, 40, 0.97), rgba(0, 0, 0, 0.98));
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px) scale(0.99);
+  transition: opacity 280ms var(--ps5-ease), transform 320ms var(--ps5-ease), visibility 0s linear 320ms;
+  outline: none;
+}
+#ps5-library.open { opacity: 1; visibility: visible; transform: none; transition: opacity 280ms var(--ps5-ease), transform 320ms var(--ps5-ease), visibility 0s; }
+.ps5-lib-head { display: flex; align-items: center; gap: 28px; }
+.ps5-lib-title { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.ps5-lib-tabs { display: flex; gap: 6px; }
+.ps5-lib-tabs button {
+  height: 38px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ps5-text-2);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease);
+}
+.ps5-lib-tabs button:hover { color: #fff; background: var(--ps5-glass-hover); }
+.ps5-lib-tabs button.on { background: #fff; color: #0b0b0f; }
+.ps5-lib-close { margin-left: auto; width: 44px; height: 44px; }
+.ps5-lib-tools { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; flex-wrap: wrap; }
+.ps5-lib-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 340px;
+  height: 42px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid transparent;
+  color: var(--ps5-text-2);
+  transition: border-color var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-lib-search:focus-within { border-color: var(--ps5-accent); box-shadow: 0 0 0 3px var(--ps5-accent-soft); }
+.ps5-lib-search .ps5-ico { width: 18px; height: 18px; }
+.ps5-lib-search input { flex: 1; min-width: 0; background: none; border: none; outline: none; color: #fff; font-size: 15px; }
+.ps5-lib-sort {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+.ps5-lib-sort option { background: #0b1630; color: #fff; }
+.ps5-chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--ps5-line-strong);
+  background: transparent;
+  color: var(--ps5-text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--ps5-t) var(--ps5-ease);
+}
+.ps5-chip.on { background: var(--ps5-accent); border-color: var(--ps5-accent); color: #fff; }
+.ps5-lib-count { margin-left: auto; color: var(--ps5-text-3); font-size: 13px; }
+.ps5-lib-scroll { flex: 1; overflow-y: auto; margin: 0 -12px; padding: 6px 12px 40px; }
+.ps5-lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 22px 18px;
+}
+.ps5-gcard {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 150px 290px;
+  animation: ps5-card-in 380ms var(--ps5-ease) backwards;
+}
+.ps5-gcard-art {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--ps5-r);
+  overflow: hidden;
+  background: linear-gradient(160deg, #13244d, #070d1d);
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-gcard-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 300ms var(--ps5-ease);
+}
+.ps5-gcard.loaded .ps5-gcard-art img { opacity: 1; }
+.ps5-gcard-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ps5-text-2);
+}
+.ps5-gcard.loaded .ps5-gcard-fallback { display: none; }
+.ps5-gcard:hover .ps5-gcard-art,
+.ps5-gcard:focus-visible .ps5-gcard-art { transform: scale(1.05); box-shadow: var(--ps5-focus), var(--ps5-shadow); }
+.ps5-gcard:not(.installed) .ps5-gcard-art img { filter: saturate(0.6) brightness(0.8); }
+.ps5-gcard-name { margin-top: 10px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps5-gcard-meta { margin-top: 2px; font-size: 12px; color: var(--ps5-text-3); }
+.ps5-gcard-play {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #0b0b0f;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.ps5-gcard:not(.installed) .ps5-gcard-play { background: var(--ps5-accent); color: #fff; }
+.ps5-gcard-play .ps5-ico { width: 18px; height: 18px; }
+.ps5-gcard:hover .ps5-gcard-play,
+.ps5-gcard:focus-within .ps5-gcard-play { opacity: 1; transform: none; }
+.ps5-lib-empty { grid-column: 1 / -1; padding: 80px 0; text-align: center; color: var(--ps5-text-3); font-size: 16px; }
+.ps5-lib-more { height: 1px; }
+
+/* ───────────── Control Center ───────────── */
+#ps5-cc { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+#ps5-cc.open { pointer-events: auto; }
+.ps5-cc-backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.1));
+  opacity: 0;
+  transition: opacity 300ms var(--ps5-ease);
+}
+#ps5-cc.open .ps5-cc-backdrop { opacity: 1; }
+.ps5-cc-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  width: min(1100px, calc(100vw - 48px));
+  transform: translate(-50%, 40px);
+  opacity: 0;
+  transition: transform 380ms var(--ps5-ease), opacity 260ms var(--ps5-ease);
+}
+#ps5-cc.open .ps5-cc-panel { transform: translate(-50%, 0); opacity: 1; }
+.ps5-cc-card {
+  min-height: 150px;
+  margin-bottom: 16px;
+  padding: 22px 26px;
+  box-sizing: border-box;
+  border-radius: var(--ps5-r-l);
+  background: var(--ps5-glass-strong);
+  border: 1px solid var(--ps5-line);
+  -webkit-backdrop-filter: blur(30px) saturate(1.3);
+  backdrop-filter: blur(30px) saturate(1.3);
+  box-shadow: var(--ps5-shadow);
+  color: #fff;
+}
+.ps5-cc-card.swap { animation: ps5-info-in 300ms var(--ps5-ease); }
+.ps5-cc-card h3 { margin: 0 0 12px; font-size: 20px; font-weight: 700; }
+.ps5-cc-card h3 small { font-size: 13px; color: var(--ps5-text-3); font-weight: 500; margin-left: 8px; }
+.ps5-cc-text { margin: 0 0 14px; color: var(--ps5-text-2); font-size: 14px; line-height: 1.5; max-width: 720px; }
+.ps5-cc-text.warn { color: #ffb4b4; }
+.ps5-cc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.ps5-cc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease);
+}
+.ps5-cc-btn .ps5-ico { width: 18px; height: 18px; }
+.ps5-cc-btn:hover,
+.ps5-cc-btn:focus-visible { outline: none; background: rgba(255, 255, 255, 0.22); box-shadow: var(--ps5-focus); }
+.ps5-cc-btn.primary { background: #fff; color: #0b0b0f; }
+.ps5-cc-btn.danger { background: rgba(224, 40, 75, 0.25); }
+.ps5-cc-btn.confirm { background: #e0284b; color: #fff; animation: ps5-pulse 900ms ease-in-out infinite alternate; }
+@keyframes ps5-pulse { to { box-shadow: 0 0 0 4px rgba(224, 40, 75, 0.35); } }
+.ps5-cc-btn.status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #7a7f8c; }
+.ps5-cc-btn.status.s1::before { background: #3fd15a; }
+.ps5-cc-btn.status.s2::before { background: #e2384d; }
+.ps5-cc-btn.status.s3::before { background: #f0b232; }
+.ps5-cc-btn.status.s7::before { background: transparent; border: 2px solid #7a7f8c; box-sizing: border-box; }
+.ps5-cc-profile { display: flex; align-items: center; gap: 18px; }
+.ps5-cc-profile h3 { margin: 0; font-size: 24px; }
+.ps5-cc-sub { color: var(--ps5-text-2); font-size: 14px; margin-top: 2px; }
+.ps5-cc-avatar { position: relative; width: 72px; height: 72px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); display: grid; place-items: center; flex: none; }
+.ps5-cc-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85); }
+.ps5-cc-avatar .ps5-dot { width: 16px; height: 16px; right: 2px; bottom: 2px; border-width: 3px; }
+.ps5-cc-friends { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; max-height: 210px; overflow-y: auto; }
+.ps5-cc-friend {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease);
+}
+.ps5-cc-friend:hover { background: rgba(255, 255, 255, 0.14); }
+.ps5-cc-favatar { position: relative; grid-row: 1 / 3; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); display: grid; place-items: center; }
+.ps5-cc-favatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.ps5-cc-fname { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps5-cc-fgame { font-size: 12px; color: var(--ps5-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps5-cc-empty { color: var(--ps5-text-3); font-size: 14px; padding: 8px 0; }
+.ps5-cc-dlrow { max-width: 640px; }
+.ps5-cc-dlname { font-size: 16px; font-weight: 600; }
+.ps5-cc-dlmeta { margin-top: 8px; font-size: 13px; color: var(--ps5-text-2); font-variant-numeric: tabular-nums; }
+.ps5-cc-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--ps5-glass-strong);
+  border: 1px solid var(--ps5-line);
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  box-shadow: var(--ps5-shadow);
+}
+.ps5-cc-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-cc-icon .ps5-ico { width: 26px; height: 26px; }
+.ps5-cc-icon > span:not(.ps5-ico) {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ps5-ease);
+}
+.ps5-cc-icon:hover > span:not(.ps5-ico),
+.ps5-cc-icon:focus-visible > span:not(.ps5-ico) { opacity: 1; }
+.ps5-cc-icon:hover { background: var(--ps5-glass-hover); color: #fff; }
+.ps5-cc-icon:focus-visible { outline: none; box-shadow: var(--ps5-focus); }
+.ps5-cc-icon.on { background: #fff; color: #0b0b0f; transform: scale(1.08); }
+
+/* ───────────── game hub strip (game page) ───────────── */
+#ps5-details { position: relative; z-index: 1; padding: 6px 28px 24px; color: #fff; }
+#ps5-details .ps5-cards { margin-top: 18px; }
+.ps5-det-about { max-width: 880px; }
+.ps5-det-about h3,
+.ps5-det-shots h3 { margin: 26px 0 10px; font-size: 18px; font-weight: 700; }
+.ps5-det-about p { margin: 0; color: var(--ps5-text-2); font-size: 15px; line-height: 1.6; }
+.ps5-det-facts { margin-top: 10px; font-size: 13px; color: var(--ps5-text-3); }
+.ps5-det-strip { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 12px; }
+.ps5-shot {
+  flex: none;
+  width: 260px;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: zoom-in;
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.ps5-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ps5-shot:hover,
+.ps5-shot:focus-visible { outline: none; transform: scale(1.04); box-shadow: var(--ps5-focus); }
+
+#ps5-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.88);
+  opacity: 0;
+  visibility: hidden;
+  cursor: zoom-out;
+  transition: opacity 240ms var(--ps5-ease), visibility 0s linear 240ms;
+}
+#ps5-lightbox.open { opacity: 1; visibility: visible; transition: opacity 240ms var(--ps5-ease); }
+#ps5-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 12px; box-shadow: var(--ps5-shadow); }
+
+/* ───────────── snack (launch feedback) ───────────── */
+#ps5-snack {
+  position: fixed;
+  bottom: 64px;
+  right: 24px;
+  z-index: 1200;
+  padding: 14px 20px;
+  border-radius: var(--ps5-r);
+  background: var(--ps5-glass-strong);
+  border: 1px solid var(--ps5-line);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--ps5-shadow);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 240ms var(--ps5-ease), transform 240ms var(--ps5-ease);
+}
+#ps5-snack.on { opacity: 1; transform: none; }
+
+/* small windows */
+@media (max-width: 900px) {
+  #ps5-home { padding: 14px 24px 30px; }
+  .ps5-home-name { font-size: 34px; }
+  .ps5-card { width: calc(50% - 7px); }
+  #ps5-library { padding: 20px 20px 0; }
+  .ps5-lib-search { width: 100%; }
+  .ps5-cc-icon { width: 44px; height: 44px; }
+}

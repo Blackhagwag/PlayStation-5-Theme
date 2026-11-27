@@ -1,0 +1,27 @@
+:root {
+  /*
+   * @name Accent
+   * @description Buttons, focus glow and progress bars (used when "Accent color" is set to "Colors tab").
+   */
+  --ps5-accent-user: #0070D1;
+  /*
+   * @name Background top
+   * @description Upper part of the PS5 ambient gradient behind the interface.
+   */
+  --ps5-bg-top: #0A1C46;
+  /*
+   * @name Background bottom
+   * @description Lower part of the PS5 ambient gradient.
+   */
+  --ps5-bg-bottom: #000000;
+  /*
+   * @name Glass
+   * @description Tint of the translucent panels.
+   */
+  --ps5-glass-tint: #0B1630;
+  /*
+   * @name Text
+   * @description Main text color.
+   */
+  --ps5-text-user: #FFFFFF;
+}

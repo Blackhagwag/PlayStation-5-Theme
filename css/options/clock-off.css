@@ -1,0 +1,3 @@
+/* Clock → Hidden */
+:root { --ps5-clock: off; }
+#ps5-clock { display: none !important; }

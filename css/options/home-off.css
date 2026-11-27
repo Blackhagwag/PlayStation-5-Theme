@@ -1,0 +1,3 @@
+/* Home Screen → Steam default: js/ps5.js reads this variable and does not mount the PS5 home */
+:root { --ps5-home: off; }
+#ps5-home { display: none !important; }

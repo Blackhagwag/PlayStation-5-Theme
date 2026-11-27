@@ -1,0 +1,231 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   webkit/web.css: Store, Community and Profile pages inside Steam
+   (PlayStation Store / PlayStation Network look). Colors, radii and type
+   only — no layout changes, so every page keeps working.
+   ========================================================================== */
+@font-face {
+  font-family: "PS5 Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../../fonts/inter/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "PS5 Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../../fonts/inter/inter-cyrillic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+:root {
+  --ps5-accent: var(--ps5-accent-preset, #0070D1);
+  --ps5-glass: rgba(16, 32, 70, 0.55);
+  --ps5-line: rgba(255, 255, 255, 0.10);
+  --ps5-r: 14px;
+}
+
+/* ---------- ground & type ---------- */
+html, body {
+  background-color: #020611 !important;
+}
+body {
+  font-family: "PS5 Inter", "Motiva Sans", "Segoe UI", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+body.v6,
+body.v7,
+.responsive_page_frame,
+.responsive_page_content,
+.page_content_ctn,
+.home_page_body_ctn {
+  background-color: transparent !important;
+}
+body.v6::before,
+body.v7::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 85% -10%, rgba(0, 70, 180, 0.45), transparent 60%),
+    linear-gradient(180deg, #071633 0%, #020611 60%);
+}
+
+/* ---------- buttons ---------- */
+.btn_green_steamui,
+.btn_green_white_innerfade,
+.btn_blue_steamui,
+.btnv6_green_white_innerfade,
+.btnv6_blue_hoverfade,
+.btn_profile_action,
+.btnv6_lightblue_blue,
+.DialogButton.Primary {
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+.btn_green_steamui > span,
+.btn_green_white_innerfade > span,
+.btnv6_green_white_innerfade > span {
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+.btn_green_steamui:hover > span,
+.btn_green_white_innerfade:hover > span,
+.btnv6_green_white_innerfade:hover > span {
+  background: #fff !important;
+  color: #0b0b0f !important;
+}
+.btnv6_blue_hoverfade > span,
+.btn_profile_action > span,
+.btnv6_lightblue_blue > span {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+}
+.btnv6_blue_hoverfade:hover > span,
+.btn_profile_action:hover > span { background: rgba(255, 255, 255, 0.22) !important; }
+
+/* ---------- store: capsules and cards ---------- */
+.store_main_capsule,
+.store_capsule,
+.tab_item,
+.tab_item_cap_img,
+.home_area_spotlight,
+.spotlight_content,
+.carousel_items .store_capsule,
+.search_result_row,
+.game_area_purchase_game,
+.game_area_purchase_game_wrapper .game_area_purchase_game,
+.block_responsive_horizontal_scroll,
+.dailydeal_cap,
+.special_cap,
+.recommendation_highlight,
+.store_horizontal_autoslider_item,
+.wishlist_row {
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+}
+.game_area_purchase_game,
+.game_area_purchase_game_wrapper .game_area_purchase_game,
+.block.responsive_apppage_details_right,
+.glance_ctn,
+.game_page_autocollapse_ctn,
+.store_nav,
+#store_nav_area .store_nav_bg {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+  box-shadow: none !important;
+}
+.tab_item {
+  background: rgba(255, 255, 255, 0.04) !important;
+  margin-bottom: 6px !important;
+  transition: background 180ms ease, transform 180ms ease !important;
+}
+.tab_item:hover,
+.tab_item.focus { background: rgba(255, 255, 255, 0.12) !important; transform: translateX(3px); }
+.discount_pct,
+.bundle_base_discount { background: var(--ps5-accent) !important; color: #fff !important; border-radius: 6px 0 0 6px !important; }
+.discount_final_price { color: #fff !important; }
+.store_nav .tab > span,
+.store_nav .tab .pulldown > span { color: #fff !important; font-weight: 600 !important; text-transform: none !important; }
+.store_nav .tab:hover { background: rgba(255, 255, 255, 0.10) !important; border-radius: 10px; }
+.home_page_content h2,
+.home_ctn h2,
+.page_content h2 {
+  color: #fff !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+}
+.game_page_background,
+.game_page_background.game { background-color: transparent !important; }
+.apphub_AppName { font-weight: 700 !important; letter-spacing: -0.01em; }
+
+/* ---------- community / PSN-style profile ---------- */
+.profile_page,
+.profile_page.has_profile_background { background-color: transparent !important; }
+.profile_header_bg,
+.profile_header_bg_texture {
+  background: linear-gradient(180deg, rgba(0, 70, 180, 0.35), transparent) !important;
+}
+.profile_header {
+  padding-top: 26px !important;
+}
+.profile_header .playerAvatar,
+.playerAvatar.profile_header_size,
+.playerAvatar.profile_header_size img,
+.playerAvatarAutoSizeInner,
+.playerAvatarAutoSizeInner img {
+  border-radius: 50% !important;
+}
+.playerAvatar.profile_header_size { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 40px rgba(0, 112, 209, 0.5) !important; background: none !important; }
+.profile_header .persona_name .actual_persona_name,
+.actual_persona_name { font-size: 30px !important; font-weight: 700 !important; color: #fff !important; letter-spacing: -0.01em; }
+.profile_header_badgeinfo,
+.profile_header_summary .profile_summary { color: rgba(255, 255, 255, 0.78) !important; }
+.friendPlayerLevel {
+  border-radius: 50% !important;
+  border-color: var(--ps5-accent) !important;
+  box-shadow: 0 0 14px rgba(0, 112, 209, 0.6);
+}
+.profile_customization,
+.profile_leftcol .profile_customization,
+.profile_recentgame_header,
+.recent_games,
+.profile_rightcol .profile_item_links,
+.profile_rightcol .profile_badges,
+.profile_rightcol .profile_group_links,
+.profile_rightcol .profile_friend_links,
+.profile_in_game,
+.responsive_status_info,
+.profile_comment_area,
+.commentthread_area {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+}
+.profile_customization_header,
+.profile_recentgame_header,
+.profile_count_link_preview_ctn .profile_count_link a .count_link_label {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.profile_count_link .count_link_label { color: rgba(255, 255, 255, 0.7) !important; }
+.profile_count_link .profile_count_link_total { color: #fff !important; font-weight: 700 !important; }
+.recent_game { border-radius: 12px !important; overflow: hidden; }
+.recent_game .game_info_cap img,
+.game_capsule,
+.showcase_slot img,
+.showcase_content_bg { border-radius: 10px !important; }
+.profile_in_game.in-game { border-color: rgba(143, 212, 255, 0.4) !important; }
+.achievement_progress_bar_ctn,
+.achieveBar,
+.progress_bar { border-radius: 99px !important; overflow: hidden; }
+.achievement_progress_bar,
+.achieveBarProgress,
+.progress_bar .progress { background: var(--ps5-accent) !important; }
+
+/* community headers & tabs */
+.apphub_HomeHeaderContent,
+.apphub_sectionTabs .apphub_sectionTab { border-radius: 10px !important; }
+.pagecontent,
+.maincontent { background: transparent !important; }
+
+/* inputs */
+input[type="text"],
+input[type="search"],
+textarea,
+.searchbox,
+#store_nav_search_term {
+  border-radius: 999px !important;
+}
+textarea { border-radius: 14px !important; }

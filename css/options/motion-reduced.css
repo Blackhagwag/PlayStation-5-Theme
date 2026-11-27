@@ -1,0 +1,8 @@
+/* Animations → Reduced */
+:root { --ps5-motion: reduced; --ps5-ease-time: 1ms; }
+*, *::before, *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+#ps5-bg .ps5-bg-waves { animation: none !important; }

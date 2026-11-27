@@ -1,0 +1,30 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   menus.css: context menus and the Steam / Store / Library dropdowns.
+   ========================================================================== */
+.contextMenu,
+.BasicContextMenuContainer,
+[class*="contextmenu_contextMenu"],
+.SuperNavMenu .MenuPopup {
+  background: rgba(10, 22, 50, 0.96) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--ps5-shadow) !important;
+  padding: 6px !important;
+  overflow: hidden;
+}
+.contextMenuItem,
+[class*="contextmenu_contextMenuItem"] {
+  border-radius: 9px !important;
+  color: var(--ps5-text) !important;
+  font-weight: 500 !important;
+  transition: background 120ms var(--ps5-ease) !important;
+}
+.contextMenuItem:hover,
+.contextMenuItem.active,
+[class*="contextmenu_contextMenuItem"]:hover {
+  background: #fff !important;
+  color: #0b0b0f !important;
+}
+.contextMenuItem.contextMenuItemSeparator,
+.ContextMenuSeparator { background: var(--ps5-line) !important; }

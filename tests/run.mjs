@@ -1,0 +1,147 @@
+// Test harness only: drives js/ps5.js against the mock Steam window in Chromium.
+//   node tests/run.mjs            → checks only
+//   node tests/run.mjs --shots    → also writes README screenshots to assets/
+import { createRequire } from 'node:module';
+const { chromium } = createRequire(import.meta.url)('playwright');
+import { spawn } from 'node:child_process';
+import path from 'node:path';
+const DIR = path.dirname(new URL(import.meta.url).pathname);
+const SHOTS = process.argv.includes('--shots');
+const PORT = 8765;
+const srv = spawn(process.execPath, [path.join(DIR, 'server.mjs')], { env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
+await new Promise(r => setTimeout(r, 600));
+const results = [];
+const check = (name, ok, extra = '') => { results.push([ok, name]); console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${extra ? '  ' + extra : ''}`); };
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 860 }, deviceScaleFactor: SHOTS ? 2 : 1, locale: 'en-US' });
+const page = await ctx.newPage();
+const errors = [];
+page.on('pageerror', e => errors.push(String(e)));
+page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+const shot = async name => { if (SHOTS) await page.screenshot({ path: path.join(DIR, '..', 'assets', name), type: 'jpeg', quality: 82 }); };
+try {
+  await page.goto(`http://localhost:${PORT}/tests/harness.html`);
+  await page.waitForSelector('#ps5-home .ps5-tile.selected', { timeout: 5000 });
+  check('boot overlay shown once', await page.locator('#ps5-boot').count() === 1);
+  await page.waitForTimeout(2600);
+  check('boot overlay removed after animation', await page.locator('#ps5-boot').count() === 0);
+  const tiles = await page.locator('#ps5-home .ps5-tile').count();
+  check('home rail has games + library tile', tiles === 13, `tiles=${tiles}`);
+  check('first tile = most recently played', (await page.locator('.ps5-tile.selected').getAttribute('title')) === 'Neon Drift Racing');
+  check('game list hidden on home', await page.locator('.LeftListSizableContainer').isHidden());
+  check('top bar extras mounted in SuperNavBar', await page.locator('.SuperNavBar > #ps5-top').count() === 1);
+  check('clock shows time', /^\d\d:\d\d$/.test(await page.locator('#ps5-clock').textContent()));
+  check('background art applied', await page.locator('#ps5-bg.has-art').count() === 1);
+  await page.waitForTimeout(400);
+  check('logo art shown', await page.locator('#ps5-home.has-logo').count() === 1);
+  check('description from store API', (await page.locator('.ps5-home-desc').textContent()).includes('"test"'));
+  check('Steam shelves kept under home', await page.locator('#ps5-home + .LibraryHome').count() === 1);
+  await shot('preview-home.jpg');
+
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(300);
+  check('ArrowRight selects next game', (await page.locator('.ps5-tile.selected').getAttribute('title')) === 'Iron Tactics');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(500);
+  check('hidden game skipped on home', (await page.locator('.ps5-tile.selected').getAttribute('title')) === 'Starfall Odyssey');
+  check('achievements card for game with trophies', (await page.locator('.ps5-home-cards').textContent()).includes('34/50'));
+  await page.click('.ps5-btn-play');
+  let calls = await page.evaluate(() => window.__steamCalls);
+  check('Play → SteamClient.Apps.RunGame(appid)', calls.some(c => c[0] === 'RunGame' && c[1] === '101' && c[3] === -1 && c[4] === 100));
+  await shot('preview-home-2.jpg');
+
+  await page.keyboard.press('Control+Shift+KeyL');
+  await page.waitForSelector('#ps5-library.open');
+  await page.waitForTimeout(500);
+  const installedCount = await page.locator('.ps5-gcard').count();
+  check('library: installed tab lists only installed games', installedCount === 28, `cards=${installedCount}`);
+  await shot('preview-library.jpg');
+  await page.click('[data-tab="all"]');
+  await page.waitForTimeout(150);
+  const allCount = await page.locator('.ps5-gcard').count();
+  check('library: first page rendered lazily (60 of 60)', allCount === 60, `cards=${allCount}`);
+  check('library: count label', (await page.locator('.ps5-lib-count').textContent()) === '60 games');
+  await page.locator('.ps5-lib-scroll').evaluate(n => { n.scrollTop = n.scrollHeight; });
+  await page.waitForTimeout(300);
+  check('library: hidden game excluded, shortcut included', await page.locator('.ps5-gcard[data-app="110"]').count() === 0 && await page.locator('.ps5-gcard[data-app="3000000001"]').count() === 1);
+  await page.fill('.ps5-lib-search input', 'neon');
+  await page.waitForTimeout(300);
+  check('library: search filters', await page.locator('.ps5-gcard').count() === 6);
+  await page.fill('.ps5-lib-search input', '');
+  await page.selectOption('.ps5-lib-sort', 'playtime');
+  await page.waitForTimeout(300);
+  check('library: sort by playtime', (await page.locator('.ps5-gcard').first().getAttribute('title')) === 'Pixel Farmstead');
+  await page.click('[data-filter="hidden"]');
+  await page.waitForTimeout(150);
+  check('library: hidden filter shows hidden only', await page.locator('.ps5-gcard').count() === 1);
+  await page.click('[data-filter="hidden"]');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+  check('library: Esc closes', await page.locator('#ps5-library.open').count() === 0);
+
+  await page.keyboard.press('Control+Shift+Space');
+  await page.waitForSelector('#ps5-cc.open');
+  await page.waitForTimeout(450);
+  check('CC: profile card shows persona', (await page.locator('.ps5-cc-card').textContent()).includes('Vasya_PS5'));
+  await shot('preview-control-center.jpg');
+  await page.click('[data-act="status-away"]');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('CC: status → steam://friends/status/away', calls.some(c => c[1] === 'steam://friends/status/away'));
+  await page.click('[data-sec="friends"]');
+  await page.waitForTimeout(350);
+  const fr = await page.locator('.ps5-cc-friend').count();
+  check('CC: online friends listed (offline excluded)', fr === 6, `friends=${fr}`);
+  check('CC: in-game friends first', (await page.locator('.ps5-cc-friend').first().textContent()).includes('Starfall Odyssey') || (await page.locator('.ps5-cc-friend').first().textContent()).includes('Iron Tactics'));
+  await shot('preview-friends.jpg');
+  await page.click('[data-sec="downloads"]');
+  await page.waitForTimeout(350);
+  check('CC: live download progress', (await page.locator('.ps5-cc-dl').textContent()).includes('Iron Tactics') && (await page.locator('.ps5-cc-dl').textContent()).includes('%'));
+  await shot('preview-downloads.jpg');
+  await page.click('[data-sec="power"]');
+  await page.click('[data-act="exit"]');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('CC: exit needs confirmation', !calls.some(c => c[0] === 'StartShutdown'));
+  await page.click('[data-act="exit"]');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('CC: second press → SteamClient.User.StartShutdown', calls.some(c => c[0] === 'StartShutdown'));
+  await page.keyboard.press('Control+Shift+Space');
+  await page.keyboard.press('Control+Shift+Space');
+  await page.waitForTimeout(100);
+  await page.click('[data-sec="music"]');
+  await page.click('[data-act="soundtracks"]');
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('CC: Music → steam://open/library/view/soundtracks', calls.some(c => c[1] === 'steam://open/library/view/soundtracks'));
+  check('CC: closing unregisters download listener', calls.some(c => c[0] === 'UnregisterDownloads'));
+
+  await page.dblclick('.ps5-tile[data-i="0"]');
+  await page.waitForSelector('#ps5-details .ps5-card');
+  await page.waitForTimeout(600);
+  calls = await page.evaluate(() => window.__steamCalls);
+  check('double-click tile → SteamUIStore.Navigate(/library/app/id)', calls.some(c => c[0] === 'Navigate' && c[1] === '/library/app/102'));
+  check('game hub strip placed after the play bar', await page.locator('.PlayBar + #ps5-details').count() === 1);
+  check('game hub: screenshots strip', await page.locator('#ps5-details .ps5-shot').count() === 4);
+  check('game list visible again off home', await page.locator('.LeftListSizableContainer').isVisible());
+  await shot('preview-game.jpg');
+  await page.click('.ps5-shot');
+  await page.waitForTimeout(300);
+  check('screenshot lightbox opens', await page.locator('#ps5-lightbox.open').count() === 1);
+  await page.keyboard.press('Escape');
+
+  await page.evaluate(() => window.SteamUIStore.Navigate('/library/home'));
+  await page.waitForTimeout(300);
+  check('home remounts after route back', await page.locator('#ps5-home').count() === 1);
+
+  await page.evaluate(() => window.__ps5Theme.destroy());
+  await page.waitForTimeout(100);
+  const left = await page.evaluate(() => document.querySelectorAll('[id^="ps5-"]').length);
+  check('destroy() removes every element it built', left === 0, `left=${left}`);
+  check('no page errors', errors.length === 0, errors.join(' | '));
+} catch (e) {
+  check('harness run', false, String(e));
+} finally {
+  await browser.close();
+  srv.kill();
+}
+const failed = results.filter(r => !r[0]).length;
+console.log(`\n${results.length - failed}/${results.length} checks passed`);
+process.exit(failed ? 1 : 0);

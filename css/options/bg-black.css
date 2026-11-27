@@ -1,0 +1,4 @@
+/* Background → Pure black */
+:root { --ps5-bg-mode: black; }
+#ps5-bg { background: #000 !important; }
+#ps5-bg > * { display: none !important; }

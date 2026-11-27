@@ -1,0 +1,2 @@
+/* Steam shelves under Home → Hide */
+.ps5-home-mounted .LibraryHome { display: none !important; }

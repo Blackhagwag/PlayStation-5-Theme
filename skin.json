@@ -1,0 +1,219 @@
+{
+  "name": "PlayStation 5",
+  "description": "A PlayStation 5 style shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, PSN-style profile, glass panels and smooth motion. Not affiliated with Sony Interactive Entertainment.",
+  "author": "Blackhagwag",
+  "version": "1.0.0",
+  "source": "https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme",
+  "github": {
+    "owner": "Blackhagwag",
+    "repo_name": "PlayStation-5-Millennium-Theme"
+  },
+  "tags": ["Dark", "Console", "PlayStation", "Glass", "Animated", "Blue"],
+  "header_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
+  "splash_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
+  "RootColors": "css/root.css",
+  "UseDefaultPatches": false,
+  "Patches": [
+    {
+      "MatchRegexString": "^Steam$",
+      "TargetCss": ["css/shared.css", "css/main.css", "css/components.css"],
+      "TargetJs": "js/ps5.js"
+    },
+    {
+      "MatchRegexString": ".DesktopUI",
+      "TargetCss": "css/shared.css"
+    },
+    {
+      "MatchRegexString": ".friendsui-container",
+      "TargetCss": ["css/shared.css", "css/friends.css"]
+    },
+    {
+      "MatchRegexString": "Menu$",
+      "TargetCss": ["css/shared.css", "css/menus.css"]
+    },
+    {
+      "MatchRegexString": "Supernav$",
+      "TargetCss": ["css/shared.css", "css/menus.css"]
+    },
+    {
+      "MatchRegexString": "^notificationtoasts_",
+      "TargetCss": ["css/shared.css", "css/toasts.css"]
+    },
+    {
+      "MatchRegexString": ".ModalDialogPopup",
+      "TargetCss": "css/shared.css"
+    },
+    {
+      "MatchRegexString": ".FullModalOverlay",
+      "TargetCss": "css/shared.css"
+    }
+  ],
+  "Conditions": {
+    "Home Screen": {
+      "description": "The PS5 Home Screen on top of the library home: a row of your recently played games, the art of the selected game behind everything, Play and activity cards. Steam's own shelves stay below it.",
+      "tab": "Home",
+      "section": "Home Screen",
+      "default": "PlayStation 5",
+      "values": {
+        "PlayStation 5": {},
+        "Steam default": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/home-off.css" }
+        }
+      }
+    },
+    "Home games": {
+      "description": "Which games fill the Home Screen row.",
+      "tab": "Home",
+      "section": "Home Screen",
+      "default": "Recently played (installed)",
+      "values": {
+        "Recently played (installed)": {},
+        "Recently played (whole library)": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/home-all.css" }
+        }
+      }
+    },
+    "Steam shelves under Home": {
+      "description": "Steam's own home shelves (recent games, What's New, your shelves) under the PS5 Home Screen.",
+      "tab": "Home",
+      "section": "Home Screen",
+      "default": "Show",
+      "values": {
+        "Show": {},
+        "Hide": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/shelves-hide.css" }
+        }
+      }
+    },
+    "Game list on Home": {
+      "description": "Steam's game list (left sidebar) while the Home Screen is open. Hidden gives the full-width console look; the list is back on every other page.",
+      "tab": "Home",
+      "section": "Layout",
+      "default": "Hidden",
+      "values": {
+        "Hidden": {},
+        "Visible": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/sidebar-home-show.css" }
+        }
+      }
+    },
+    "Accent color": {
+      "description": "Highlight color for buttons, focus and progress bars. 'Colors tab' uses the Accent value from the Colors tab of this theme.",
+      "tab": "Look",
+      "section": "Colors",
+      "default": "Colors tab",
+      "values": {
+        "Colors tab": {},
+        "Cosmic Red": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-red.css" }
+        },
+        "Nova Pink": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-pink.css" }
+        },
+        "Galactic Purple": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-purple.css" }
+        },
+        "Starlight Blue": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-starlight.css" }
+        },
+        "Volcanic Orange": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-orange.css" }
+        }
+      }
+    },
+    "Background": {
+      "description": "What sits behind the glass in the main window.",
+      "tab": "Look",
+      "section": "Background",
+      "default": "Game art",
+      "values": {
+        "Game art": {},
+        "PS5 ambient waves": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/bg-waves.css" }
+        },
+        "Pure black": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/bg-black.css" }
+        }
+      }
+    },
+    "Background blur": {
+      "description": "How soft the game art behind the interface is.\n[i]Default: 0px (sharp, like the PS5 Home Screen)[/i]",
+      "tab": "Look",
+      "section": "Background",
+      "default": 0,
+      "slider": {
+        "cssVariable": "--ps5-bg-blur",
+        "min": 0,
+        "max": 60,
+        "step": 2,
+        "unit": "px"
+      }
+    },
+    "Animations": {
+      "description": "Full: PS5 motion for cards, panels and the background. Reduced: almost instant, for slow machines.",
+      "tab": "Look",
+      "section": "Motion",
+      "default": "Full",
+      "values": {
+        "Full": {},
+        "Reduced": {
+          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay"], "src": "css/options/motion-reduced.css" }
+        }
+      }
+    },
+    "Boot animation": {
+      "description": "The short PS5-style start-up fade when the Steam window opens.",
+      "tab": "Look",
+      "section": "Motion",
+      "default": "On",
+      "values": {
+        "On": {},
+        "Off": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/boot-off.css" }
+        }
+      }
+    },
+    "Clock": {
+      "description": "The clock in the top bar, as on the PS5.",
+      "tab": "Look",
+      "section": "Top bar",
+      "default": "24-hour",
+      "values": {
+        "24-hour": {},
+        "12-hour": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/clock-12.css" }
+        },
+        "Hidden": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/clock-off.css" }
+        }
+      }
+    },
+    "Store and Community": {
+      "description": "PS5 colors, glass and rounded cards on the Store, Community and Profile pages (PlayStation Network style profile).",
+      "tab": "Web pages",
+      "section": "Store and Community",
+      "default": "PS5 style",
+      "values": {
+        "PS5 style": {
+          "TargetCss": { "affects": ["https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/webkit/web.css" }
+        },
+        "Steam default": {}
+      }
+    },
+    "Theme language": {
+      "description": "Language of the text this theme draws itself (Home Screen, Control Center, Game Library). Auto follows your system language.",
+      "tab": "General",
+      "section": "Language",
+      "default": "Auto",
+      "values": {
+        "Auto": {},
+        "English": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/lang-en.css" }
+        },
+        "Русский": {
+          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/lang-ru.css" }
+        }
+      }
+    }
+  }
+}

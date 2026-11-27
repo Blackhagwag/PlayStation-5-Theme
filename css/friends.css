@@ -1,0 +1,82 @@
+/* ==========================================================================
+   PlayStation 5 — Millennium theme
+   friends.css: Friends list and chat windows ("Game Base" look).
+   ========================================================================== */
+
+body.friendsui-container,
+.friendsui-container,
+.friendsui-container .FriendsListContent,
+.friendsui-container .friendlist,
+.friendsui-container .chat_main,
+.friendsui-container .ChatRoomGroupDialog {
+  background: linear-gradient(180deg, #0b1a3c 0%, #050912 70%) !important;
+  color: var(--ps5-text) !important;
+}
+
+/* own persona header */
+.friendsui-container .currentUserContainer,
+.friendsui-container .friendListHeaderContainer {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-bottom: 1px solid var(--ps5-line) !important;
+}
+.friendsui-container .currentUserAvatar img,
+.friendsui-container .avatarHolder img,
+.friendsui-container .playerAvatar img {
+  border-radius: 50% !important;
+}
+.friendsui-container .avatarHolder .avatarStatus,
+.friendsui-container .avatarStatus { border-radius: 50% !important; }
+
+/* group headers */
+.friendsui-container .friendGroup .groupName,
+.friendsui-container .friendsListSectionTitle,
+.friendsui-container .friendGroupHeader {
+  color: var(--ps5-text-2) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+}
+
+/* friend rows */
+.friendsui-container .friend {
+  border-radius: 12px !important;
+  margin: 2px 6px !important;
+  transition: background var(--ps5-t) var(--ps5-ease) !important;
+}
+.friendsui-container .friend:hover { background: var(--ps5-glass-hover) !important; }
+.friendsui-container .friend.ingame .playerName,
+.friendsui-container .friend .playerName.ingame { color: #8fd4ff !important; }
+.friendsui-container .friend .playerNickname,
+.friendsui-container .friend .richPresenceContainer { color: var(--ps5-text-3) !important; }
+
+/* chat */
+.friendsui-container .chatTabSetContainer,
+.friendsui-container .chatTabs,
+.friendsui-container .chatTab {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.friendsui-container .chatTab.chatTabSelected,
+.friendsui-container .chatTab.active { background: rgba(255, 255, 255, 0.12) !important; border-radius: 10px 10px 0 0 !important; }
+.friendsui-container .chatEntry,
+.friendsui-container .chatentry_chatTextarea,
+.friendsui-container textarea {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: 14px !important;
+  color: var(--ps5-text) !important;
+}
+.friendsui-container .chatSubmitButton,
+.friendsui-container .submitButton {
+  background: var(--ps5-accent) !important;
+  border-radius: 999px !important;
+}
+.friendsui-container .ChatMessageBlock .speakerName,
+.friendsui-container .speakerName { color: #fff !important; font-weight: 700 !important; }
+.friendsui-container .speakerTimeStamp { color: var(--ps5-text-3) !important; }
+
+/* voice */
+.friendsui-container .VoiceControlPanel,
+.friendsui-container .activeVoiceControls {
+  background: rgba(0, 112, 209, 0.18) !important;
+  border-radius: 14px !important;
+}

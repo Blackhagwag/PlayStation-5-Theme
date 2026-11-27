@@ -1,0 +1,4 @@
+/* Background → PS5 ambient waves: no game art, only the animated PS5 waves */
+:root { --ps5-bg-mode: waves; }
+#ps5-bg .ps5-bg-layer { display: none !important; }
+#ps5-bg .ps5-bg-waves { opacity: 1 !important; }

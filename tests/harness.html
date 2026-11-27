@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Steam</title>
+<link rel="stylesheet" href="../css/root.css">
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../css/components.css">
+<style>
+ /* the mock's own skeleton (Steam's real layout comes from Steam) */
+ html,body{margin:0;height:100%;overflow:hidden;color:#fff}
+ #popup_target{display:flex;flex-direction:column;height:100%}
+ .TitleBar{height:32px;display:flex;justify-content:flex-end;align-items:center;padding:0 8px;flex:none}
+ .TitleBarControls{display:flex;gap:4px}.TitleBarControls .Button{width:28px;height:24px;display:grid;place-items:center;opacity:.6}
+ .ContentFrame{flex:1;display:flex;flex-direction:column;min-height:0}
+ .LocalContentContainer,.Library{flex:1;display:flex;min-height:0}
+ .LeftListSizableContainer{width:270px;display:flex;flex-direction:column}
+ .LeftListSizableContainer .Container{padding:10px;font-size:13px;overflow:auto}
+ .LeftListSizableContainer .row{padding:6px 10px}
+ .MainPanel{flex:1;min-width:0;display:flex;flex-direction:column}
+ .AppDetailsTransitionGroup{flex:1;overflow:auto;position:relative}
+ .LibraryHome{padding:20px 56px}.LibraryHome .Shelf{display:flex;gap:14px}.LibraryHome .LibraryItemBox{width:150px;height:225px;background:#223}
+ .Header .TopCapsule{position:relative;height:52vh}.HeaderBackgroundImage img{width:100%;height:100%;object-fit:cover}
+ .PlayBar{display:flex;align-items:center;gap:30px;padding:16px 28px}
+ .PlayButton{height:44px;border:none;font-size:16px;padding:0 28px}
+ .BottomBar{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:13px}
+</style></head>
+<body class="DesktopUI">
+<div id="popup_target">
+  <div class="TitleBar"><div class="TitleBarControls"><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
+  <div class="SuperNavBar">
+    <div class="SuperNavMenu"><div class="MenuButton">Store</div></div>
+    <div class="SuperNavMenu Selected"><div class="MenuButton">Library</div></div>
+    <div class="SuperNavMenu"><div class="MenuButton">Community</div></div>
+  </div>
+  <div class="ContentFrame"><div class="LocalContentContainer"><div class="Library">
+    <div class="LeftListSizableContainer"><div class="Container"><div class="row">Starfall Odyssey</div><div class="row Selected">Neon Drift Racing</div><div class="row">Hollow Kingdom</div></div></div>
+    <div class="LibraryWindowDivider"></div>
+    <div class="MainPanel"><div class="AppDetailsTransitionGroup" id="route"></div></div>
+  </div></div></div>
+  <div class="BottomBar"><div class="DownloadStatus">Downloads</div><div class="FriendsButton">Friends &amp; Chat</div></div>
+</div>
+<script src="mock-steam.js"></script>
+<script>
+ window.__mockRoute = p => {
+   const r = document.getElementById('route');
+   const m = /^\/library\/app\/(\d+)/.exec(p);
+   if (m) {
+     r.innerHTML = `<div class="AppDetailsMain"><div class="Header"><div class="TopCapsule"><div class="HeaderBackgroundImage"><img src="/assets/${m[1]}/library_hero.jpg"></div></div></div><div class="PlayBar"><div class="PlayButtonContainer"><button class="PlayButton">▶ PLAY</button></div><div><div class="PlayBarLabel">Last played</div><div class="PlayBarDetailLabel">Today</div></div></div><div class="AppDetailsOverviewPanel" style="padding:20px 28px;height:600px"><div class="AppDetailsSectionContainer" style="padding:16px">Steam activity feed (native)</div></div></div>`;
+   } else {
+     r.innerHTML = `<div class="Body InnerContainer"><div class="LibraryHome"><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div>`;
+   }
+ };
+ window.__mockRoute('/library/home');
+</script>
+<script type="module" src="../js/ps5.js"></script>
+</body></html>
