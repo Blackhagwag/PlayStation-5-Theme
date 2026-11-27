@@ -24,6 +24,8 @@ Real captures from a Steam client running the theme:
 | ![Store](assets/real/store.jpg) | ![Store product page](assets/real/store-game.jpg) |
 | **Library game page** | **Control Center (profile)** |
 | ![Library game page](assets/real/game-page.jpg) | ![Control Center](assets/real/control-center.jpg) |
+| **Wishlist grid** | |
+| ![Wishlist](assets/real/wishlist.jpg) | |
 
 *Friends' names and avatars are blurred in the real captures.*
 
