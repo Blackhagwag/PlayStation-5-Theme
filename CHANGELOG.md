@@ -4,6 +4,13 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.5.2] — 2026-11-27 — Real Library & Control Center Screenshots
+
+### Added
+- Real captures of the **library game page** (Portal 2) and the **Control Center** profile
+  panel (`assets/real/game-page.jpg`, `assets/real/control-center.jpg`) in the README gallery;
+  friends' names and avatars are blurred. The theme's files are unchanged from 1.5.1.
+
 ## [1.5.1] — 2026-11-27 — Real Screenshots & Wishlist Width
 
 ### Added

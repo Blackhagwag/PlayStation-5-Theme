@@ -22,6 +22,10 @@ Real captures from a Steam client running the theme:
 | PlayStation Store | Store product page |
 |---|---|
 | ![Store](assets/real/store.jpg) | ![Store product page](assets/real/store-game.jpg) |
+| **Library game page** | **Control Center (profile)** |
+| ![Library game page](assets/real/game-page.jpg) | ![Control Center](assets/real/control-center.jpg) |
+
+*Friends' names and avatars are blurred in the real captures.*
 
 Rendered by the test harness (placeholder game art):
 
