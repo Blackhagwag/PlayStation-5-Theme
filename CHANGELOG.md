@@ -4,6 +4,28 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases).
 
+## [1.8.0] — 2026-11-27 — Cart & Checkout
+
+### Added
+- **Cart in the PS5 look**: every line a rounded card with the white focus ring on hover,
+  rounded capsules, the total as a glass card with the accent light and **"Continue to
+  payment" as the white PS5 button**, pill buttons and dropdowns, the "digital item" notice
+  as an accent card, Steam's full-width background art removed. The cart is a React page
+  whose class names change with Steam updates, so `js/web.js` finds the lines, the total box
+  and the background layer by structure (only attributes are added; Steam's buttons and their
+  handlers are untouched); the class names captured by Aika stay as a fallback.
+- **Checkout in the PS5 look** (`checkout.steampowered.com` — payment info, review, receipt),
+  **CSS only**: no theme script runs on payment pages and nothing reads, shows or changes what is
+  typed. Steps as pills (current one white, Steam's PNG notches gone), panels and side blocks as
+  glass cards, pill fields with the PS5 focus ring, pill dropdowns, Steam's lime buttons as the
+  white PS5 button, centred review rows, totals, Steam Points banner, receipt.
+- **A PS5 payment card** over the card form: it lights up while the card number is focused and
+  swings to its back ("CVC •••") for the security code — placeholders only, no field value is
+  read or drawn.
+- *Store and Community → Steam default* now also switches checkout back to Steam's look (a CSS
+  style query on the option's variable; a browser without style queries keeps Steam's look).
+- Tests: cart and checkout pages — 222 checks.
+
 ## [1.7.0] — 2026-11-27 — Chat Redo, Sign-in & Settings Windows
 
 Following the Aika theme's approach (studied, not copied: Aika has no licence), adapted to PS5.

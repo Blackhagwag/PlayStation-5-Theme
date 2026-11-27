@@ -48,6 +48,8 @@ Rendered by the test harness (placeholder game art):
 | ![Friends list](assets/preview-friends-list.jpg) | ![Chat](assets/preview-chat.jpg) |
 | **Profile tab: Friends** | **Steam Settings** |
 | ![Community friends](assets/preview-community-friends.jpg) | ![Settings](assets/preview-settings.jpg) |
+| **Cart** | **Checkout (CSS only)** |
+| ![Cart](assets/preview-cart.jpg) | ![Checkout](assets/preview-checkout.jpg) |
 | **Sign in: "Who's playing?"** | **Signing in** |
 | ![Account chooser](assets/preview-login-chooser.jpg) | ![Signing in](assets/preview-login.jpg) |
 | **What's New + bottom bar** | **Profile panel over the Store** |
@@ -78,6 +80,9 @@ Rendered by the test harness (placeholder game art):
 - **Game actions menu** — "…" on the Home Screen: Play, Game hub, Store page, Achievements,
   Screenshots, Community hub, Controller layout, Desktop shortcut, Properties, Uninstall — all
   real Steam actions.
+- **Cart and checkout** — cart lines as cards, the total with a white "Continue to payment",
+  checkout steps, fields and buttons in the PS5 look with a PS5 payment card; checkout is
+  styled with CSS only (no script on payment pages, nothing typed is read).
 - **Wishlist** — a PS5 grid on your real wishlist (Steam's Web API): covers, prices,
   discounts, reviews, date added, Add to Cart and remove through Steam, search, sorting,
   "On sale" filter; one click back to Steam's own list.
@@ -193,7 +198,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 215 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 222 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

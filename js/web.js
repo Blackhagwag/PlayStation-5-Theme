@@ -706,6 +706,41 @@
     return { init };
   })();
 
+  // ---- v1.8.0: the cart (React, hashed class names that change with Steam updates) ----
+  // Marks by structure instead: data-ps5-cart="item" on each line (the wide row around a
+  // product capsule — recommendation capsules are narrow), "total" on the box around the
+  // primary "Continue to payment" button, "bg" on the full-width background-art layer.
+  // Only attributes are added; Steam's buttons and their handlers are untouched.
+  const markCart = () => {
+    if (state.kind !== 'cart') return;
+    const scope = document.querySelector('#StoreTemplate') || document.querySelector('.page_content_ctn') || document.body;
+    const page = scope.getBoundingClientRect().width || innerWidth;
+    for (const a of scope.querySelectorAll('a[href*="/app/"], a[href*="/sub/"], a[href*="/bundle/"]')) {
+      if (!a.querySelector('img') || a.closest('[data-ps5-cart="item"], header, footer, #global_header')) continue;
+      let row = a;
+      for (let i = 0; i < 7 && row.parentElement && row.parentElement !== scope; i++) {
+        row = row.parentElement;
+        const w = row.getBoundingClientRect().width;
+        if (w >= 420 && w < page - 4 && row.querySelectorAll('button, [role="button"], a').length >= 2) break;
+      }
+      const w = row.getBoundingClientRect().width;
+      if (row !== a && w >= 420 && w < page - 4) row.setAttribute('data-ps5-cart', 'item');
+    }
+    const primary = scope.querySelector('.DialogButton.Primary, button.Primary, [class*="Primary"][role="button"]');
+    if (primary) {
+      let box = primary;
+      while (box.parentElement && box.parentElement !== scope) {
+        const p = box.parentElement;
+        if (p.getBoundingClientRect().width > box.getBoundingClientRect().width * 1.3 && box.getBoundingClientRect().height >= 80) break;
+        box = p;
+      }
+      if (box !== primary && !box.hasAttribute('data-ps5-cart')) box.setAttribute('data-ps5-cart', 'total');
+    }
+    for (const el of scope.querySelectorAll('[style*="background-image"]')) {
+      if (/page_bg|library_hero|store_item_assets.*\/(page_bg|bg)/i.test(el.getAttribute('style') || '') && el.getBoundingClientRect().width >= page - 4) el.setAttribute('data-ps5-cart', 'bg');
+    }
+  };
+
   let last = 0, timer = 0, observer = null;
   const pass = () => {
     timer = 0;
@@ -726,6 +761,7 @@
     try { buildHero(); } catch (e) { console.warn('[PS5] store hero', e); }
     try { markArrows(); } catch (e) { /* arrows keep Steam's look */ }
     Wish.init();
+    try { markCart(); } catch (e) { /* the cart keeps Steam's layout */ }
   };
   const soon = () => {
     if (timer) return;

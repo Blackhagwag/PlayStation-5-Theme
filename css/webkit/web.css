@@ -2496,4 +2496,282 @@ a.ps5-wcard-name { color: #fff !important; font-size: 14px; font-weight: 700; li
   color: #fff !important;
 }
 
+/* ═══════════════ v1.8.0 — CART (store.steampowered.com/cart, React) ═══════════════
+   js/web.js marks the lines (data-ps5-cart="item"), the total box ("total") and the
+   background-art layer ("bg") by structure; Aika's captured class names of the two cart
+   engines are kept as a fallback (.XjPmFc2t_i1DAuEXEbIX / ._2bIzQo07mxubFvscA8RIA8,
+   .i-xXuvHLioU- / .i1XZFikuzME-, notices .jY9l4aHTdQLHeTWfPonTr / .nfxC9n3FRVE-). */
+&.ps5-p-cart [data-ps5-cart="bg"],
+&.ps5-p-cart #StoreTemplate .otLXAz3VIiY- { background-image: none !important; background-color: transparent !important; }
+&.ps5-p-cart :is(h1, h2) { color: #fff !important; font-weight: 800 !important; letter-spacing: -0.02em !important; text-transform: none !important; }
+&.ps5-p-cart :is(.XjPmFc2t_i1DAuEXEbIX, .i-xXuvHLioU-) {
+  padding: 16px !important;
+  border-radius: 22px !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-cart [data-ps5-cart="item"] {
+  margin-bottom: 8px !important;
+  padding: 12px 14px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  transition: box-shadow 220ms var(--ps5-ease), background 220ms var(--ps5-ease) !important;
+}
+&.ps5-p-cart [data-ps5-cart="item"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 2px #fff, var(--ps5-shadow) !important;
+}
+&.ps5-p-cart [data-ps5-cart="item"] img { border-radius: 12px !important; }
+&.ps5-p-cart [data-ps5-cart="item"] a:not(:has(img)) { color: #fff !important; font-weight: 700 !important; }
+&.ps5-p-cart [data-ps5-cart="total"],
+&.ps5-p-cart :is(._2bIzQo07mxubFvscA8RIA8, .i1XZFikuzME-) {
+  padding: 20px !important;
+  border: none !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(120% 120% at 100% 0%, var(--ps5-accent-soft), transparent 60%),
+    var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+  color: var(--ps5-ink-2) !important;
+}
+&.ps5-p-cart :is([data-ps5-cart="total"], ._2bIzQo07mxubFvscA8RIA8, .i1XZFikuzME-) :is(.DialogButton.Primary, button.Primary) {
+  height: 46px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  background-image: none !important;
+  color: #0b0b0f !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 26px -12px rgba(255, 255, 255, 0.55) !important;
+  transition: transform 200ms var(--ps5-ease) !important;
+}
+&.ps5-p-cart :is([data-ps5-cart="total"], ._2bIzQo07mxubFvscA8RIA8, .i1XZFikuzME-) :is(.DialogButton.Primary, button.Primary):hover { transform: scale(1.02); }
+&.ps5-p-cart :is(.DialogButton:not(.Primary), .DialogDropDown) {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  color: #fff !important;
+}
+&.ps5-p-cart :is(.DialogButton:not(.Primary), .DialogDropDown):hover { box-shadow: 0 0 0 2px #fff !important; }
+&.ps5-p-cart :is(.jY9l4aHTdQLHeTWfPonTr, .nfxC9n3FRVE-) {
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--ps5-accent) 14%, transparent) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px rgba(143, 212, 255, 0.3) !important;
+}
+&.ps5-p-cart :is(._31DQWsrdb_9oV-vMOaaPqI, .bi47TlP7SSw-, ._2Wg3oyIvxKKM_o6q7rXdc5, .YrxkWXNtDMU-) { color: var(--ps5-ink-3) !important; }
+&.ps5-p-cart .hAT7-qU1HuU- { border-radius: 12px !important; overflow: hidden; }
+&.ps5-p-cart footer._36eiL2GCxdc- { background: transparent !important; border-top: 1px solid var(--ps5-line) !important; }
+
+}
+
+/* ═══════════════ v1.8.0 — CHECKOUT (checkout.steampowered.com, body.v6.checkout) ═══════════════
+   Payment pages: no theme script runs here (Millennium injects none into checkout, and
+   js/web.js would leave it alone anyway), so this block is CSS only and is scoped by
+   Steam's own body.v6.checkout instead of html.ps5-web. Nothing reads, shows or changes
+   what is typed into a field; forms, buttons and their order stay Steam's.
+   "Store and Community → Steam default" turns it off through a style query on --ps5-web
+   (a browser without style queries simply keeps Steam's look).
+   Steam markup (readable): .page_header_ctn, #checkout_pipeline / #receipt_pipeline
+   .cart_tab(_on, _left_on, _right_on), .checkout_content h3.tab_header,
+   .payment_info_form_area, .form_row label + input.text, .dselect_container button.trigger,
+   #submit_payment_info_btn, #purchase_button_bottom (.btnv6_green_white_innerfade),
+   .rightcol .block (.block_header, .block_content), .checkout_steam_rewards_banner,
+   .checkout_review_cart_item (.checkout_review_item_img/_desc/_price),
+   .checkout_content.confirm (.cart_totals_area, .cart_total_rule, .rule),
+   .purchase_summary_area, .receipt_body, .payment_method_review_method_label, #accept_ssa */
+@container not style(--ps5-web: off) {
+  html body.v6.checkout {
+    background:
+      radial-gradient(90% 55% at 100% 0%, color-mix(in srgb, var(--ps5-accent) 28%, transparent), transparent 60%),
+      linear-gradient(180deg, #071640 0%, #030a22 50%, #00040f 100%) !important;
+    background-attachment: fixed !important;
+    color: var(--ps5-ink-2) !important;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif !important;
+  }
+  html body.v6.checkout .page_header_ctn { background: transparent !important; background-image: none !important; border: none !important; }
+  html body.v6.checkout :is(h1, h2, .pageheader) { color: #fff !important; font-weight: 800 !important; letter-spacing: -0.02em !important; text-transform: none !important; }
+
+  /* steps: Steam's blue tabs with PNG notches → PS5 pills */
+  html body.v6.checkout :is(#checkout_pipeline, #receipt_pipeline) .cart_tab {
+    border-radius: 999px !important;
+    background: var(--ps5-field) !important;
+    background-image: none !important;
+    color: var(--ps5-ink-2) !important;
+    margin-right: 6px !important;
+  }
+  html body.v6.checkout :is(#checkout_pipeline, #receipt_pipeline) .cart_tab_on {
+    border-radius: 999px !important;
+    background: #fff !important;
+    background-image: none !important;
+    color: #0b0b0f !important;
+  }
+  html body.v6.checkout :is(#checkout_pipeline, #receipt_pipeline) .cart_tab_on * { color: #0b0b0f !important; }
+  html body.v6.checkout :is(#checkout_pipeline, #receipt_pipeline) :is(.cart_tab_left_on, .cart_tab_right_on, .cart_tab_left, .cart_tab_right) { display: none !important; }
+
+  /* headings and panels */
+  html body.v6.checkout .checkout_content h3.tab_header {
+    color: #fff !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+  html body.v6.checkout :is(.payment_info_form_area, .checkout_review_cart_item, .checkout_content.confirm,
+    .purchase_summary_area, .receipt_body, .checkout_receipt_gift_detail, .rightcol .block) {
+    border: none !important;
+    border-radius: 20px !important;
+    background: var(--ps5-glass) !important;
+    background-image: none !important;
+    box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+  }
+  html body.v6.checkout .payment_info_form_area,
+  html body.v6.checkout .checkout_content.confirm { padding: 20px !important; }
+  html body.v6.checkout .rightcol .block { overflow: hidden; }
+  html body.v6.checkout .rightcol .block .block_header {
+    padding: 14px 16px 4px !important;
+    border: none !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+  }
+  html body.v6.checkout .rightcol .block .block_content { padding: 4px 16px 14px !important; background: transparent !important; color: var(--ps5-ink-2) !important; }
+
+  /* fields: pills with the white PS5 focus ring */
+  html body.v6.checkout .form_row label,
+  html body.v6.checkout .review_row_label,
+  html body.v6.checkout .receipt_confirmation_label { color: var(--ps5-ink-2) !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; }
+  html body.v6.checkout .checkout_content input.text {
+    height: 40px !important;
+    padding: 0 16px !important;
+    border: none !important;
+    border-radius: 999px !important;
+    background: var(--ps5-field) !important;
+    box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+    color: #fff !important;
+    box-sizing: border-box;
+  }
+  html body.v6.checkout .checkout_content input.text:hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24) !important; }
+  html body.v6.checkout .checkout_content input.text:focus { outline: none !important; box-shadow: var(--ps5-focus) !important; }
+  html body.v6.checkout .checkout_content .dselect_container button.trigger {
+    height: 40px !important;
+    border: none !important;
+    border-radius: 999px !important;
+    background: var(--ps5-field) !important;
+    background-image: none !important;
+    box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+    color: #fff !important;
+  }
+  html body.v6.checkout .checkout_content .dselect_container button:is(.trigger:hover, .activetrigger) { box-shadow: 0 0 0 2px #fff !important; }
+  html body.v6.checkout .dselect_container .dropcontainer ul,
+  html body.v6.checkout .dropcontainer {
+    border: none !important;
+    border-radius: 14px !important;
+    background: var(--ps5-glass-strong) !important;
+    box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+  }
+  html body.v6.checkout .dropcontainer a:hover { background: var(--ps5-accent) !important; color: #fff !important; }
+  html body.v6.checkout #accept_ssa { accent-color: var(--ps5-accent); width: 18px; height: 18px; }
+
+  /* the main buttons: Steam's lime gradient → the white PS5 button */
+  html body.v6.checkout :is(#submit_payment_info_btn, #purchase_button_bottom, .btnv6_green_white_innerfade) {
+    border: none !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+    background-image: none !important;
+    box-shadow: 0 10px 26px -12px rgba(255, 255, 255, 0.55) !important;
+    transition: transform 200ms var(--ps5-ease) !important;
+  }
+  html body.v6.checkout :is(#submit_payment_info_btn, #purchase_button_bottom, .btnv6_green_white_innerfade) > span {
+    border-radius: 999px !important;
+    background: transparent !important;
+    background-image: none !important;
+    color: #0b0b0f !important;
+    font-weight: 700 !important;
+  }
+  html body.v6.checkout :is(#submit_payment_info_btn, #purchase_button_bottom, .btnv6_green_white_innerfade):hover { transform: scale(1.02); }
+  html body.v6.checkout :is(.btnv6_blue_hoverfade, .btn_grey_white_innerfade, .btnv6_grey_black) {
+    border: none !important;
+    border-radius: 999px !important;
+    background: var(--ps5-field) !important;
+    background-image: none !important;
+  }
+  html body.v6.checkout :is(.btnv6_blue_hoverfade, .btn_grey_white_innerfade, .btnv6_grey_black) > span { background: transparent !important; color: #fff !important; border-radius: 999px !important; }
+
+  /* review: centred item rows, totals, payment method */
+  html body.v6.checkout .checkout_review_cart_item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px;
+    min-height: 0 !important;
+    margin-bottom: 8px !important;
+    padding: 10px 14px !important;
+  }
+  html body.v6.checkout .checkout_review_cart_item > :is(.checkout_review_item_img, .checkout_review_item_desc, .checkout_review_item_price) { float: none !important; padding-top: 0 !important; }
+  html body.v6.checkout .checkout_review_cart_item > .checkout_review_item_desc { flex: 1 1 auto; color: #fff !important; font-weight: 600 !important; }
+  html body.v6.checkout .checkout_review_cart_item > .checkout_review_item_price { color: #fff !important; font-weight: 800 !important; }
+  html body.v6.checkout .checkout_review_item_img img { border-radius: 10px !important; display: block; }
+  html body.v6.checkout :is(.cart_total_rule, .checkout_content .rule) { border: none !important; height: 1px !important; background: var(--ps5-line) !important; }
+  html body.v6.checkout .cart_totals_area { color: #fff !important; }
+  html body.v6.checkout .payment_method_review_method_label { color: #8fd4ff !important; font-weight: 700 !important; }
+  html body.v6.checkout .receipt_confirmation_data { color: #fff !important; }
+  html body.v6.checkout .checkout_footer_notes { color: var(--ps5-ink-3) !important; }
+  html body.v6.checkout .checkout_steam_rewards_banner {
+    border: none !important;
+    border-radius: 20px !important;
+    background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--ps5-accent) 40%, transparent), transparent 60%), var(--ps5-glass) !important;
+    box-shadow: inset 0 0 0 1px rgba(143, 212, 255, 0.35) !important;
+  }
+  html body.v6.checkout .checkout_steam_rewards_banner :is(#reward_points_to_earn, #reward_points_earned) {
+    background: none !important;
+    -webkit-text-fill-color: #fff !important;
+    color: #fff !important;
+  }
+
+  /* a PS5-style payment card over the card form: it follows the focused field only (front
+     for the number / name / expiry, back for the security code) and shows placeholders —
+     no field value is read or drawn */
+  html body.v6.checkout:has(#card_number) .rightcol { perspective: 900px; }
+  html body.v6.checkout:has(#card_number) .rightcol::before {
+    content: "•••• •••• •••• ••••";
+    display: flex;
+    align-items: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1.586;
+    margin-bottom: 14px;
+    padding: 0 22px 24%;
+    border-radius: 18px;
+    background:
+      radial-gradient(60% 50% at 85% 15%, rgba(255, 255, 255, 0.35), transparent 60%),
+      radial-gradient(10px 8px at 30px 40%, #e8d28a 60%, transparent 62%),
+      linear-gradient(135deg, var(--ps5-accent) 0%, #0a2c78 55%, #050e2a 100%);
+    box-shadow: 0 20px 44px -18px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+    font: 700 18px/1 "Inter", system-ui, sans-serif;
+    letter-spacing: 0.12em;
+    transition: box-shadow 300ms ease;
+  }
+  html body.v6.checkout:has(#card_number:focus) .rightcol::before { box-shadow: 0 0 0 2px #fff, 0 20px 44px -18px rgba(0, 0, 0, 0.9); }
+  /* the back for the security code: a magnetic strip and a CVC box, swung in */
+  html body.v6.checkout:has(#security_code:focus) .rightcol::before {
+    content: "CVC •••";
+    justify-content: flex-end;
+    padding-bottom: 30%;
+    background:
+      linear-gradient(180deg, transparent 14%, #05070f 14%, #05070f 32%, transparent 32%),
+      linear-gradient(135deg, #0a2c78 0%, #050e2a 100%);
+    box-shadow: 0 0 0 2px #fff, 0 20px 44px -18px rgba(0, 0, 0, 0.9);
+    animation: ps5-card-flip 420ms var(--ps5-ease);
+  }
+  @keyframes ps5-card-flip {
+    from { transform: rotateY(90deg); }
+    to { transform: none; }
+  }
 }

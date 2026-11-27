@@ -447,7 +447,7 @@ try {
     const res = await fetch(u);
     r.fulfill({ status: res.status, contentType: res.headers.get('content-type') || 'image/svg+xml', body: Buffer.from(await res.arrayBuffer()) });
   });
-  await wp.route(/https:\/\/(store\.steampowered\.com|steamcommunity\.com|example\.com)\/.*/, r => {
+  await wp.route(/https:\/\/(store\.steampowered\.com|steamcommunity\.com|checkout\.steampowered\.com|example\.com)\/.*/, r => {
     if (/\/api\//.test(r.request().url())) return r.fallback();
     const fn = WEB[r.request().url()];
     r.fulfill(fn ? { status: 200, contentType: 'text/html', body: fn() } : { status: 404, body: '' });
@@ -649,6 +649,31 @@ try {
   await wp.waitForTimeout(300);
   const sc = await wp.evaluate(() => [getComputedStyle(document.querySelector('#st-1')).backgroundColor, getComputedStyle(document.querySelector('#pm-1 .imgWallItem')).borderTopLeftRadius, getComputedStyle(document.querySelector('#pm-1 .imgWallItem')).borderTopWidth]);
   check('content tabs: white active pill, rounded wall without Steam\'s black border', /ps5-p-screenshots/.test(await cls()) && sc[0] === 'rgb(255, 255, 255)' && sc[1] === '14px' && sc[2] === '0px', sc.join(' '));
+  // ---- v1.8.0: cart + checkout
+  await wp.goto('https://store.steampowered.com/cart/');
+  await wp.waitForTimeout(500);
+  const cart = await wp.evaluate(() => {
+    const g = s => document.querySelector(s);
+    return { item: g('#cl-1').dataset.ps5Cart, total: g('#ct-1').dataset.ps5Cart, recs: !!document.querySelector('.recs [data-ps5-cart]'), bg: g('.cartbg').dataset.ps5Cart,
+      itemR: getComputedStyle(g('#cl-1')).borderTopLeftRadius, btn: getComputedStyle(g('#ct-1 .DialogButton.Primary')), bgImg: getComputedStyle(g('.cartbg')).backgroundImage };
+  });
+  check('cart: lines and the total box found by structure (recommendations left alone)', cart.item === 'item' && cart.total === 'total' && !cart.recs, `${cart.item} ${cart.total} recs=${cart.recs}`);
+  const cbtn = await wp.locator('#ct-1 .DialogButton.Primary').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius]);
+  check('cart: lines as rounded cards, "Continue to payment" as the white PS5 button', cart.itemR === '18px' && cbtn[0] === 'rgb(255, 255, 255)' && cbtn[1] === '999px', `${cart.itemR} ${cbtn.join(' ')}`);
+  check('cart: Steam\'s full-width background art removed', cart.bg === 'bg' && cart.bgImg === 'none', cart.bgImg);
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-cart.jpg'), type: 'jpeg', quality: 82 });
+  await wp.goto('https://checkout.steampowered.com/checkout/?purchasetype=self');
+  await wp.waitForTimeout(400);
+  const co = await wp.evaluate(() => { const c = (s, p) => getComputedStyle(document.querySelector(s), p); return [c('#tab-on').backgroundColor, c('#pf').borderTopLeftRadius, c('#card_number').borderTopLeftRadius, c('#submit_payment_info_btn').backgroundColor, c('.cart_tab_left_on').display, c('.rightcol', '::before').content, document.documentElement.className]; });
+  check('checkout: CSS-only PS5 look (no theme script on payment pages)', !/ps5-web/.test(co[6]) && co[0] === 'rgb(255, 255, 255)' && co[1] === '20px' && co[2] === '999px', co.slice(0, 3).join(' '));
+  check('checkout: white main button, Steam\'s PNG tab notches gone, placeholder card shown', co[3] === 'rgb(255, 255, 255)' && co[4] === 'none' && /••••/.test(co[5]), `${co[3]} ${co[4]} ${co[5]}`);
+  await wp.focus('#security_code');
+  await wp.waitForTimeout(700);
+  check('checkout: the card turns over for the security code (no field value read)', /CVC/.test(await wp.evaluate(() => getComputedStyle(document.querySelector('.rightcol'), '::before').content)));
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-checkout.jpg'), type: 'jpeg', quality: 82 });
+  await wp.addStyleTag({ content: ':root{--ps5-web:off}' });
+  await wp.waitForTimeout(100);
+  check('checkout: «Store and Community → Steam default» turns it off', (await wp.evaluate(() => getComputedStyle(document.querySelector('#submit_payment_info_btn')).backgroundColor)) !== 'rgb(255, 255, 255)');
   await wp.goto('https://example.com/');
   await wp.waitForTimeout(300);
   check('other websites untouched', !/ps5-web/.test(await cls()));
