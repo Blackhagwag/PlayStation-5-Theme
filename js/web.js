@@ -28,8 +28,9 @@
   // pages that must look exactly like Steam: payments, sign-in, the light hardware pages
   if (/^\/(checkout|login|join|widget|hardware|steamdeck\w*|about|steamcontroller|vr)(\/|$)/i.test(location.pathname)) return;
   if (isCommunity && /^\/(openid|login|linkfilter)(\/|$)/i.test(location.pathname)) return;
-  // v1.4.0: profiles stay exactly as Steam draws them (owners' own backgrounds and showcases)
-  if (isCommunity && /^\/(id|profiles)\//i.test(location.pathname)) return;
+  // v1.4.0: the profile page itself stays exactly as Steam draws it (owners' own backgrounds
+  // and showcases); v1.6.0: its tabs (activity, friends, badges, inventory, content…) get the theme
+  if (isCommunity && /^\/(id|profiles)\/[^/]+\/?$/i.test(location.pathname)) return;
 
   const root = document.documentElement;
   const state = window.__ps5Web = { kind: '', on: false };
@@ -42,10 +43,11 @@
     ['home', /^\/($|\?|home|\?.*)/i],
   ];
   const COMMUNITY_PAGES = [
-    ['profile', /^\/(id|profiles)\/[^/]+\/?($|\?|home)/i], ['games', /^\/(id|profiles)\/[^/]+\/games/i],
-    ['achievements', /^\/(id|profiles)\/[^/]+\/(stats|achievements)/i], ['friends', /^\/(id|profiles)\/[^/]+\/friends/i],
-    ['badges', /^\/(id|profiles)\/[^/]+\/(badges|gamecards)/i], ['inventory', /^\/(id|profiles)\/[^/]+\/inventory/i],
-    ['screenshots', /^\/(id|profiles)\/[^/]+\/screenshots|^\/sharedfiles\/filedetails.*screenshot/i],
+    ['activity', /^\/(id|profiles)\/[^/]+\/home/i], ['games', /^\/(id|profiles)\/[^/]+\/games/i],
+    ['achievements', /^\/(id|profiles)\/[^/]+\/(stats|achievements)/i],
+    ['friends', /^\/(id|profiles)\/[^/]+\/(friends|groups|followedgames|following)(\/|$|\?)/i],
+    ['badges', /^\/(id|profiles)\/[^/]+\/(badges|gamecards|badge)/i], ['inventory', /^\/(id|profiles)\/[^/]+\/(inventory|tradeoffers)/i],
+    ['screenshots', /^\/(id|profiles)\/[^/]+\/(screenshots|images|videos|myworkshopfiles|mycollections|recommended|reviews)|^\/sharedfiles\/filedetails.*screenshot/i],
     ['userpage', /^\/(id|profiles)\//i],
     ['workshop', /^\/(workshop|sharedfiles)/i], ['discussions', /^\/discussions|\/discussions\//i],
     ['market', /^\/market/i], ['hub', /^\/app\//i], ['groups', /^\/groups\//i], ['home', /^\/($|\?|home)/i],

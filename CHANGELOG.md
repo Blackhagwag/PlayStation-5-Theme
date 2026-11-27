@@ -4,6 +4,35 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases).
 
+## [1.6.0] — 2026-11-27 — Friends & Profile Tabs
+
+### Added
+- **Friends list rebuilt as PS5 "Game Base"** (`css/friends.css` rewritten, new `js/friends.js`):
+  your profile card on top (big round avatar with a white ring, name, status, menu button);
+  tabs as pills (current one white) and round icon buttons for search, requests and add friend;
+  the search opens as a pill field; groups with a count chip instead of caps headers.
+- **Friends in game as Game Base cards**: the game's art fills the card (taken from the game's
+  icon address — Steam's CDN library art, store header as a fallback), the game's title on it,
+  the friend's avatar, name and what they do below. A game with two friends or more gets one
+  banner over its group. Non-Steam games stay plain rows.
+- Every avatar round, with a PS5 status dot: online blue, in game green, away amber, offline a
+  grey ring (Steam's 2 px strip is hidden). Hover is the PS5 white focus ring.
+- Friend requests as cards with a white ✓ and a glass ✕; group chats as cards; favourites strip,
+  "unread messages" pill, hover card, "Create group chat" dialog in the same style.
+- **Chat window**: tabs as pills, the header as a glass card, messages as bubbles (yours in the
+  accent), day dividers as pills, a pill entry field with a round accent Send button, round voice
+  and emoji buttons, member list for group chats.
+- **Profile tabs now themed** (the profile page itself stays exactly as Steam draws it):
+  *Activity* (event cards, day pills, side boxes), *Friends / Groups / Followed* (pill menu with
+  counts, friends as a grid of cards with round avatars and status rings, group cards),
+  *Badges* (level bar, badges as a grid of cards, card sets), *Inventory* (game tabs as pills,
+  rounded item tiles, filters, paging), *Screenshots / Artwork / Videos / Workshop / Reviews*
+  (pill tabs, rounded wall, dropdowns, review cards); PS5 pills for the site's buttons and fields.
+- Tests: mock friends list and chat windows and five profile tabs — 205 checks.
+
+Reference: the class names of Steam's friends UI and community pages were studied in the Aika
+theme; the code here is written from scratch for the PS5 design.
+
 ## [1.5.3] — 2026-11-27 — Repository renamed
 
 ### Changed

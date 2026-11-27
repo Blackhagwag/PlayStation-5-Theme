@@ -1,144 +1,781 @@
 /* ==========================================================================
    PlayStation 5 — Millennium theme
-   friends.css: Friends list and chat windows ("Game Base" look).
+   friends.css: the Friends list and chat windows as PS5 "Game Base".
+
+   Both are separate Steam windows with .friendsui-container (skin.json patch).
+   Millennium marks them on <html>: .MillenniumWindow_FriendsList (the list) and
+   .MillenniumWindow_FriendChatWindow (a chat window); js/friends.js adds
+   .ps5-fl / .ps5-chat as well, for builds without those marks.
+
+   Steam markup used here (readable class names of the friends UI):
+     list   .friendListHeaderContainer > .currentUserContainer.<status>
+              (svg.statusHeaderGlow, .currentUserAvatar .avatarHolder, .labelHolder >
+               .statusAndName > .playerName + .ContextMenuButton, .richPresenceContainer)
+            .socialTabContainer (.friendTab.socialListTab[.activeTab],
+              .friendsTabButtonsContainer: .TabSearchButton, .friendRequestButton, .addFriendButton)
+            .friendlistListContainer > .friendGroup[.gameGroup|.onlineFriends|.offlineFriends|
+              .friendRequests] > .groupName (+ .groupCount) and .friend rows:
+              .avatarHolder.<online|ingame|offline>[.awayOrSnooze] > img.avatar + .avatarStatus,
+              .labelHolder > .statusAndName > .playerName, .richPresenceContainer >
+              .richPresenceLabel, .FriendInGameIcon > img.gameIcon
+            .FriendsListChatSection (group chats: .ChatRoomListGroupItem)
+     chat   .ChatTabs > .ChatTab[.Active]; .chatWindow > .chatHeader, .chatHistoryScroll >
+              .chatHistory > .msg.timeDivision, .ChatMessageBlock > .ChatSpeaker + .msg > .msgText;
+            .chatEntry > form.chatEntryControls (textarea.chatTextarea, button.chatSubmitButton)
+   Colours: online — PS blue, in game — green, away — amber, offline — grey ring.
    ========================================================================== */
 
-body.friendsui-container,
-.friendsui-container,
-.friendsui-container .FriendsListContent,
-.friendsui-container .friendlist,
-.friendsui-container .chat_main,
-.friendsui-container .ChatRoomGroupDialog {
-  background: linear-gradient(180deg, #0b1a3c 0%, #050912 70%) !important;
-  color: var(--ps5-text) !important;
+.friendsui-container {
+  --ps5-st-online: #2d9bff;
+  --ps5-st-ingame: #3fd15a;
+  --ps5-st-away: #ffb547;
+  --ps5-st-off: rgba(255, 255, 255, 0.38);
+  --ps5-fl-row: rgba(255, 255, 255, 0.05);
 }
 
-/* own persona header */
-.friendsui-container .currentUserContainer,
-.friendsui-container .friendListHeaderContainer {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border-bottom: 1px solid var(--ps5-line) !important;
+/* ---------- window ground ---------- */
+html.friendsui-container,
+html.friendsui-container body,
+body.friendsui-container {
+  background:
+    radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--ps5-accent) 30%, transparent), transparent 62%),
+    radial-gradient(90% 50% at 0% 100%, rgba(0, 40, 120, 0.35), transparent 70%),
+    linear-gradient(180deg, var(--ps5-bg-top, #0a1c46) 0%, #050a18 60%, #000 100%) !important;
+  color: var(--ps5-text) !important;
+  font-family: var(--ps5-font) !important;
 }
-.friendsui-container .currentUserAvatar img,
-.friendsui-container .avatarHolder img,
-.friendsui-container .playerAvatar img {
+.friendsui-container :is(.chat_main, .chat_main_flex, .friendsListContainer, .friendlist, .FriendsListContent,
+  .friendListHeaderContainer, .friendListFooter, .ChatRoomListAndChat, .friendlistListContainer,
+  .chatRoomListContainer, .ChatRoomGroupDialog, .socialTabContainer, .quickAccessFriends, .titleBarContainer),
+body.fullheight #popup_target.popup_chat_frame {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+}
+.friendsui-container :is(.FriendListInsetShadowTop, .FriendListInsetShadowBottom, .statusHeaderGlow, .insetShadow) {
+  display: none !important;
+}
+.friendsui-container ::-webkit-scrollbar { width: 8px; height: 8px; }
+.friendsui-container ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+.friendsui-container ::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- avatars: round, status dot cut into the corner ---------- */
+.friendsui-container .avatarHolder {
+  position: relative;
   border-radius: 50% !important;
 }
-.friendsui-container .avatarHolder .avatarStatus,
-.friendsui-container .avatarStatus { border-radius: 50% !important; }
+.friendsui-container .avatarHolder img.avatar,
+.friendsui-container .avatarHolder img,
+.friendsui-container .avatarHolder .avatar {
+  border-radius: 50% !important;
+  border: none !important;
+}
+.friendsui-container .avatarHolder:is(.online, .ingame, .offline) > .avatarStatus { display: none !important; }
+.friendsui-container .avatarHolder:is(.online, .ingame, .offline)::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 32%;
+  height: 32%;
+  min-width: 9px;
+  min-height: 9px;
+  max-width: 14px;
+  max-height: 14px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--ps5-st-online);
+  box-shadow: 0 0 0 2.5px #07102a;
+  pointer-events: none;
+  z-index: 2;
+}
+.friendsui-container .avatarHolder.ingame::after { background: var(--ps5-st-ingame); }
+.friendsui-container .avatarHolder.awayOrSnooze::after { background: var(--ps5-st-away); }
+.friendsui-container .avatarHolder.offline::after { background: transparent; border: 2px solid var(--ps5-st-off); }
+.friendsui-container .avatarFrame { border-radius: 50%; overflow: hidden; }
 
-/* group headers */
-.friendsui-container .friendGroup .groupName,
-.friendsui-container .friendsListSectionTitle,
-.friendsui-container .friendGroupHeader {
+/* names by status */
+.friendsui-container .playerName { color: #fff !important; font-weight: 600 !important; }
+.friendsui-container :is(.labelHolder, .LabelHolder).online .playerName { color: #fff !important; }
+.friendsui-container :is(.labelHolder, .LabelHolder).ingame .playerName { color: #b9f5c2 !important; }
+.friendsui-container :is(.labelHolder, .LabelHolder).offline .playerName { color: var(--ps5-text-3) !important; }
+.friendsui-container :is(.labelHolder, .LabelHolder).awayOrSnooze .playerName { color: #ffe2b0 !important; }
+.friendsui-container .richPresenceLabel { color: var(--ps5-text-3) !important; font-weight: 500 !important; }
+.friendsui-container :is(.labelHolder, .LabelHolder).ingame .richPresenceLabel { color: #8ee08a !important; }
+.friendsui-container .playerNicknameBracket { color: var(--ps5-text-3) !important; }
+
+/* ==========================================================================
+   FRIENDS LIST WINDOW
+   ========================================================================== */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendListHeaderContainer {
+  padding: 4px 10px 0 !important;
+  box-shadow: none !important;
+}
+
+/* --- your profile card --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer {
+  position: relative;
+  margin: 6px 0 10px !important;
+  padding: 14px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background:
+    radial-gradient(140% 120% at 0% 0%, color-mix(in srgb, var(--ps5-accent) 34%, transparent), transparent 60%),
+    rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line), 0 14px 30px -18px rgba(0, 0, 0, 0.9) !important;
+  overflow: hidden;
+  transition: box-shadow var(--ps5-t) var(--ps5-ease) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer:hover {
+  box-shadow: inset 0 0 0 1px var(--ps5-line-strong), 0 14px 30px -18px rgba(0, 0, 0, 0.9) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .AvatarAndUser {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserAvatar .avatarHolder {
+  width: 54px !important;
+  height: 54px !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 20px 2px var(--ps5-accent-glow) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserAvatar .avatarHolder img.avatar {
+  width: 54px !important;
+  height: 54px !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserAvatar .avatarHolder::after {
+  width: 15px !important;
+  height: 15px !important;
+  max-width: 15px;
+  max-height: 15px;
+  box-shadow: 0 0 0 3px #0b1a3c !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .statusAndName .playerName {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  letter-spacing: -0.01em;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .richPresenceLabel {
   color: var(--ps5-text-2) !important;
+  font-size: 12.5px !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .ContextMenuButton {
+  width: 26px !important;
+  height: 26px !important;
+  margin-left: 6px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .ContextMenuButton:hover { background: rgba(255, 255, 255, 0.22) !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .ContextMenuButton svg { width: 12px !important; height: 12px !important; fill: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserContainer .ContextMenuButton svg * { fill: #fff !important; stroke: #fff !important; }
+
+/* --- tabs + buttons bar --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .socialTabContainer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 10px 8px !important;
+  border: none !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendTab,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .socialListTab {
+  height: 34px !important;
+  padding: 0 16px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: var(--ps5-text-2) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendTab:hover { background: rgba(255, 255, 255, 0.14) !important; color: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab {
+  background: #fff !important;
+  color: #0b0b0f !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab :is(.tabLabel, span) { color: #0b0b0f !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendTab.activeTab svg * { fill: #0b0b0f !important; stroke: #0b0b0f !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+  background: transparent !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer :is(.TabSearchButton > .searchIconButton, .friendRequestButton, .addFriendButton) {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer :is(.TabSearchButton > .searchIconButton, .friendRequestButton, .addFriendButton):hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 0 0 2px #fff !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer svg { width: 16px !important; height: 16px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer svg :is(path, circle, line, polyline, polygon, rect, g) {
+  stroke: #fff !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer svg :is(.friendHead, .friendBody, .friendArm, .friendHead circle) { fill: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendRequestButton .requestsNumber,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendRequestButton .redCircle {
+  fill: var(--ps5-accent) !important;
+  stroke: none !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendRequestButton .requestsNumber {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* search: a pill field that opens beside the magnifier */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px;
+  background: transparent !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton > .searchIconButton { order: -1; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton .socialSearchContainer,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton .inputContainer { background: transparent !important; border: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) input.friendSearchInput,
+.friendsui-container input.friendSearchInput[type="text"] {
+  height: 34px !important;
+  padding: 0 14px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  outline: none !important;
+}
+.friendsui-container input.friendSearchInput:focus { box-shadow: 0 0 0 2px #fff, 0 0 16px 2px var(--ps5-accent-glow) !important; }
+.friendsui-container input.friendSearchInput::placeholder { color: var(--ps5-text-3) !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchActive .friendsTabButtonsContainer .TabSearchButton { flex: 1 1 auto; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton .friendSearchClear {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12) !important;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchButton .friendSearchClear svg * { stroke: #fff !important; fill: #fff !important; }
+
+/* --- groups --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendlistListContainer { padding: 0 6px 12px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup {
+  margin: 0 4px 10px !important;
+  border: none !important;
+  background: transparent !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 30px !important;
+  padding: 0 8px !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--ps5-text-2) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), color var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName:hover { background: rgba(255, 255, 255, 0.06) !important; color: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName hr { display: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .groupCount {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 7px !important;
+  border-radius: 99px !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+  text-align: center;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus { margin-left: auto !important; opacity: 0.7; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus svg * { stroke: #fff !important; fill: #fff !important; }
+
+/* --- a friend row --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 48px !important;
+  margin: 3px 0 !important;
+  padding: 6px 10px !important;
+  border-radius: var(--ps5-r) !important;
+  background: transparent !important;
+  box-sizing: border-box;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend:hover {
+  background: var(--ps5-fl-row) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 10px 24px -14px rgba(0, 0, 0, 0.9) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend .avatarHolder { flex: none; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend .labelHolder { min-width: 0; flex: 1 1 auto; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend .playerName { font-size: 14px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend .richPresenceLabel { font-size: 12px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.offline .avatarHolder img { filter: grayscale(0.55) brightness(0.8); }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .friend.unreadFriend .playerName::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 7px;
+  border-radius: 50%;
+  background: var(--ps5-accent);
+  box-shadow: 0 0 8px var(--ps5-accent-glow);
+  vertical-align: middle;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendMessageCount {
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+  border-radius: 99px !important;
+}
+
+/* --- friends in game: a Game Base card with the game's art (js/friends.js sets --ps5-fl-art) --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art] {
+  position: relative;
+  flex-wrap: wrap !important;
+  align-items: flex-end !important;
+  min-height: 92px !important;
+  margin: 6px 0 !important;
+  padding: 50px 12px 10px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+  isolation: isolate;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(180deg, rgba(5, 10, 24, 0.05) 0%, rgba(5, 10, 24, 0.55) 45%, rgba(6, 12, 30, 0.96) 78%), var(--ps5-fl-art);
+  background-size: cover, cover, cover;
+  background-position: center, center 30%, center;
+  background-repeat: no-repeat;
+  transition: transform 500ms var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art]:hover::before { transform: scale(1.05); }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art]:hover {
+  box-shadow: 0 0 0 2px #fff, 0 14px 28px -14px rgba(0, 0, 0, 0.9) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art] .FriendInGameIcon { display: none !important; }
+/* the card's title is the game: the first presence line (the game's name) would repeat it */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art] .richPresenceContainer > .richPresenceLabel:first-child:not(:only-child) { display: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friend.ingame[data-ps5-art]::after {
+  content: attr(data-ps5-game);
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  padding-left: 15px;
+  background: radial-gradient(circle at 4px 50%, var(--ps5-st-ingame) 3.5px, transparent 4.5px) no-repeat;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* a game group (2+ friends in one game): the header becomes the art banner */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup.gameGroup[data-ps5-art]:not(.OtherGamesGroup) {
+  padding: 0 6px 6px !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup.gameGroup[data-ps5-art]:not(.OtherGamesGroup) > .groupName {
+  height: 64px !important;
+  margin: 0 -6px 4px !important;
+  padding: 0 14px !important;
+  align-items: flex-end !important;
+  padding-bottom: 10px !important;
+  border-radius: 0 !important;
+  background-image: linear-gradient(180deg, transparent 20%, rgba(6, 12, 30, 0.92)), var(--ps5-fl-art) !important;
+  background-size: cover, cover !important;
+  background-position: center, center 30% !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup.gameGroup[data-ps5-art] > .groupName img { display: none !important; }
+
+/* --- friend requests: cards with Accept (white) / Decline --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .friendInviteContainer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  margin: 6px 0 !important;
+  padding: 10px 12px !important;
+  border-radius: var(--ps5-r) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteContainer .friend { flex: 1 1 auto; margin: 0 !important; padding: 0 !important; background: transparent !important; box-shadow: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteContainer .friendInviteButtons { display: flex !important; gap: 6px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton:is(.acceptFriendInvite, .declineFriendInvite) {
+  width: 34px !important;
+  height: 34px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton.acceptFriendInvite { background: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton.acceptFriendInvite svg * { stroke: #0b0b0f !important; fill: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton.declineFriendInvite { background: rgba(255, 255, 255, 0.10) !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton.declineFriendInvite svg * { stroke: #fff !important; fill: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton.dim:not(:hover) { opacity: 0.55 !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendInviteButton:hover { box-shadow: 0 0 0 2px #fff, 0 0 14px 2px var(--ps5-accent-glow) !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .confirmInviteRequestContainer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 10px !important;
+  background: transparent !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .confirmInviteRequestContainer .confirmInviteButton {
+  height: 34px !important;
+  padding: 0 18px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: #fff !important;
   font-weight: 700 !important;
 }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .confirmInviteRequestContainer .confirmInviteButton.confirmInvites:not(.dim) { background: #fff !important; color: #0b0b0f !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendRequests .groupName,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .cancelAddFriends { color: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .cancelAddFriends svg * { stroke: #fff !important; }
+.friendsui-container .friendInviteBlockContainer .blockCommunicationLabel { color: var(--ps5-text-3) !important; }
 
-/* friend rows */
-.friendsui-container .friend {
+/* --- favourites strip (quick access) --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends { padding: 6px 10px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends .friend { min-height: 0 !important; padding: 4px !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends.emptyQuickAccess,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriendsMessage {
+  border-radius: var(--ps5-r) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--ps5-text-3) !important;
+}
+
+/* --- group chats --- */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendsListChatSection {
+  border-top: 1px solid var(--ps5-line) !important;
+  background: transparent !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendsListChatSection :is(.chatSectionTitle, .groupChatSectionTitle) {
+  background: transparent !important;
+  color: var(--ps5-text-2) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendsListChatSection :is(.ToggleGroupChatList, .createChatRoomButton) {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transition: background var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendsListChatSection :is(.ToggleGroupChatList, .createChatRoomButton):hover { background: rgba(255, 255, 255, 0.18) !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .FriendsListChatSection :is(.ToggleGroupChatList, .createChatRoomButton) svg * { stroke: #fff !important; fill: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .ChatRoomListGroupItem {
+  margin: 2px 8px !important;
+  border-radius: var(--ps5-r) !important;
+  background: transparent !important;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .ChatRoomListGroupItem:hover,
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .ChatRoomListGroupItem.expanded {
+  background: var(--ps5-fl-row) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .ChatRoomListGroupItem_header { background: transparent !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .ChatRoomListGroupItem .chatRoomName { color: #fff !important; font-weight: 600 !important; }
+.friendsui-container :is(.ChatRoomGroupAvatar, .ChatRoomMultiFriendAvatar, .ChatRoomGroupAvatar_initials) {
   border-radius: 12px !important;
-  margin: 2px 6px !important;
-  transition: background var(--ps5-t) var(--ps5-ease) !important;
+  overflow: hidden;
 }
-.friendsui-container .friend:hover { background: var(--ps5-glass-hover) !important; }
-.friendsui-container .friend.ingame .playerName,
-.friendsui-container .friend .playerName.ingame { color: #8fd4ff !important; }
-.friendsui-container .friend .playerNickname,
-.friendsui-container .friend .richPresenceContainer { color: var(--ps5-text-3) !important; }
-
-/* chat */
-.friendsui-container .chatTabSetContainer,
-.friendsui-container .chatTabs,
-.friendsui-container .chatTab {
-  background: rgba(255, 255, 255, 0.03) !important;
-}
-.friendsui-container .chatTab.chatTabSelected,
-.friendsui-container .chatTab.active { background: rgba(255, 255, 255, 0.12) !important; border-radius: 10px 10px 0 0 !important; }
-.friendsui-container .chatEntry,
-.friendsui-container .chatentry_chatTextarea,
-.friendsui-container textarea {
-  background: rgba(255, 255, 255, 0.07) !important;
-  border: 1px solid var(--ps5-line) !important;
-  border-radius: 14px !important;
-  color: var(--ps5-text) !important;
-}
-.friendsui-container .chatSubmitButton,
-.friendsui-container .submitButton {
-  background: var(--ps5-accent) !important;
+.friendsui-container .ChatRoomGroupAvatar_initials { background: var(--ps5-accent) !important; color: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendListFooter { background: transparent !important; border: none !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .unreadMessageViolator {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  padding: 6px 14px !important;
   border-radius: 999px !important;
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 20px -8px var(--ps5-accent-glow) !important;
 }
-.friendsui-container .ChatMessageBlock .speakerName,
-.friendsui-container .speakerName { color: #fff !important; font-weight: 700 !important; }
-.friendsui-container .speakerTimeStamp { color: var(--ps5-text-3) !important; }
+
+/* hover card on a friend */
+.friendsui-container .FriendStatusHover,
+.friendsui-container .miniprofile_hover_inner {
+  background: rgba(9, 20, 46, 0.97) !important;
+  border-radius: var(--ps5-r) !important;
+  box-shadow: 0 0 0 1px var(--ps5-line-strong), 0 18px 40px -12px rgba(0, 0, 0, 0.9) !important;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   CHAT WINDOW
+   ========================================================================== */
+.friendsui-container .ChatTabs {
+  display: flex !important;
+  gap: 6px !important;
+  padding: 8px 10px 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+.friendsui-container .ChatTab {
+  height: 34px !important;
+  min-width: 0;
+  padding: 0 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: var(--ps5-text-2) !important;
+  transition: background var(--ps5-t) var(--ps5-ease);
+  overflow: hidden;
+}
+.friendsui-container .ChatTab:hover { background: rgba(255, 255, 255, 0.14) !important; }
+.friendsui-container .ChatTab.Active { background: rgba(255, 255, 255, 0.92) !important; }
+.friendsui-container .ChatTab.Active :is(.ChatTabContent_ChatRoomName, .playerName, span, div) { color: #0b0b0f !important; }
+.friendsui-container .ChatTab .ChatTabRow { background: transparent !important; height: 100%; display: flex; align-items: center; gap: 6px; }
+.friendsui-container .ChatTab .CloseButton { border-radius: 50% !important; }
+.friendsui-container .ChatTab .CloseButton:hover { background: rgba(0, 0, 0, 0.12) !important; }
+
+/* header */
+.friendsui-container .chatHeader {
+  margin: 8px 10px 0 !important;
+  padding: 10px 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+.friendsui-container .chatHeader .playerName { font-size: 16px !important; font-weight: 700 !important; }
+.friendsui-container .chatHeader :is(.chatHeaderActions, .chatHeaderButtons) button,
+.friendsui-container .chatHeader .ContextMenuButton {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* history */
+.friendsui-container .chatHistoryScroll { scrollbar-width: thin; padding: 0 6px !important; }
+.friendsui-container .chatHistory { padding: 8px 6px 12px !important; }
+.friendsui-container .msg.timeDivision,
+.friendsui-container .timeDivision {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+.friendsui-container .msg.timeDivision .msgText,
+.friendsui-container .timeDivision span {
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--ps5-text-2) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+}
+.friendsui-container .ChatMessageBlock {
+  margin: 6px 0 !important;
+  padding: 8px 10px !important;
+  border-radius: var(--ps5-r) !important;
+  transition: background var(--ps5-t) var(--ps5-ease);
+}
+.friendsui-container .ChatMessageBlock:hover { background: rgba(255, 255, 255, 0.04) !important; }
+.friendsui-container .ChatSpeaker .speakerName,
+.friendsui-container .speakerName { color: #fff !important; font-weight: 700 !important; font-size: 13.5px !important; }
+.friendsui-container .ChatSpeaker.online .speakerName { color: #fff !important; }
+.friendsui-container .ChatSpeaker.ingame .speakerName { color: #b9f5c2 !important; }
+.friendsui-container .ChatSpeaker.offline .speakerName { color: var(--ps5-text-2) !important; }
+.friendsui-container .speakerTimeStamp { color: var(--ps5-text-3) !important; font-size: 11px !important; }
+.friendsui-container .ChatMessageBlock .msg { padding: 1px 0 !important; }
+.friendsui-container .ChatMessageBlock .msgText {
+  display: inline-block;
+  max-width: 100%;
+  margin: 2px 0 !important;
+  padding: 7px 12px !important;
+  border-radius: 4px 16px 16px 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  font-size: 13.5px !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box;
+}
+.friendsui-container .ChatMessageBlock.isCurrentUser .msgText,
+.friendsui-container .ChatSpeaker.isCurrentUser + .msg .msgText,
+.friendsui-container .msg.isCurrentUser .msgText {
+  background: color-mix(in srgb, var(--ps5-accent) 55%, rgba(255, 255, 255, 0.04)) !important;
+}
+.friendsui-container .msgText a { color: #8fd4ff !important; }
+.friendsui-container .msg.serverMsg .msgText,
+.friendsui-container .serverMsg {
+  background: transparent !important;
+  color: var(--ps5-text-3) !important;
+  font-size: 12px !important;
+}
+.friendsui-container :is(.gameInviteSelf, .gameInviteDismissed, .ChatMessageInvite, .bbcode_inviteurl) {
+  border-radius: var(--ps5-r) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+}
+.friendsui-container img.productImage { border-radius: 10px !important; }
+.friendsui-container .ScrollToBottomButton {
+  border-radius: 999px !important;
+  background: var(--ps5-accent) !important;
+  color: #fff !important;
+}
+.friendsui-container .FriendChatTypingNotification { color: var(--ps5-text-2) !important; }
+
+/* entry */
+.friendsui-container .chatEntry {
+  margin: 0 10px 10px !important;
+  padding: 6px !important;
+  border: none !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  transition: box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.friendsui-container .chatEntry:focus-within { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px var(--ps5-accent-glow) !important; }
+.friendsui-container .chatEntry .chatEntryControls { background: transparent !important; align-items: center !important; }
+.friendsui-container .chatEntry textarea,
+.friendsui-container textarea.chatTextarea,
+.friendsui-container .chatentry_chatTextarea {
+  resize: none !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-size: 13.5px !important;
+}
+.friendsui-container .chatEntry textarea::placeholder { color: var(--ps5-text-3) !important; }
+.friendsui-container .chatSubmitButton,
+.friendsui-container .chatEntry .submitButton {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: var(--ps5-accent) !important;
+  box-shadow: 0 6px 16px -6px var(--ps5-accent-glow) !important;
+  transition: transform var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease);
+}
+.friendsui-container .chatSubmitButton:hover { transform: scale(1.06); box-shadow: 0 0 0 2px #fff, 0 6px 18px -4px var(--ps5-accent-glow) !important; }
+.friendsui-container .chatSubmitButton svg * { fill: #fff !important; stroke: #fff !important; }
+.friendsui-container .chatEntryActionsGroup button,
+.friendsui-container .VoiceToggle {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+.friendsui-container .chatEntryActionsGroup button:hover,
+.friendsui-container .VoiceToggle:hover { background: rgba(255, 255, 255, 0.18) !important; }
+.friendsui-container .chatEntryActionsGroup svg *,
+.friendsui-container .VoiceToggle svg * { fill: #fff !important; }
+.friendsui-container .inviteAnotherFriendButton {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+/* group chat member list */
+.friendsui-container .MemberListColumn,
+.friendsui-container .MultiUserChat .MemberListColumn {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-left: 1px solid var(--ps5-line) !important;
+}
+.friendsui-container .MemberListColumn .friend { border-radius: 12px !important; margin: 2px 6px !important; }
+.friendsui-container .MemberListColumn .friend:hover { background: var(--ps5-fl-row) !important; }
 
 /* voice */
 .friendsui-container .VoiceControlPanel,
 .friendsui-container .activeVoiceControls {
-  background: rgba(0, 112, 209, 0.18) !important;
-  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--ps5-accent) 22%, transparent) !important;
+  border-radius: var(--ps5-r) !important;
 }
 
-/* ---------- v1.1.0: the friends list and chat as Steam builds them today ---------- */
-body.fullheight #popup_target.popup_chat_frame,
-.chat_main,
-.friendsListContainer,
-.friendlist,
-.FriendsListContent,
-.friendListHeaderContainer,
-.friendListFooter,
-.ChatRoomListAndChat,
-.friendlistListContainer,
-.chatRoomListContainer {
-  background: transparent !important;
-  background-image: none !important;
+/* ==========================================================================
+   "Create group chat" dialog (opens in the friends window)
+   ========================================================================== */
+.friendsui-container .CreateChatDialog,
+.friendsui-container .ChatPopup {
+  border-radius: var(--ps5-r-l) !important;
+  background: rgba(9, 20, 46, 0.98) !important;
+  box-shadow: 0 0 0 1px var(--ps5-line-strong), var(--ps5-shadow) !important;
 }
-.chat_main_flex,
-body.fullheight #popup_target.popup_chat_frame {
-  background:
-    radial-gradient(120% 70% at 100% 0%, rgba(0, 80, 190, 0.30), transparent 60%),
-    linear-gradient(180deg, #0b1a3c 0%, #050912 70%) !important;
-  color: #fff !important;
-}
-.friendsListSectionTitle,
-.chatSectionTitle {
-  background: transparent !important;
-  color: rgba(255, 255, 255, 0.55) !important;
-  font-weight: 700 !important;
-}
-.currentUserContainer { border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important; }
-.currentUserContainer .avatarHolder,
-.avatarHolder .avatar,
-.avatarHolder img { border-radius: 50% !important; }
-.currentUserContainer .avatarHolder.online { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px rgba(0, 112, 209, 0.7); }
-.currentUserContainer .avatarHolder.ingame { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px rgba(63, 209, 90, 0.6); }
-.playerName { color: #fff !important; }
-.labelHolder.online .playerName { color: #8fd4ff !important; }
-.labelHolder.ingame .playerName { color: #8ee08a !important; }
-.labelHolder.offline .playerName { color: rgba(255, 255, 255, 0.5) !important; }
-.richPresenceLabel { color: rgba(255, 255, 255, 0.55) !important; }
-.friendGroup.onlineFriends { border-top-color: rgba(255, 255, 255, 0.10) !important; }
-.FriendStatusHover {
-  background: rgba(9, 20, 46, 0.97) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 14px 30px -10px rgba(0, 0, 0, 0.85) !important;
-}
-.friendTab.socialListTab { border-radius: 10px 10px 0 0 !important; }
-.friendTab.socialListTab.activeTab { background: rgba(255, 255, 255, 0.10) !important; }
-.chatEntry .chatentry_chatTextarea,
-.chatEntry textarea,
-.friendSearchInput {
-  background: rgba(255, 255, 255, 0.07) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+.friendsui-container .CreateChatDialog .DialogHeader { color: #fff !important; text-transform: none !important; font-weight: 800 !important; letter-spacing: 0 !important; }
+.friendsui-container .CreateChatDialog .DialogLabel { color: var(--ps5-text-2) !important; text-transform: none !important; letter-spacing: 0 !important; }
+.friendsui-container .CreateChatDialog .DialogListBuilderInput {
   border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+.friendsui-container .FriendPicker_ChosenFriend {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
   color: #fff !important;
 }
-.chatEntry textarea { border-radius: 16px !important; }
-.chatEntry .chatSubmitButton { background: var(--ps5-accent, #0070D1) !important; border-radius: 999px !important; }
-.msg.isCurrentUser .msgText,
-.ChatMessageBlock.isCurrentUser .msgText { color: #fff; }
-.chatHistoryScroll { scrollbar-width: thin; }
-.FriendChatTypingNotification { color: rgba(255, 255, 255, 0.6) !important; }
-.quickAccessFriends { background: transparent !important; }
+.friendsui-container .FriendPickerScrollPanel .friend { border-radius: 12px !important; }
+.friendsui-container .FriendPickerScrollPanel .friend:hover { background: var(--ps5-fl-row) !important; }

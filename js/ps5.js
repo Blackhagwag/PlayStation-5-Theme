@@ -28,7 +28,7 @@
     try { window.__ps5Theme.destroy(); } catch (e) { /* old instance already gone */ }
   }
 
-  const VERSION = '1.5.3';
+  const VERSION = '1.6.0';
   const doc = document;
   const root = doc.documentElement;
 

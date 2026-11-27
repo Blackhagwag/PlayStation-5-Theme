@@ -44,6 +44,10 @@ Rendered by the test harness (placeholder game art):
 | ![Game menu](assets/preview-game-menu.jpg) | ![Arrows](assets/preview-store-arrows.jpg) |
 | **Long titles (second game)** | **Purchase options** |
 | ![Store hero 2](assets/preview-store-hero-2.jpg) | ![Buy](assets/preview-store-buy.jpg) |
+| **Friends list (Game Base)** | **Chat** |
+| ![Friends list](assets/preview-friends-list.jpg) | ![Chat](assets/preview-chat.jpg) |
+| **Profile tab: Friends** | |
+| ![Community friends](assets/preview-community-friends.jpg) | |
 | **What's New + bottom bar** | **Profile panel over the Store** |
 | ![What's New](assets/preview-whatsnew.jpg) | ![Profile panel](assets/preview-profile-store.jpg) |
 | **Game hub** | **Steam menus** |
@@ -76,8 +80,12 @@ Rendered by the test harness (placeholder game art):
   discounts, reviews, date added, Add to Cart and remove through Steam, search, sorting,
   "On sale" filter; one click back to Steam's own list.
 - **Address panel** — compact capsule at the top left: back, forward, reload, where you are.
-- **Community** — hubs, Workshop, Discussions, Guides, Screenshots, Market in the PS5 style;
-  user profiles stay exactly as Steam (and their owners) draw them.
+- **Friends list as PS5 Game Base** — profile card, pill tabs, friends in game as cards with the
+  game's art, round avatars with status dots, requests and group chats as cards; **chat** with
+  bubbles, pill tabs and a pill entry field.
+- **Community** — hubs, Workshop, Discussions, Guides, Market and every profile tab (Activity,
+  Friends, Groups, Badges, Inventory, Screenshots, Workshop items, Reviews) in the PS5 style;
+  the profile page itself stays exactly as Steam (and its owner) draws it.
 - **One profile button** — the PS5 avatar replaces Steam's account button; account details,
   wallet, store preferences, language, status and change account are in its panel. The panel
   works the same on every page, including on top of the Store (the native web view is hidden
@@ -150,11 +158,12 @@ css/root.css         colours editable in Millennium's Colors tab
 css/shared.css       tokens, font, buttons, inputs, dialogs (all desktop windows)
 css/main.css         main window: top bar, game list, home shelves, game page, downloads
 css/components.css   the PS5 components built by the script
-css/friends.css      friends & chat     css/menus.css   all Steam menus
+css/friends.css      friends list & chat (Game Base)     css/menus.css   all Steam menus
 css/toasts.css       notifications      css/webkit/web.css  Store, Wishlist, Community, Profile
 css/options/         one small file per option value
 js/ps5.js            runtime for the main window (Home, Library, Control Center, game hub, bottom bar)
 js/web.js            runtime for store / community pages (page detection, marks for web.css)
+js/friends.js        friends window: game art on friends in game
 fonts/inter/         Inter variable font (OFL)
 tests/               mock Steam window + Playwright checks (not shipped)
 scripts/             validate.mjs, package.sh (not shipped)
@@ -179,7 +188,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 175 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 205 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

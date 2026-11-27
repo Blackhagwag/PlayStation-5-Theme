@@ -318,6 +318,49 @@ try {
   if (SHOTS) await mp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-menu.jpg'), type: 'jpeg', quality: 85 });
   await mp.close();
 
+  // ---- v1.6.0: friends list + chat windows (PS5 Game Base)
+  const fp = await ctx.newPage();
+  const ferr = [];
+  fp.on('pageerror', e => ferr.push(String(e)));
+  await fp.route(/steamstatic\.com/, r => r.fulfill({ status: 200, contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#2a4d8f"/></svg>' }));
+  await fp.setViewportSize({ width: 340, height: 760 });
+  await fp.goto(`http://localhost:${PORT}/tests/friends.html`);
+  await fp.waitForTimeout(250);
+  check('friends: list window marked (.ps5-fl)', await fp.evaluate(() => document.documentElement.classList.contains('ps5-fl')));
+  const fcard = await fp.locator('#fr-a').evaluate(n => [n.dataset.ps5Art, n.dataset.ps5Game, n.style.getPropertyValue('--ps5-fl-art'), getComputedStyle(n, '::after').content, getComputedStyle(n).minHeight]);
+  check('friends: in-game friend = Game Base card with the game\'s art (appid from the icon)', fcard[0] === '620' && /apps\/620\/library_hero\.jpg/.test(fcard[2]) && fcard[4] === '92px', fcard.slice(0, 3).join(' | '));
+  check('friends: game title on the card', fcard[1] === 'Starfall Odyssey' && /Starfall Odyssey/.test(fcard[3]), fcard[3]);
+  check('friends: non-Steam game keeps a plain row (no art)', !(await fp.locator('#fr-ns').getAttribute('data-ps5-art')));
+  check('friends: a game group carries the art on its header', (await fp.locator('#grp-game').getAttribute('data-ps5-art')) === '440');
+  const fav = await fp.evaluate(() => ['#fr-on .avatarHolder', '#fr-a .avatarHolder', '#av-away', '#av-off'].map(s => { const n = document.querySelector(s); const a = getComputedStyle(n, '::after'); return [getComputedStyle(n.querySelector('img')).borderTopLeftRadius, a.backgroundColor, a.borderTopColor, a.borderTopWidth]; }));
+  check('friends: round avatars', fav.every(a => a[0] === '50%'), fav.map(a => a[0]).join(' '));
+  check('friends: status dots — online blue, in game green, away amber, offline ring', fav[0][1] === 'rgb(45, 155, 255)' && fav[1][1] === 'rgb(63, 209, 90)' && fav[2][1] === 'rgb(255, 181, 71)' && fav[3][1] === 'rgba(0, 0, 0, 0)' && fav[3][3] === '2px', fav.map(a => a[1]).join(' / '));
+  check('friends: Steam\'s status strip hidden', await fp.locator('#fr-on .avatarStatus').isHidden());
+  const fprof = await fp.locator('.currentUserContainer').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.querySelector('.currentUserAvatar .avatarHolder')).width]);
+  check('friends: profile card (rounded, 54 px avatar)', fprof[0] === '22px' && fprof[1] === '54px', fprof.join(' '));
+  check('friends: Steam\'s header glow hidden', await fp.locator('.statusHeaderGlow').isHidden());
+  const ftab = await fp.locator('.friendTab.activeTab').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).textTransform]);
+  check('friends: active tab = white pill, no caps', ftab[0] === 'rgb(255, 255, 255)' && ftab[2] === 'none', ftab.join(' '));
+  const fbtn = await fp.locator('.addFriendButton').evaluate(n => [getComputedStyle(n).width, getComputedStyle(n).borderTopLeftRadius]);
+  check('friends: round 34 px icon buttons', fbtn[0] === '34px' && fbtn[1] === '50%', fbtn.join(' '));
+  check('friends: group header — count chip, no caps', await fp.locator('.onlineFriends .groupName').evaluate(n => getComputedStyle(n).textTransform === 'none' && getComputedStyle(n.querySelector('.groupCount')).borderTopLeftRadius === '99px'));
+  await fp.hover('#fr-on');
+  await fp.waitForTimeout(300);
+  check('friends: hover = PS5 white focus ring', /rgba\(255, 255, 255, 0\.9\) 0px 0px 0px 2px/.test(await fp.locator('#fr-on').evaluate(n => getComputedStyle(n).boxShadow)));
+  if (SHOTS) { await fp.mouse.move(0, 0); await fp.waitForTimeout(300); await fp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-friends-list.jpg'), type: 'jpeg', quality: 85 }); }
+  await fp.setViewportSize({ width: 520, height: 560 });
+  await fp.goto(`http://localhost:${PORT}/tests/friends.html?chat`);
+  await fp.waitForTimeout(200);
+  check('chat: window marked (.ps5-chat)', await fp.evaluate(() => document.documentElement.classList.contains('ps5-chat')));
+  const fbub = await fp.evaluate(() => [...document.querySelectorAll('.ChatMessageBlock .msgText')].map(n => [getComputedStyle(n).borderTopRightRadius, getComputedStyle(n).backgroundColor]));
+  check('chat: messages as bubbles, yours in the accent', fbub[0][0] === '16px' && fbub[0][1] !== fbub[1][1] && /rgb\(|color/.test(fbub[1][1]), JSON.stringify(fbub));
+  const fent = await fp.evaluate(() => [getComputedStyle(document.querySelector('.chatEntry')).borderTopLeftRadius, getComputedStyle(document.querySelector('.chatSubmitButton')).borderTopLeftRadius, getComputedStyle(document.querySelector('.chatSubmitButton')).backgroundColor]);
+  check('chat: pill entry + round accent send button', fent[0] === '24px' && fent[1] === '50%' && fent[2] === 'rgb(0, 112, 209)', fent.join(' '));
+  check('chat: active tab white pill', (await fp.locator('.ChatTab.Active').evaluate(n => getComputedStyle(n).borderTopLeftRadius)) === '999px');
+  if (SHOTS) await fp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-chat.jpg'), type: 'jpeg', quality: 85 });
+  check('friends/chat: no script errors', ferr.length === 0, ferr.join(' | '));
+  await fp.close();
+
   // ---- web pages on the real hostnames, injected the way Millennium does
   const wp = await ctx.newPage();
   const werr = [];
@@ -533,6 +576,36 @@ try {
   const av = await wp.locator('.playerAvatar.profile_header_size').evaluate(n => getComputedStyle(n).borderTopLeftRadius);
   check('community profile: Steam\'s square avatar', av === '0px', av);
   if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-profile-psn.jpg'), type: 'jpeg', quality: 82 });
+  // ---- v1.6.0: profile tabs get the theme (the profile page above stays Steam's)
+  await wp.goto('https://steamcommunity.com/id/vasya/friends/');
+  await wp.waitForTimeout(400);
+  check('profile tabs: friends page themed', /ps5-web/.test(await cls()) && /ps5-p-friends/.test(await cls()));
+  const fnav = await wp.locator('.friends_nav a.icon_item.active').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius]);
+  check('friends page: menu as pills, current one white', fnav[0] === 'rgb(255, 255, 255)' && fnav[1] === '999px', fnav.join(' '));
+  const fgrid = await wp.locator('.responsive_friendblocks').evaluate(n => getComputedStyle(n).display);
+  const fb = await wp.locator('#fb-1').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.querySelector('.player_avatar img')).borderTopLeftRadius, getComputedStyle(n.querySelector('.player_avatar')).borderRightWidth, getComputedStyle(n.querySelector('.player_avatar img')).boxShadow]);
+  check('friends page: friends as a grid of PS5 cards', fgrid === 'grid' && fb[0] === '14px', fgrid + ' ' + fb[0]);
+  check('friends page: round avatars with a green ring in game, no Steam status strip', fb[1] === '50%' && fb[2] === '0px' && /rgb\(63, 209, 90\)/.test(fb[3]), fb.slice(1).join(' | '));
+  check('friends page: search field is a pill', (await wp.locator('.friends_search_text_box').evaluate(n => getComputedStyle(n).borderTopLeftRadius)) === '999px');
+  if (SHOTS) await wp.screenshot({ path: path.join(DIR, '..', 'assets', 'preview-community-friends.jpg'), type: 'jpeg', quality: 82 });
+  await wp.goto('https://steamcommunity.com/id/vasya/home/');
+  await wp.waitForTimeout(300);
+  const blk = await wp.locator('#bb-1').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).backgroundColor]);
+  check('activity: events as PS5 cards (Steam\'s light-blue fill gone)', /ps5-p-activity/.test(await cls()) && blk[0] === '20px' && !/103, 193, 245/.test(blk[1]), blk.join(' '));
+  check('activity: day label pill', (await wp.locator('.blotter_day_header_date').evaluate(n => getComputedStyle(n).borderTopLeftRadius)) === '999px');
+  await wp.goto('https://steamcommunity.com/id/vasya/badges/');
+  await wp.waitForTimeout(300);
+  const br = await wp.locator('#br-1').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.parentElement).display, getComputedStyle(n).backgroundColor]);
+  check('badges: grid of rounded cards', /ps5-p-badges/.test(await cls()) && br[0] === '20px' && br[1] === 'grid' && br[2] !== 'rgb(0, 0, 0)', br.join(' '));
+  check('badges: level bar in the accent', (await wp.locator('.profile_xp_block_remaining_bar_progress').evaluate(n => getComputedStyle(n).backgroundColor)) === 'rgb(0, 112, 209)');
+  await wp.goto('https://steamcommunity.com/id/vasya/inventory/');
+  await wp.waitForTimeout(300);
+  const it = await wp.evaluate(() => [getComputedStyle(document.querySelector('a.games_list_tab.active')).backgroundColor, getComputedStyle(document.querySelector('a.games_list_tab')).borderTopLeftRadius, getComputedStyle(document.querySelector('#ih-1')).borderTopLeftRadius]);
+  check('inventory: game tabs as pills (current white), rounded item tiles', /ps5-p-inventory/.test(await cls()) && it[0] === 'rgb(255, 255, 255)' && it[1] === '999px' && it[2] === '12px', it.join(' '));
+  await wp.goto('https://steamcommunity.com/id/vasya/screenshots/');
+  await wp.waitForTimeout(300);
+  const sc = await wp.evaluate(() => [getComputedStyle(document.querySelector('#st-1')).backgroundColor, getComputedStyle(document.querySelector('#pm-1 .imgWallItem')).borderTopLeftRadius, getComputedStyle(document.querySelector('#pm-1 .imgWallItem')).borderTopWidth]);
+  check('content tabs: white active pill, rounded wall without Steam\'s black border', /ps5-p-screenshots/.test(await cls()) && sc[0] === 'rgb(255, 255, 255)' && sc[1] === '14px' && sc[2] === '0px', sc.join(' '));
   await wp.goto('https://example.com/');
   await wp.waitForTimeout(300);
   check('other websites untouched', !/ps5-web/.test(await cls()));

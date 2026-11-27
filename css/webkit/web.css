@@ -1785,4 +1785,607 @@ a.ps5-wcard-name { color: #fff !important; font-size: 14px; font-weight: 700; li
 }
 #ps5-wtoast.on { opacity: 1; transform: translate(-50%, 0); }
 
+/* ═══════════════ v1.6.0 — PROFILE TABS (activity, friends, groups, badges, inventory, content) ═══════════════
+   The profile page itself stays Steam's (js/web.js skips it); every tab under it gets the PS5 look.
+   Steam's old community markup, readable classes:
+     shared   .profile_small_header_* (name strip on sub-pages)
+     activity #blotter_page: .friend_activity_header, #friendactivity_right_column .box, .blotter_day >
+              .blotter_day_header_date, .blotter_block (.blotter_author_block, .blotter_comment_thread,
+              .blotter_daily_rollup), .dynamiclink_box, .blotter_status_entry
+     friends  .friends_header_*, .friends_nav (h4, a.icon_item[.active] .count), .profile_friends.title_bar,
+              .friends_search_text_box, .manage_friends_panel, .state_block,
+              .friend_block_v2.persona.(in-game|online|offline) (.player_avatar, .friend_block_content,
+              .friend_small_text, .friend_game_link, .friend_last_online_text), .group_block
+     badges   .profile_xp_block, .badge_row (.badge_row_inner, .badge_title, .badge_info_image,
+              .badge_progress_info), .badge_card_set_card
+     inventory #games_list_public (a.games_list_tab), #tabcontent_inventory, #filter_control,
+              .filter_tag_button, #inventories (.itemHolder > .item), .pagebtn
+     content  #BG_top_sharedfiles (.sharedfiles_header_ctn), .sectionTabs .sectionTab[.active],
+              #ScreenshotManagementControlsTop, .sharedfiles_filterselect, #image_wall .imgWallItem */
+
+/* --- the name strip at the top of every tab --- */
+.profile_small_header_bg,
+.profile_small_header_texture,
+.friends_header_bg,
+.sharedfiles_header_ctn,
+#BG_top_sharedfiles {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.profile_small_header_texture,
+.friends_header_ctn,
+.sharedfiles_header_ctn {
+  margin-top: 12px !important;
+  padding: 16px 20px !important;
+  border-radius: var(--ps5-r-l) !important;
+  background:
+    radial-gradient(120% 140% at 0% 0%, var(--ps5-accent-soft), transparent 60%),
+    var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+}
+.profile_small_header_avatar img,
+.profile_small_header_avatar .playerAvatar img,
+.friends_header_avatar img,
+#HeaderUserAvatar img {
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 18px 2px var(--ps5-accent-glow) !important;
+}
+.profile_small_header_avatar .playerAvatar,
+.profile_small_header_avatar .playerAvatar.online,
+.profile_small_header_avatar .playerAvatar.offline,
+.profile_small_header_avatar .playerAvatar.in-game { background: transparent !important; border-radius: 50% !important; padding: 0 !important; }
+.profile_small_header_name a,
+.profile_small_header_name,
+.friends_header_name a,
+#HeaderUserInfoName a { color: #fff !important; font-weight: 800 !important; letter-spacing: -0.01em; }
+.profile_small_header_arrow { color: var(--ps5-ink-3) !important; }
+.profile_small_header_location,
+.HeaderUserInfoSection a { color: var(--ps5-ink-2) !important; font-weight: 600 !important; }
+
+/* round avatars with a status ring, everywhere on the tabs */
+:is(.playerAvatar, .player_avatar, .friend_block_v2 .player_avatar) {
+  border-radius: 50% !important;
+  background: transparent !important;
+}
+:is(.playerAvatar, .player_avatar) img { border-radius: 50% !important; }
+.playerAvatar.online img, .player_avatar.online img, .friend_block_v2.online .player_avatar img { box-shadow: 0 0 0 2px #2d9bff !important; }
+.playerAvatar.in-game img, .player_avatar.in-game img, .friend_block_v2.in-game .player_avatar img { box-shadow: 0 0 0 2px #3fd15a !important; }
+.playerAvatar.offline img, .friend_block_v2.offline .player_avatar img { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28) !important; }
+.playerAvatar .profile_avatar_frame img { box-shadow: none !important; border-radius: 0 !important; }
+
+/* shared community buttons as PS5 pills */
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage, &.ps5-p-games, &.ps5-p-achievements)
+  :is(.btn_grey_grey, .btn_grey_white_innerfade, .btn_grey_black, .btn_darkblue_white_innerfade, .btnv6_blue_hoverfade, .btn_profile_action, .btn_medium, .btn_small, .btn_small_thin, .btn_grey_steamui) {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  color: #fff !important;
+  transition: background 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease) !important;
+}
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage, &.ps5-p-games, &.ps5-p-achievements)
+  :is(.btn_grey_grey, .btn_grey_white_innerfade, .btn_grey_black, .btn_darkblue_white_innerfade, .btnv6_blue_hoverfade, .btn_profile_action, .btn_medium, .btn_small, .btn_small_thin, .btn_grey_steamui):hover {
+  background: var(--ps5-hover) !important;
+  box-shadow: 0 0 0 2px #fff !important;
+}
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage, &.ps5-p-games, &.ps5-p-achievements)
+  :is(.btn_grey_grey, .btn_grey_white_innerfade, .btn_grey_black, .btn_darkblue_white_innerfade, .btnv6_blue_hoverfade, .btn_profile_action, .btn_medium, .btn_small, .btn_small_thin, .btn_grey_steamui) > span {
+  background: transparent !important;
+  background-image: none !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+}
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage)
+  :is(.btn_green_white_innerfade, .btn_green_steamui, .btn_blue_steamui, .btn_blue_white_innerfade) {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-accent) !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage)
+  :is(.btn_green_white_innerfade, .btn_green_steamui, .btn_blue_steamui, .btn_blue_white_innerfade) > span { background: transparent !important; color: #fff !important; }
+
+/* fields */
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage)
+  :is(input[type="text"], input[type="search"], textarea, .friends_search_text_box, #filter_control, .commentthread_textarea, .blotter_status_textarea) {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  color: #fff !important;
+  padding-left: 16px !important;
+  outline: none !important;
+}
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-userpage) textarea { border-radius: var(--ps5-r) !important; }
+:is(&.ps5-p-activity, &.ps5-p-friends, &.ps5-p-badges, &.ps5-p-inventory, &.ps5-p-screenshots, &.ps5-p-userpage)
+  :is(input[type="text"], input[type="search"], textarea):focus { box-shadow: var(--ps5-focus) !important; }
+
+/* ---------- ACTIVITY (/home) ---------- */
+&.ps5-p-activity #blotter_page { background: transparent !important; }
+&.ps5-p-activity .friend_activity_header h1,
+&.ps5-p-activity .friend_activity_header {
+  color: #fff !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  text-transform: none !important;
+}
+&.ps5-p-activity .friend_activity_header h1 { font-size: 30px !important; clear: both; }
+&.ps5-p-activity .friend_activity_header a { color: var(--ps5-ink-2) !important; }
+&.ps5-p-activity .blotter_day_header_date {
+  display: inline-block !important;
+  margin: 18px 0 8px !important;
+  padding: 5px 14px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+&.ps5-p-activity .blotter_block,
+&.ps5-p-activity .blotter_status_entry,
+&.ps5-p-activity .blotter_daily_rollup {
+  margin-bottom: 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+  transition: box-shadow 220ms var(--ps5-ease) !important;
+}
+&.ps5-p-activity .blotter_block:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), var(--ps5-shadow) !important; }
+&.ps5-p-activity :is(.blotter_author_block, .blotter_gamepurchase, .blotter_gamepurchase_content, .blotter_userstatus,
+  .blotter_screenshot, .blotter_recommendation, .blotter_workshopitem, .blotter_group_announcement, .blotter_achievement_list) {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+}
+&.ps5-p-activity .blotter_author_block { padding: 12px 16px 6px !important; }
+&.ps5-p-activity .blotter_author_block a,
+&.ps5-p-activity .blotter_daily_rollup_line a { color: #fff !important; font-weight: 700 !important; }
+&.ps5-p-activity .blotter_gamepurchase_logo img,
+&.ps5-p-activity .blotter_screenshot img,
+&.ps5-p-activity .blotter_userstatus_game img,
+&.ps5-p-activity .blotter_recommendation img { border-radius: 10px !important; }
+&.ps5-p-activity .blotter_comment_thread,
+&.ps5-p-activity .commentthread_area,
+&.ps5-p-activity .blotter_viewall_comments {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: none !important;
+  border-top: 1px solid var(--ps5-line) !important;
+}
+&.ps5-p-activity .commentthread_comment { background: transparent !important; border: none !important; }
+&.ps5-p-activity .commentthread_comment_author a { color: #fff !important; font-weight: 700 !important; }
+&.ps5-p-activity .dynamiclink_box {
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-field) !important;
+  background-image: none !important;
+}
+&.ps5-p-activity #friendactivity_right_column .box,
+&.ps5-p-activity #friendactivity_right_column .rightbox {
+  margin-bottom: 12px !important;
+  padding: 14px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-activity #friendactivity_right_column :is(.box_title, h2, .title) { color: #fff !important; font-weight: 800 !important; text-transform: none !important; letter-spacing: 0 !important; }
+&.ps5-p-activity #blotter_appselect_app { border-radius: 999px !important; background: var(--ps5-field) !important; background-image: none !important; }
+&.ps5-p-activity .popup_block .popup_body,
+&.ps5-p-activity .popup_block_new .popup_body {
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass-strong) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+}
+
+/* ---------- FRIENDS / GROUPS / FOLLOWED (/friends, /groups, /followedgames, /following) ---------- */
+&.ps5-p-friends .friends_nav {
+  padding: 12px !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-friends .friends_nav h4 {
+  margin: 12px 8px 6px !important;
+  color: var(--ps5-ink-3) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  border: none !important;
+}
+&.ps5-p-friends .friends_nav h4:first-child { margin-top: 2px !important; }
+&.ps5-p-friends .friends_nav a.icon_item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  height: 38px !important;
+  margin: 2px 0 !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  color: var(--ps5-ink-2) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: background 200ms var(--ps5-ease), color 200ms var(--ps5-ease);
+}
+&.ps5-p-friends .friends_nav a.icon_item * { text-decoration: none !important; }
+&.ps5-p-friends .friends_nav a.icon_item:hover { background: var(--ps5-hover) !important; color: #fff !important; }
+&.ps5-p-friends .friends_nav a.icon_item.active { background: #fff !important; color: #0b0b0f !important; }
+&.ps5-p-friends .friends_nav a.icon_item.active * { color: #0b0b0f !important; }
+&.ps5-p-friends .friends_nav a.icon_item .count {
+  margin-left: auto !important;
+  min-width: 22px;
+  padding: 1px 8px !important;
+  border-radius: 99px !important;
+  background: var(--ps5-field) !important;
+  color: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-align: center;
+}
+&.ps5-p-friends .friends_nav a.icon_item.active .count { background: rgba(0, 0, 0, 0.1) !important; }
+&.ps5-p-friends .friends_nav a.icon_item .title { background-image: none !important; padding-left: 0 !important; }
+&.ps5-p-friends .profile_friends.title_bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  margin-bottom: 12px !important;
+  padding: 10px 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-friends .profile_friends.title_bar .profile_friends.title { color: #fff !important; font-weight: 800 !important; }
+&.ps5-p-friends .manage_friends_panel {
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-friends .state_block,
+&.ps5-p-friends .profile_friends.search_results .state_block,
+&.ps5-p-friends .friendListSectionHeader {
+  margin: 18px 4px 8px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+&.ps5-p-friends .profile_friends.responsive_friendblocks,
+&.ps5-p-friends .friends_content .profile_friends {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 10px !important;
+}
+&.ps5-p-friends .responsive_friendblocks > .state_block,
+&.ps5-p-friends .responsive_friendblocks > :not(.friend_block_v2):not(.selectable) { grid-column: 1 / -1; }
+&.ps5-p-friends .friend_block_v2 {
+  position: relative;
+  width: auto !important;
+  min-height: 64px !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  transition: box-shadow 220ms var(--ps5-ease), transform 220ms var(--ps5-ease), background 220ms var(--ps5-ease) !important;
+}
+&.ps5-p-friends .friend_block_v2:hover {
+  background: var(--ps5-hover) !important;
+  box-shadow: 0 0 0 2px #fff, var(--ps5-shadow) !important;
+  transform: translateY(-2px);
+}
+&.ps5-p-friends .friend_block_v2 .player_avatar {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  width: 44px !important;
+  height: 44px !important;
+  border: none !important;
+  border-right: none !important;
+}
+&.ps5-p-friends .friend_block_v2 .player_avatar img { width: 44px !important; height: 44px !important; }
+&.ps5-p-friends .friend_block_v2 .friend_block_content {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  padding-left: 56px !important;
+}
+&.ps5-p-friends .friend_block_v2 :is(.friend_small_text, .friend_last_online_text, .player_nickname_hint) { color: var(--ps5-ink-3) !important; font-weight: 500 !important; }
+&.ps5-p-friends .friend_block_v2.in-game :is(.friend_small_text, .friend_game_link) { color: #8ee08a !important; }
+&.ps5-p-friends .friend_block_v2.online .friend_small_text { color: #8fd4ff !important; }
+&.ps5-p-friends .friend_block_v2.offline { opacity: 0.8; }
+&.ps5-p-friends .friend_block_v2.selected,
+&.ps5-p-friends .friend_block_v2.selectable.selected { box-shadow: 0 0 0 2px var(--ps5-accent), var(--ps5-shadow) !important; }
+&.ps5-p-friends .group_block {
+  margin: 0 0 10px !important;
+  padding: 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  transition: box-shadow 220ms var(--ps5-ease) !important;
+}
+&.ps5-p-friends .group_block:hover { box-shadow: 0 0 0 2px #fff !important; }
+&.ps5-p-friends .group_block img,
+&.ps5-p-friends .group_block .avatarMedium img { border-radius: 12px !important; }
+&.ps5-p-friends .group_block :is(.groupTitle a, .linkTitle) { color: #fff !important; font-weight: 700 !important; }
+&.ps5-p-friends .search_results_none,
+&.ps5-p-friends .emptyFriendsCtn,
+&.ps5-p-friends .friends_content .no_friends {
+  padding: 24px !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  color: var(--ps5-ink-2) !important;
+}
+/* followed games (flat page) */
+&.ps5-p-friends .gameListRow,
+&.ps5-p-friends .followed_game {
+  margin-bottom: 8px !important;
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-friends .gameListRow img,
+&.ps5-p-friends .followed_game img { border-radius: 10px !important; }
+
+/* mini profile on hover (store and community) */
+.miniprofile_hover {
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), var(--ps5-shadow) !important;
+}
+
+/* ---------- BADGES (/badges, /gamecards) ---------- */
+&.ps5-p-badges .profile_xp_block {
+  padding: 16px 20px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-badges .profile_xp_block_mid { background: transparent !important; }
+&.ps5-p-badges .profile_xp_block_remaining_bar {
+  height: 8px !important;
+  border-radius: 99px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  overflow: hidden;
+}
+&.ps5-p-badges .profile_xp_block_remaining_bar_progress { border-radius: 99px !important; background: var(--ps5-accent) !important; }
+&.ps5-p-badges .badges_sheet {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+  gap: 10px !important;
+}
+&.ps5-p-badges .badges_sheet > :not(.badge_row) { grid-column: 1 / -1; }
+&.ps5-p-badges .badge_row {
+  position: relative;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+  transition: box-shadow 220ms var(--ps5-ease), transform 220ms var(--ps5-ease) !important;
+}
+&.ps5-p-badges .badge_row:hover { box-shadow: 0 0 0 2px #fff, var(--ps5-shadow) !important; transform: translateY(-2px); background: var(--ps5-glass) !important; }
+&.ps5-p-badges .badge_row_inner,
+&.ps5-p-badges .badge_title_row,
+&.ps5-p-badges .badge_content,
+&.ps5-p-badges .badge_progress_info { background: transparent !important; background-image: none !important; border: none !important; }
+&.ps5-p-badges .badge_title { color: #fff !important; font-weight: 800 !important; font-size: 16px !important; }
+&.ps5-p-badges .badge_title_stats,
+&.ps5-p-badges .badge_info_description,
+&.ps5-p-badges .progress_info_bold { color: var(--ps5-ink-2) !important; }
+&.ps5-p-badges .badge_info_image img,
+&.ps5-p-badges .badge_icon { border-radius: 50% !important; }
+&.ps5-p-badges .badge_title_playgame a,
+&.ps5-p-badges .badge_craft_button {
+  border-radius: 999px !important;
+  background: #fff !important;
+  background-image: none !important;
+  color: #0b0b0f !important;
+  font-weight: 700 !important;
+}
+&.ps5-p-badges .badge_card_set_card {
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+  overflow: hidden;
+}
+&.ps5-p-badges .badge_card_set_card img { border-radius: 10px !important; }
+&.ps5-p-badges .badge_card_set_card.unowned { opacity: 0.55; }
+&.ps5-p-badges :is(.badge_sort_option, .profile_badges_sortoptions a) {
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  color: #fff !important;
+}
+&.ps5-p-badges :is(.badge_sort_option.active, .profile_badges_sortoptions a.active) { background: #fff !important; color: #0b0b0f !important; }
+
+/* ---------- INVENTORY (/inventory, /tradeoffers) ---------- */
+&.ps5-p-inventory #games_list_public .games_list_tabs,
+&.ps5-p-inventory .games_list_tabs_ctn {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-inventory a.games_list_tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px;
+  float: none !important;
+  height: 40px !important;
+  margin: 0 !important;
+  padding: 0 14px 0 6px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  background-image: none !important;
+  color: #fff !important;
+  transition: background 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease);
+}
+&.ps5-p-inventory a.games_list_tab:hover { background: var(--ps5-hover) !important; box-shadow: 0 0 0 2px #fff !important; }
+&.ps5-p-inventory a.games_list_tab.active { background: #fff !important; }
+&.ps5-p-inventory a.games_list_tab.active * { color: #0b0b0f !important; }
+&.ps5-p-inventory a.games_list_tab img { border-radius: 50% !important; }
+&.ps5-p-inventory .games_list_separator {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  color: var(--ps5-ink-2) !important;
+}
+&.ps5-p-inventory #tabcontent_inventory,
+&.ps5-p-inventory .inventory_ctn,
+&.ps5-p-inventory .trade_item_box {
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-inventory .itemHolder {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  overflow: hidden;
+  transition: box-shadow 200ms var(--ps5-ease), transform 200ms var(--ps5-ease);
+}
+&.ps5-p-inventory .itemHolder:hover { box-shadow: 0 0 0 2px #fff !important; transform: translateY(-1px); }
+&.ps5-p-inventory .itemHolder .item { border-radius: 12px !important; background-color: transparent !important; }
+&.ps5-p-inventory .itemHolder.activeInfo { box-shadow: 0 0 0 2px var(--ps5-accent), 0 0 18px 2px var(--ps5-accent-glow) !important; }
+&.ps5-p-inventory .filter_tag_button,
+&.ps5-p-inventory :is(.pagebtn, .pagecontrol_element) {
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+&.ps5-p-inventory :is(.pagebtn, .filter_tag_button):hover { background: var(--ps5-hover) !important; }
+&.ps5-p-inventory .inventory_page_right,
+&.ps5-p-inventory .inventory_iteminfo { border-radius: var(--ps5-r-l) !important; overflow: hidden; }
+&.ps5-p-inventory .item_desc_content,
+&.ps5-p-inventory .item_desc_description { background: transparent !important; }
+&.ps5-p-inventory .item_market_actions,
+&.ps5-p-inventory .item_owner_actions { border-radius: var(--ps5-r) !important; background: var(--ps5-field) !important; }
+
+/* ---------- CONTENT: screenshots, artwork, videos, workshop items, reviews ---------- */
+&.ps5-p-screenshots .sectionTabs,
+&.ps5-p-screenshots .sharedfiles_tabs_ctn {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  border: none !important;
+  background: transparent !important;
+}
+&.ps5-p-screenshots .sectionTab {
+  height: 36px !important;
+  padding: 0 16px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  background-image: none !important;
+  color: var(--ps5-ink-2) !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+&.ps5-p-screenshots .sectionTab:hover { background: var(--ps5-hover) !important; color: #fff !important; }
+&.ps5-p-screenshots .sectionTab.active { background: #fff !important; color: #0b0b0f !important; }
+&.ps5-p-screenshots .sectionTab.active * { color: #0b0b0f !important; }
+&.ps5-p-screenshots #ScreenshotManagementControlsTop,
+&.ps5-p-screenshots .sharedfiles_management_ctn,
+&.ps5-p-screenshots #FilterContainer {
+  padding: 10px 14px !important;
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-screenshots .sharedfiles_filterselect,
+&.ps5-p-screenshots .sharedfiles_filterselect_activeoption,
+&.ps5-p-screenshots .profileAppFilter {
+  border: none !important;
+  border-radius: 999px !important;
+  background-color: var(--ps5-field) !important;
+  color: #fff !important;
+}
+&.ps5-p-screenshots .profileAppFilter.searchedForTerm,
+&.ps5-p-screenshots #searchedForApp { background-color: var(--ps5-accent) !important; color: #fff !important; }
+&.ps5-p-screenshots .popup_block .sharedfiles_filterselect_options,
+&.ps5-p-screenshots .shadow_content {
+  border-radius: var(--ps5-r) !important;
+  background: var(--ps5-glass-strong) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line), var(--ps5-shadow) !important;
+}
+&.ps5-p-screenshots .sharedfiles_filterselect_options .option:hover { background: var(--ps5-accent) !important; color: #fff !important; }
+&.ps5-p-screenshots #image_wall .imgWallItem,
+&.ps5-p-screenshots .profile_media_item .imgWallItem,
+&.ps5-p-screenshots .workshopItem .workshopItemPreviewHolder,
+&.ps5-p-screenshots .review_box,
+&.ps5-p-screenshots .profile_media_item {
+  border: none !important;
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+}
+&.ps5-p-screenshots #image_wall .profile_media_item { transition: transform 220ms var(--ps5-ease), box-shadow 220ms var(--ps5-ease); }
+&.ps5-p-screenshots #image_wall .profile_media_item:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px #fff, var(--ps5-shadow) !important; }
+&.ps5-p-screenshots .imgWallHover .imgWallHoverBottom { background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.8)) !important; }
+&.ps5-p-screenshots .imgWallHoverDescription q { color: #fff !important; }
+&.ps5-p-screenshots .review_box {
+  margin-bottom: 12px !important;
+  background: var(--ps5-glass) !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+&.ps5-p-screenshots .review_box :is(.leftcol, .rightcol, .header, .hr) { background: transparent !important; border: none !important; }
+&.ps5-p-screenshots .review_box .title a { color: #fff !important; font-weight: 800 !important; }
+&.ps5-p-screenshots .workshopBrowsePaging,
+&.ps5-p-screenshots .pagingPageLink { color: var(--ps5-ink-2) !important; }
+&.ps5-p-screenshots .pagebtn,
+&.ps5-p-screenshots .pagingPageLink {
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  padding: 2px 10px !important;
+}
+
+/* ---------- any other tab: generic cards ---------- */
+&.ps5-p-userpage :is(.profile_page_content, .maincontent) :is(.box, .rightbox, .block, .profile_customization) {
+  border: none !important;
+  border-radius: var(--ps5-r-l) !important;
+  background: var(--ps5-glass) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--ps5-line) !important;
+}
+
 }
