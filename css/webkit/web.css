@@ -1641,7 +1641,10 @@ a.ps5-rev-link:hover { color: #fff !important; }
 &:not(.ps5-wish-grid) #ps5-wish .ps5-wcount { display: none !important; }
 /* grid mode: Steam's page column widens (title and grid on one edge), centred */
 &.ps5-wish-grid [data-ps5-wcol] {
-  width: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  align-self: stretch !important;
   max-width: min(1400px, 100vw - 48px) !important;
   margin-left: auto !important;
   margin-right: auto !important;

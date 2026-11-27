@@ -5,20 +5,27 @@ A PlayStation 5 style shell for the Steam desktop client, built for
 real games, a **Game Library**, a **Control Center**, PS5 **game hubs**, a PSN-style profile,
 glass panels and smooth motion — while every Steam function keeps working underneath.
 
-![PlayStation 5 theme in a real Steam client](assets/real/header.jpg)
+![PS5 Home Screen in a real Steam client](assets/real/home.jpg)
 
-*Real capture from a Steam client running the theme. The gallery below is rendered by the test harness with placeholder art.*
+*Real capture: the PS5 Home Screen running in the Steam client.*
 
 > Unofficial fan project. Not affiliated with or endorsed by Sony Interactive Entertainment or
 > Valve. "PlayStation" and "PS5" are trademarks of Sony Interactive Entertainment. No Sony logos
-> or assets are included. Screenshots use placeholder game art.
+> or assets are included. Game art in the real captures belongs to its publishers; harness renders use placeholder art.
 
 **[⬇ Download the latest ZIP from GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases/latest)**
 
 ## Screenshots
 
-![Home Screen](assets/preview-home.jpg)
+Real captures from a Steam client running the theme:
 
+| PlayStation Store | Store product page |
+|---|---|
+| ![Store](assets/real/store.jpg) | ![Store product page](assets/real/store-game.jpg) |
+
+Rendered by the test harness (placeholder game art):
+
+![Home Screen](assets/preview-home.jpg)
 
 | Game Library | Control Center |
 |---|---|
@@ -166,7 +173,7 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 174 checks: mock Steam window, menus, store/community pages
+node tests/run.mjs            # 175 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 

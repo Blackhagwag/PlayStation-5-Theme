@@ -4,6 +4,21 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme/releases).
 
+## [1.5.1] — 2026-11-27 — Real Screenshots & Wishlist Width
+
+### Added
+- **Real screenshots everywhere**: the Millennium store's big preview (`splash_image`) is now the
+  PS5 Home Screen captured in a real Steam client (`assets/real/home.jpg`); the README gallery
+  opens with real captures of the Home Screen, the Store and a Store product page
+  (`assets/real/`). Test-harness renders stay below, labelled as such.
+
+### Fixed
+- **Wishlist grid squeezed into a narrow column** in the real client (3 columns, empty sides):
+  Steam caps the wishlist inside page wrappers ~940 px wide higher up than the list's own
+  section. Grid mode now widens every narrower wrapper up to the page, so the grid uses the
+  window (6–7 columns at 1440–1920 px) and stays centred. "Steam list" restores Steam's layout.
+- Test mock now wraps the wishlist the way Steam does, so this regression is caught (175 checks).
+
 ## [1.5.0] — 2026-11-27 — Millennium Store Release
 
 ### Added

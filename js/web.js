@@ -626,6 +626,12 @@
       }
       const col = list.closest('section') || list.parentElement;
       if (col) col.setAttribute('data-ps5-wcol', '');
+      // the real page also caps the column higher up (page wrappers ~940px wide): mark every
+      // narrower ancestor up to <body> so grid mode can use the window's width
+      for (let a = (col || list).parentElement; a && a !== document.body; a = a.parentElement) {
+        const cs = getComputedStyle(a);
+        if (cs.maxWidth !== 'none' || a.getBoundingClientRect().width < window.innerWidth - 80) a.setAttribute('data-ps5-wcol', '');
+      }
       const opt = (v, l) => el('option', '', { value: v, text: l });
       const sel = el('select', 'ps5-wsort', {}, [opt('rank', W.rank), opt('added', W.added), opt('discount', W.discount), opt('price', W.price), opt('name', W.name), opt('release', W.release), opt('reviews', W.reviews)]);
       const search = el('input', 'ps5-wsearch', { type: 'search', placeholder: W.search, spellcheck: 'false' });
