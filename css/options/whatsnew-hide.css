@@ -1,0 +1,3 @@
+/* What's New → Hidden. html prefix: option files load before main.css */
+html .LibraryHome div:has(> .UpdatesContainer),
+html .UpdatesContainer { display: none !important; }

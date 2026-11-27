@@ -24,6 +24,7 @@ const add = (file, where) => {
 };
 const many = (v, where) => (Array.isArray(v) ? v : [v]).forEach(f => add(f, where));
 if (skin.RootColors) add(skin.RootColors, 'RootColors');
+for (const k of ['webkitCSS', 'Steam-WebKit', 'webkitJS']) if (skin[k]) add(skin[k], k);
 for (const p of skin.Patches || []) {
   if (!p.MatchRegexString) errors.push('Patch without MatchRegexString');
   try { new RegExp(p.MatchRegexString); } catch (e) { errors.push(`bad regex ${p.MatchRegexString}`); }

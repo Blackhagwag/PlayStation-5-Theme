@@ -157,3 +157,39 @@ input.DialogInput {
 /* any progress bar Steam draws */
 .ProgressBar,
 [class*="ProgressBar"] > div { border-radius: 999px !important; }
+
+/* ---------- v1.1.0: settings, properties and other dialog windows (body.ModalDialogBody) ---------- */
+body.ModalDialogBody {
+  background: linear-gradient(180deg, #0b1a3c 0%, #050912 75%) !important;
+  color: var(--ps5-text);
+}
+body.ModalDialogBody .PagedSettingsDialog_PageList,
+body.ModalDialogBody .PagedSettingsDialog_PageListColumn {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-right: 1px solid var(--ps5-line) !important;
+}
+body.ModalDialogBody .PagedSettingDialog_ContentColumn,
+body.ModalDialogBody .DialogContentTransition,
+body.ModalDialogBody .ModalPosition_Content { background: transparent !important; }
+body.ModalDialogBody .Field,
+body.ModalDialogBody .SettingsDialogSubHeader + .Field {
+  border-radius: var(--ps5-r-s) !important;
+}
+body.ModalDialogBody .SettingsDialogSubHeader,
+body.ModalDialogBody .DialogSubHeader {
+  color: #fff !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+}
+body.ModalDialogBody .FieldLabel { color: #fff !important; }
+body.ModalDialogBody .FieldDescription { color: var(--ps5-text-3) !important; }
+.DialogToggle_On,
+.Toggle.On { background: var(--ps5-accent) !important; }
+.DialogCheckbox.Active svg * { fill: var(--ps5-accent) !important; }
+.DialogDropDown {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-s) !important;
+}
+.DialogInput_Wrapper.Panel { border-radius: var(--ps5-r-s) !important; }

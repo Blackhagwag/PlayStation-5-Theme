@@ -1,0 +1,2 @@
+/* Store and Community → Steam default: js/web.js reads this and leaves the page alone */
+:root { --ps5-web: off; }

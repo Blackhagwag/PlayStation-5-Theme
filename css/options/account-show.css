@@ -1,0 +1,4 @@
+/* Steam account button → Visible */
+:root { --ps5-account: show; }
+html.ps5-theme .TitleBarControls .AccountMenu,
+html.ps5-theme .AccountMenu { display: revert !important; }

@@ -282,3 +282,224 @@ html.ps5-hide-list .LibraryWindowDivider { display: none !important; }
 
 /* ---------- Millennium's own settings page in the main window ---------- */
 .MillenniumSettings { background: transparent !important; }
+
+/* ==========================================================================
+   v1.1.0
+   ========================================================================== */
+
+/* ---------- one profile button: Steam's account button gives way to the PS5 avatar ----------
+   only while js/ps5.js runs (html.ps5-theme) and unless «Steam account button → Visible».
+   Everything that menu held is in Control Center → Profile. */
+html.ps5-theme:not(.ps5-account-show) .TitleBarControls .AccountMenu,
+html.ps5-theme:not(.ps5-account-show) .AccountMenu { display: none !important; }
+
+/* ---------- bottom bar: Downloads · Add a Game · Friends & Chat as PS5 pills ---------- */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  min-height: 52px !important;
+  padding: 0 18px !important;
+  background: linear-gradient(0deg, rgba(0, 4, 16, 0.82), rgba(0, 4, 16, 0.35)) !important;
+  border-top: 1px solid var(--ps5-line) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="AddGame"],
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="FriendsButton"] {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px;
+  height: 38px !important;
+  padding: 0 16px 0 14px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  transition: background var(--ps5-t) var(--ps5-ease), box-shadow var(--ps5-t) var(--ps5-ease), transform var(--ps5-t) var(--ps5-ease) !important;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus:hover,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton:hover,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton:hover,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="AddGame"]:hover,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar [class*="FriendsButton"]:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: var(--ps5-focus) !important;
+  transform: translateY(-1px);
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar svg { color: #fff !important; fill: currentColor; }
+/* PS5 icons, drawn with masks so they take the text colour */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus::before,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton::before,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: var(--ps5-bb-icon) center / contain no-repeat;
+  mask: var(--ps5-bb-icon) center / contain no-repeat;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M12 3.5v11m-4.5-4.5L12 14.5 16.5 10M4.5 19.5h15'/%3E%3C/svg%3E"); }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton { --ps5-bb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='9' cy='9' r='3.4'/%3E%3Cpath d='M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5' stroke-linecap='round'/%3E%3Ccircle cx='17' cy='8' r='2.6'/%3E%3Cpath d='M16.5 13.2c2.3.2 3.9 1.7 4.5 4.3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
+/* Steam's own small icons inside those buttons step aside for ours */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .AddGameButton > svg,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .FriendsButton > svg:first-child { display: none !important; }
+/* Downloads: blue progress line inside the pill while something downloads */
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus [class*="ProgressBar"] {
+  height: 4px !important;
+  min-width: 90px;
+  border-radius: 99px !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  overflow: hidden;
+}
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .ProgressBar > div { background: var(--ps5-accent) !important; box-shadow: 0 0 8px var(--ps5-accent-glow); }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .StatusLine,
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .Status { color: var(--ps5-text-2) !important; }
+html.ps5-theme:not(.ps5-bb-steam) .BottomBar .DownloadStatus .Percentage { color: #fff !important; font-variant-numeric: tabular-nums; }
+html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus {
+  background: color-mix(in srgb, var(--ps5-accent) 30%, transparent) !important;
+  border-color: color-mix(in srgb, var(--ps5-accent) 70%, transparent) !important;
+}
+html.ps5-theme:not(.ps5-bb-steam).ps5-downloading .BottomBar .DownloadStatus::before { animation: ps5-dl-bob 1.4s ease-in-out infinite; }
+@keyframes ps5-dl-bob { 50% { transform: translateY(2px); } }
+/* Friends & Chat: online count badge added by js/ps5.js */
+.ps5-friends-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 99px;
+  background: #3fd15a;
+  color: #04120a;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-grid;
+  place-items: center;
+}
+.ps5-friends-badge[hidden] { display: none; }
+
+/* ---------- What's New: a row of PS5 content cards (Steam's real events, Steam's own clicks) ---------- */
+.LibraryHome .UpdatesContainer,
+.UpdatesContainer {
+  background: none !important;
+  padding: 4px 0 18px !important;
+}
+.UpdatesContainer .EventTime {
+  display: inline-flex !important;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px !important;
+  margin-bottom: 10px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div {
+  position: relative;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.7) !important;
+  transition: transform 280ms var(--ps5-ease), box-shadow 280ms var(--ps5-ease), border-color 280ms var(--ps5-ease) !important;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover {
+  transform: translateY(-4px) scale(1.025);
+  border-color: transparent !important;
+  box-shadow: 0 0 0 3px #fff, 0 0 30px 4px var(--ps5-accent-glow), 0 22px 40px -14px rgba(0, 0, 0, 0.8) !important;
+  z-index: 2;
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container img {
+  border-radius: 0 !important;
+  transition: transform 600ms var(--ps5-ease), filter 400ms var(--ps5-ease);
+}
+.UpdatesContainer .PartnerEventRowCapsule_Container > div:hover img { transform: scale(1.06); filter: brightness(1.08); }
+.UpdatesContainer .PartnerEventRowCapsule_TextTitle {
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.UpdatesContainer [class*="Summary"],
+.UpdatesContainer [class*="Desc"] {
+  color: var(--ps5-text-2) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.UpdatesContainer [class*="EventType"],
+.UpdatesContainer [class*="PartnerEventType"] {
+  color: color-mix(in srgb, var(--ps5-accent) 55%, #fff) !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.UpdatesContainer .GameIconAndName {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px !important;
+  border-radius: 999px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  transition: background 160ms ease !important;
+}
+.UpdatesContainer .GameIconAndName:hover { background: rgba(255, 255, 255, 0.18) !important; }
+.UpdatesContainer .GameIconAndName .GameIcon,
+.UpdatesContainer .GameIconAndName .GameIcon img { border-radius: 50% !important; overflow: hidden; }
+.UpdatesContainer .GameIconAndName .GameName { color: #fff !important; font-weight: 600 !important; }
+/* the shelf's own scroll arrows */
+.UpdatesContainer .ScrollButton,
+.LibraryHome .ScrollButton {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.UpdatesContainer .ScrollButton:hover,
+.LibraryHome .ScrollButton:hover { background: #fff !important; color: #0b0b0f !important; }
+
+/* ---------- Downloads page: PS5 downloads list ---------- */
+.DownloadsPage .DownloadStatusContent,
+.DownloadsPage [class*="DownloadOverview"],
+.DownloadsPage [class*="AppDownloadPanel"],
+.DownloadsPage [class*="DownloadItem"] {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+}
+.DownloadsPage [class*="SectionTitle"],
+.DownloadsPage .SectionHeader {
+  color: #fff !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+}
+.DownloadsPage img { border-radius: 10px !important; }
+.DownloadsPage .DialogButton,
+.DownloadsPage button { border-radius: 999px !important; }
+.DownloadsPage canvas { border-radius: var(--ps5-r); }
+
+/* ---------- overlays over web pages: the web view is hidden while one is open ---------- */
+html.ps5-web-hidden .BrowserWrapper { visibility: hidden; }

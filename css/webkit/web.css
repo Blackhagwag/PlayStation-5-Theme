@@ -1,179 +1,812 @@
 /* ==========================================================================
    PlayStation 5 — Millennium theme
-   webkit/web.css: Store, Community and Profile pages inside Steam
-   (PlayStation Store / PlayStation Network look). Colors, radii and type
-   only — no layout changes, so every page keeps working.
+   webkit/web.css: Store (PlayStation Store look), Wishlist, Community,
+   Workshop, Discussions, Guides, Screenshots, Market and the PlayStation
+   Network-style profile.
+
+   Millennium loads this file into every page Steam's browser opens
+   (skin.json → webkitCSS). Every rule waits for html.ps5-web, which js/web.js
+   sets on store.steampowered.com and steamcommunity.com only.
+
+   Steam's store measures its own text in its own font, so the face stays
+   Steam's (swapping it clips prices and buttons); colours, surfaces, radii,
+   spacing of cards, buttons, motion and focus follow the PS5 design system
+   shared with the desktop windows.
    ========================================================================== */
-@font-face {
-  font-family: "PS5 Inter";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("../../fonts/inter/inter-latin-wght-normal.woff2") format("woff2-variations");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: "PS5 Inter";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("../../fonts/inter/inter-cyrillic-wght-normal.woff2") format("woff2-variations");
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
+
 :root {
   --ps5-accent: var(--ps5-accent-preset, #0070D1);
-  --ps5-glass: rgba(16, 32, 70, 0.55);
+  --ps5-accent-soft: color-mix(in srgb, var(--ps5-accent) 26%, transparent);
+  --ps5-accent-glow: color-mix(in srgb, var(--ps5-accent) 55%, transparent);
+  --ps5-ink: #ffffff;
+  --ps5-ink-2: rgba(255, 255, 255, 0.74);
+  --ps5-ink-3: rgba(255, 255, 255, 0.5);
+  --ps5-glass: rgba(14, 30, 66, 0.55);
+  --ps5-glass-strong: rgba(9, 20, 46, 0.92);
+  --ps5-field: rgba(255, 255, 255, 0.08);
+  --ps5-hover: rgba(255, 255, 255, 0.12);
   --ps5-line: rgba(255, 255, 255, 0.10);
+  --ps5-r-s: 8px;
   --ps5-r: 14px;
+  --ps5-r-l: 20px;
+  --ps5-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ps5-focus: 0 0 0 2px #fff, 0 0 22px 4px var(--ps5-accent-glow);
+  --ps5-shadow: 0 18px 44px -16px rgba(0, 0, 0, 0.75);
 }
 
-/* ---------- ground & type ---------- */
-html, body {
-  background-color: #020611 !important;
-}
-body {
-  font-family: "PS5 Inter", "Motiva Sans", "Segoe UI", Arial, sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-}
+/* :where() keeps the scope free of specificity; rules inside use !important where Steam does */
+:where(html.ps5-web) {
+
+/* ═══════════════ ground ═══════════════ */
+&,
+body,
 body.v6,
 body.v7,
+body.responsive_page,
+body.headerless_page,
 .responsive_page_frame,
 .responsive_page_content,
+.responsive_page_template_content,
+#responsive_page_template_content,
 .page_content_ctn,
-.home_page_body_ctn {
+.home_page_body_ctn,
+.game_page_background,
+.game_page_background.game,
+.apphub_background,
+.profile_page,
+.profile_page.has_profile_background,
+.pagecontent,
+.maincontent,
+.workshop_browse_main,
+#StoreTemplate {
   background-color: transparent !important;
 }
-body.v6::before,
-body.v7::before {
+& { background: #020611 !important; }
+body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(120% 80% at 85% -10%, rgba(0, 70, 180, 0.45), transparent 60%),
-    linear-gradient(180deg, #071633 0%, #020611 60%);
+    radial-gradient(120% 80% at 88% -10%, rgba(0, 80, 200, 0.42), transparent 60%),
+    radial-gradient(80% 60% at -10% 110%, rgba(0, 60, 160, 0.25), transparent 70%),
+    linear-gradient(180deg, #071633 0%, #020611 62%);
 }
+/* a game page: its own art, softened, as the PS Store does */
+&.ps5-p-app body::after,
+&.ps5-p-hub body::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 35% 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--ps5-page-art, none) center top / cover no-repeat;
+  opacity: 0.32;
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
+}
+&.ps5-p-app .game_page_background,
+&.ps5-p-hub .apphub_background { background-image: none !important; }
 
-/* ---------- buttons ---------- */
+/* inside the client the top bar already navigates; the web header is redundant */
+header#global_header,
+#global_header { display: none !important; }
+
+/* links and text */
+a { transition: color 140ms ease; }
+h1, h2,
+.home_page_content h2,
+.home_ctn h2,
+.page_content h2,
+.home_title,
+.home_page_title,
+.contenthub_specials h2,
+.pageheader,
+.apphub_AppName,
+.workshop_browse_title {
+  color: var(--ps5-ink) !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  font-weight: 700 !important;
+}
+.home_page_content h2,
+.home_ctn h2 { font-size: 22px !important; margin-bottom: 14px !important; }
+
+/* scrollbars */
+&::-webkit-scrollbar,
+*::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
+&::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border: 3px solid transparent; border-radius: 99px; background-clip: padding-box; }
+&::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ═══════════════ buttons (one set for every page) ═══════════════ */
 .btn_green_steamui,
 .btn_green_white_innerfade,
-.btn_blue_steamui,
 .btnv6_green_white_innerfade,
-.btnv6_blue_hoverfade,
-.btn_profile_action,
-.btnv6_lightblue_blue,
-.DialogButton.Primary {
+.btn_addtocart .btn_green_steamui,
+.btn_blue_steamui,
+.btn_medium.queue_btn_active {
   border-radius: 999px !important;
   overflow: hidden;
+  border: none !important;
+  background: var(--ps5-accent) !important;
+  box-shadow: 0 6px 20px -8px var(--ps5-accent-glow) !important;
+  transition: transform 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease), filter 200ms ease !important;
 }
 .btn_green_steamui > span,
 .btn_green_white_innerfade > span,
-.btnv6_green_white_innerfade > span {
+.btnv6_green_white_innerfade > span,
+.btn_blue_steamui > span,
+.btn_medium.queue_btn_active > span {
+  background: transparent !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  text-shadow: none !important;
+}
+.btn_green_steamui:hover,
+.btn_green_white_innerfade:hover,
+.btnv6_green_white_innerfade:hover,
+.btn_blue_steamui:hover {
+  transform: scale(1.03);
+  box-shadow: var(--ps5-focus) !important;
+}
+.btnv6_blue_hoverfade,
+.btn_grey_steamui,
+.btn_grey_grey,
+.btnv6_lightblue_blue,
+.btn_darkblue_white_innerfade,
+.btnv6_white_transparent,
+.btn_profile_action,
+.queue_btn_inactive,
+.btn_grey_black,
+.btn_black {
+  border-radius: 999px !important;
+  overflow: hidden;
+  border: none !important;
+  background: var(--ps5-field) !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  transition: background 160ms ease, box-shadow 200ms var(--ps5-ease) !important;
+}
+.btnv6_blue_hoverfade > span,
+.btn_grey_steamui > span,
+.btn_grey_grey > span,
+.btnv6_lightblue_blue > span,
+.btn_darkblue_white_innerfade > span,
+.btnv6_white_transparent > span,
+.btn_profile_action > span,
+.queue_btn_inactive > span,
+.btn_grey_black > span,
+.btn_black > span {
+  background: transparent !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  text-shadow: none !important;
+}
+.btnv6_blue_hoverfade:hover,
+.btn_grey_steamui:hover,
+.btn_grey_grey:hover,
+.btnv6_lightblue_blue:hover,
+.btnv6_white_transparent:hover,
+.btn_profile_action:hover,
+.queue_btn_inactive:hover,
+.btn_grey_black:hover { background: rgba(255, 255, 255, 0.2) !important; box-shadow: var(--ps5-focus) !important; }
+#StoreTemplate .DialogButton,
+.DialogButton { border-radius: 999px !important; }
+.DialogButton.Primary { background: var(--ps5-accent) !important; color: #fff !important; }
+
+/* fields */
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="email"],
+.searchbox,
+.searchbar_left input.text,
+#store_nav_search_term,
+.gray_bevel.for_text_input input,
+.dselect_container .trigger,
+select {
+  background: var(--ps5-field) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+textarea {
+  background: var(--ps5-field) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+  color: #fff !important;
+}
+input:focus,
+textarea:focus,
+select:focus { border-color: var(--ps5-accent) !important; box-shadow: 0 0 0 3px var(--ps5-accent-soft) !important; outline: none !important; }
+input:is([type=range], [type=checkbox], [type=radio]) { accent-color: var(--ps5-accent); }
+
+/* menus and pop-ups that pages open */
+.popup_block_new .popup_body,
+.popup_menu,
+.dselect_container .dropcontainer ul,
+.newmodal,
+.newmodal_content_border {
+  background: var(--ps5-glass-strong) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+  box-shadow: var(--ps5-shadow) !important;
+  color: #fff !important;
+}
+.popup_menu_item,
+.dselect_container .dropcontainer ul a { border-radius: var(--ps5-r-s) !important; color: var(--ps5-ink-2) !important; }
+.popup_menu_item:hover,
+.dselect_container .dropcontainer ul a:hover,
+.dselect_container .dropcontainer ul a.highlighted_selection { background: var(--ps5-accent) !important; color: #fff !important; }
+.newmodal_header_border,
+.newmodal_header { background: transparent !important; color: #fff !important; }
+
+/* prices and discounts (classic and React pages) */
+.discount_block,
+.discount_block.discount_block_large,
+.discount_prices,
+.sale_price_discount,
+.game_purchase_action_bg,
+.game_purchase_price.price { background: transparent !important; }
+.discount_pct,
+.bundle_base_discount,
+.no_discount .bundle_base_discount {
   background: var(--ps5-accent) !important;
   color: #fff !important;
   border-radius: 999px !important;
-  font-weight: 700 !important;
+  padding: 0 8px !important;
+  font-weight: 800 !important;
 }
-.btn_green_steamui:hover > span,
-.btn_green_white_innerfade:hover > span,
-.btnv6_green_white_innerfade:hover > span {
-  background: #fff !important;
-  color: #0b0b0f !important;
-}
-.btnv6_blue_hoverfade > span,
-.btn_profile_action > span,
-.btnv6_lightblue_blue > span {
-  background: rgba(255, 255, 255, 0.10) !important;
-  color: #fff !important;
-  border-radius: 999px !important;
-}
-.btnv6_blue_hoverfade:hover > span,
-.btn_profile_action:hover > span { background: rgba(255, 255, 255, 0.22) !important; }
+.discount_original_price { color: var(--ps5-ink-3) !important; }
+.discount_final_price,
+.game_purchase_price,
+.search_price { color: #fff !important; font-weight: 700 !important; }
+[role=link][aria-label*="%"] > div:first-child { background: var(--ps5-accent) !important; border-radius: 999px !important; color: #fff !important; }
+[role=link][aria-label*="%"] > div:first-child * { background: none !important; color: #fff !important; }
+[role=link][aria-label*="%"] > div:last-child > div:first-child { color: var(--ps5-ink-3) !important; }
 
-/* ---------- store: capsules and cards ---------- */
+/* review summaries */
+.game_review_summary.positive { color: #6fd0ff !important; }
+.game_review_summary.mixed { color: #f0c457 !important; }
+.game_review_summary.negative { color: #ff8a7a !important; }
+
+/* footer */
+#footer,
+.footer_content,
+#footer_text,
+#footer_spacer { background: transparent !important; color: var(--ps5-ink-3) !important; }
+#footer a { color: var(--ps5-ink-2) !important; }
+
+/* ═══════════════ STORE ═══════════════ */
+
+/* ---------- store navigation: a floating glass bar with PS5 pills ---------- */
+#store_header,
+.store_header { background: transparent !important; }
+.store_nav,
+#store_nav_area .store_nav_bg,
+.Panel[data-ps5-strip] {
+  background: rgba(9, 20, 46, 0.72) !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  backdrop-filter: blur(22px) saturate(1.2);
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+  box-shadow: var(--ps5-shadow) !important;
+}
+.store_nav .tab,
+.store_nav .tab .pulldown,
+.Panel[data-ps5-strip] [role=navigation] button,
+.Panel[data-ps5-strip] [role=navigation] a {
+  border-radius: 999px !important;
+  transition: background 160ms ease, color 160ms ease !important;
+}
+.store_nav .tab > span,
+.store_nav .tab .pulldown > span,
+.Panel[data-ps5-strip] [role=navigation] button > div,
+.Panel[data-ps5-strip] [role=navigation] a > div {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.store_nav .tab:hover,
+.store_nav .tab.focus,
+.Panel[data-ps5-strip] [role=navigation] button:hover,
+.Panel[data-ps5-strip] [role=navigation] a:hover { background: var(--ps5-hover) !important; }
+.Panel[data-ps5-strip] button[aria-expanded=true] { background: #fff !important; }
+.Panel[data-ps5-strip] button[aria-expanded=true] > div,
+.Panel[data-ps5-strip] button[aria-expanded=true] > div * { color: #0b0b0f !important; }
+.Panel[data-ps5-strip] button[aria-expanded=true] > div > div { background: transparent !important; }
+.Panel[data-ps5-strip] form[role=search],
+#store_search { border-radius: 999px !important; overflow: hidden; }
+.Panel[data-ps5-strip] form[role=search] input,
+#store_nav_search_term { background: var(--ps5-field) !important; border-radius: 999px !important; }
+/* the flyouts the strip opens */
+.Panel[data-ps5-strip] [role=navigation] ~ div,
+.store_nav .popup_block_new {
+  border-radius: var(--ps5-r-l) !important;
+}
+.Panel[data-ps5-strip] [role=navigation] ~ div a.Focusable:not([role=button]) {
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+  transition: transform 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease), background 160ms ease !important;
+}
+.Panel[data-ps5-strip] [role=navigation] ~ div a.Focusable:not([role=button]):hover { box-shadow: var(--ps5-focus) !important; transform: translateY(-2px); }
+/* wishlist / cart buttons near the strip */
+#wishlist_link,
+.store_header_btn,
+.store_header_btn_gray,
+#cart_link,
+#cart_status_data .store_header_btn {
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  border: none !important;
+}
+.store_header_btn a,
+.store_header_btn_gray a { color: #fff !important; }
+.store_header_btn_green { background: var(--ps5-accent) !important; }
+
+/* ---------- capsules and cards: one card style everywhere ---------- */
 .store_main_capsule,
 .store_capsule,
 .tab_item,
-.tab_item_cap_img,
-.home_area_spotlight,
+.special,
 .spotlight_content,
-.carousel_items .store_capsule,
-.search_result_row,
-.game_area_purchase_game,
-.game_area_purchase_game_wrapper .game_area_purchase_game,
-.block_responsive_horizontal_scroll,
+.home_area_spotlight,
+.dailydeal_ctn,
 .dailydeal_cap,
 .special_cap,
+.sale_capsule,
+.curator_capsule,
+.recommendation,
 .recommendation_highlight,
+.home_content_item,
+.home_content.single,
 .store_horizontal_autoslider_item,
-.wishlist_row {
+.content_hub_capsule_ctn,
+.marketingmessage_container,
+.home_marketing_message,
+.community_recommendation_app .right_col,
+.creator_capsule_ctn,
+.carousel_items .store_capsule,
+.search_result_row,
+.tab_row_item,
+.app_tag,
+.game_area_dlc_row,
+.bundle_package_item {
   border-radius: var(--ps5-r) !important;
   overflow: hidden;
 }
-.game_area_purchase_game,
-.game_area_purchase_game_wrapper .game_area_purchase_game,
-.block.responsive_apppage_details_right,
-.glance_ctn,
-.game_page_autocollapse_ctn,
-.store_nav,
-#store_nav_area .store_nav_bg {
+.store_capsule,
+.special,
+.sale_capsule,
+.curator_capsule,
+.home_content_item,
+.dailydeal_ctn,
+.recommendation,
+.store_horizontal_autoslider_item,
+.content_hub_capsule_ctn,
+[data-ps5-cap="1"] {
+  box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.8) !important;
+  transition: transform 260ms var(--ps5-ease), box-shadow 260ms var(--ps5-ease) !important;
+}
+.store_capsule:hover,
+.special:hover,
+.sale_capsule:hover,
+.curator_capsule:hover,
+.home_content_item:hover,
+.dailydeal_ctn:hover,
+.recommendation:hover,
+.store_horizontal_autoslider_item:hover,
+.content_hub_capsule_ctn:hover,
+[data-ps5-cap="1"]:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--ps5-focus), var(--ps5-shadow) !important;
+  z-index: 2;
+}
+[data-ps5-mount] a[href*="/app/"] img,
+.capsule_image_ctn,
+.capsule_image_ctn img,
+.microtrailer_wrapper,
+.store_capsule img,
+.special img,
+.tab_item_cap_img,
+.dailydeal_cap img { border-radius: var(--ps5-r) !important; }
+.store_capsule img,
+.special img,
+[data-ps5-mount] a[href*="/app/"] img { transition: transform 500ms var(--ps5-ease), filter 300ms ease; }
+.store_capsule:hover img,
+.special:hover img,
+[data-ps5-mount] a[href*="/app/"]:hover img { filter: brightness(1.08); }
+.home_content.single,
+.community_recommendation_app .right_col,
+.creator_capsule_ctn,
+.tab_preview,
+.info:not(.reason),
+.home_discount_games_ctn,
+.OtherEvents_EventCtn,
+.recently_updated_desc {
   background: var(--ps5-glass) !important;
   border: 1px solid var(--ps5-line) !important;
-  border-radius: var(--ps5-r) !important;
+}
+.app_tag {
+  background: var(--ps5-field) !important;
+  border-radius: 999px !important;
+  color: var(--ps5-ink-2) !important;
   box-shadow: none !important;
 }
-.tab_item {
+.app_tag:hover { background: var(--ps5-accent) !important; color: #fff !important; }
+
+/* ---------- store home: big banners, rails, tabs ---------- */
+&.ps5-p-home .home_page_content,
+&.ps5-p-home .home_ctn,
+&.ps5-p-home .home_cluster_ctn,
+&.ps5-p-home .main_cluster_content,
+&.ps5-p-home .home_tabs_content,
+&.ps5-p-home .tab_content,
+&.ps5-p-home .contenthub_specials,
+&.ps5-p-home .saleitembrowserrow { background: transparent !important; }
+/* the hero carousel: PS Store-sized banner */
+.home_page_content .main_cluster_capsule,
+.main_cluster_content .store_main_capsule,
+.store_main_capsule {
+  border-radius: var(--ps5-r-l) !important;
+  box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.9) !important;
+  border: 1px solid var(--ps5-line) !important;
+}
+.store_main_capsule .info { background: linear-gradient(90deg, rgba(5, 12, 30, 0.95), rgba(5, 12, 30, 0.7)) !important; border: none !important; }
+.store_main_capsule .app_name { color: #fff !important; font-weight: 700 !important; font-size: 24px !important; }
+.carousel_thumbs > div,
+.carousel_thumbs div { border-radius: 99px !important; }
+.carousel_thumbs div.focus,
+.handle.focus { background: var(--ps5-accent) !important; box-shadow: 0 0 10px var(--ps5-accent-glow); }
+.arrow.left,
+.arrow.right,
+.carousel_container .arrow,
+.slider_left,
+.slider_right {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background 160ms ease, transform 200ms var(--ps5-ease) !important;
+}
+.arrow.left:hover,
+.arrow.right:hover,
+.slider_left:hover,
+.slider_right:hover { background: #fff !important; transform: scale(1.08); }
+.arrow.left > div,
+.arrow.right > div { filter: none; }
+.carousel_wide_mode .arrow.left,
+.carousel_wide_mode .arrow.right { border-radius: 50% !important; }
+/* home tabs (New & Trending, Top Sellers, Upcoming, Specials…) as PS5 pills */
+.home_tabs_row,
+.tab_row,
+.home_tabs_ctn { border: none !important; background: transparent !important; }
+.home_tabs_row .tab,
+.tab_menu_item {
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  margin-right: 6px !important;
+  transition: background 160ms ease !important;
+}
+.home_tabs_row .tab > div,
+.tab_menu_item > div { color: #fff !important; background: transparent !important; text-transform: none !important; }
+.home_tabs_row .tab.active,
+.tab_menu_item.active { background: #fff !important; }
+.home_tabs_row .tab.active > div,
+.home_tabs_row .tab.active *,
+.tab_menu_item.active > div { color: #0b0b0f !important; }
+.tab_item { background: rgba(255, 255, 255, 0.04) !important; margin-bottom: 8px !important; transition: background 160ms ease, transform 200ms var(--ps5-ease) !important; }
+.tab_item:hover,
+.tab_item.focus { background: rgba(255, 255, 255, 0.12) !important; transform: translateX(4px); }
+.tab_item_name { color: #fff !important; font-weight: 600 !important; }
+.tab_preview { border-radius: var(--ps5-r) !important; }
+.tab_preview .screenshot,
+.tab_preview video { border-radius: 10px !important; }
+.home_tab_bg_ctn,
+.home_tabs_row_ctn { background-image: none !important; }
+/* categories / tags tiles */
+.big_buttons .big_button,
+.home_category_ctn a,
+.genre_tile,
+.label_ctn > .label,
+.content_hub_capsule_ctn .label_ctn .label {
+  border-radius: var(--ps5-r) !important;
+  overflow: hidden;
+}
+.label_ctn > .label { background: rgba(5, 12, 30, 0.75) !important; color: #fff !important; }
+/* discovery queue, see more buttons */
+.ds_options,
+.ds_options_tab { border-radius: 999px !important; background: var(--ps5-glass-strong) !important; }
+.home_page_gutter,
+.home_page_gutter_block { background: transparent !important; }
+.home_page_gutter_block a,
+.gutter_item { border-radius: var(--ps5-r-s) !important; }
+.gutter_item:hover { background: var(--ps5-hover) !important; }
+
+/* hover cards on capsules */
+.game_hover_box,
+.hover_box {
+  background: var(--ps5-glass-strong) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+  box-shadow: var(--ps5-shadow) !important;
+  color: #fff !important;
+}
+.hover_arrow_left,
+.hover_arrow_right { display: none !important; }
+.game_hover h4.hover_title { color: #fff !important; }
+.hover_review_summary,
+.hover_details_block,
+.hover_details_block_full { background: rgba(255, 255, 255, 0.07) !important; border-radius: 10px !important; }
+.hover_screenshot,
+.hover_body img { border-radius: 10px !important; }
+
+/* ---------- store game page: PS Store product page ---------- */
+&.ps5-p-app .apphub_AppName {
+  font-size: 40px !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+}
+&.ps5-p-app .apphub_HomeHeaderContent,
+&.ps5-p-app .apphub_HeaderStandardTop { background: transparent !important; }
+&.ps5-p-app .breadcrumbs a { color: var(--ps5-ink-2) !important; }
+&.ps5-p-app .apphub_OtherSiteInfo a { border-radius: 999px !important; }
+&.ps5-p-app #game_highlights,
+&.ps5-p-app .game_page_autocollapse_ctn,
+&.ps5-p-app .glance_ctn,
+&.ps5-p-app .block.responsive_apppage_details_right,
+&.ps5-p-app .block.responsive_apppage_details_left,
+&.ps5-p-app .game_area_description,
+&.ps5-p-app .sysreq_contents,
+&.ps5-p-app .game_area_sys_req,
+&.ps5-p-app .game_area_details_specs_ctn,
+&.ps5-p-app .user_reviews_header,
+&.ps5-p-app .review_box,
+&.ps5-p-app #game_area_dlc_expanded,
+&.ps5-p-app .game_area_dlc_section,
+&.ps5-p-app .block.recommendation_reasons,
+&.ps5-p-app .queue_ctn .queue_actions_ctn,
+&.ps5-p-app .game_area_bubble,
+&.ps5-p-app .game_language_options {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+  box-shadow: none !important;
+}
+&.ps5-p-app #game_highlights { padding: 16px !important; overflow: hidden; }
+&.ps5-p-app .game_area_description,
+&.ps5-p-app .sysreq_contents,
+&.ps5-p-app .game_area_sys_req { padding: 18px 22px !important; }
+&.ps5-p-app .game_area_description h2,
+&.ps5-p-app #game_area_description h2 {
+  background: none !important;
+  color: #fff !important;
+  font-size: 20px !important;
+  border: none !important;
+}
+&.ps5-p-app .game_description_snippet,
+&.ps5-p-app .game_area_description { color: var(--ps5-ink-2) !important; line-height: 1.6 !important; }
+&.ps5-p-app .game_header_image_full { border-radius: var(--ps5-r) !important; }
+/* the big screenshot / trailer and its strip */
+&.ps5-p-app .highlight_player_area,
+&.ps5-p-app .highlight_ctn,
+&.ps5-p-app .highlight_player_item,
+&.ps5-p-app .highlight_movie,
+&.ps5-p-app .highlight_screenshot { border-radius: var(--ps5-r) !important; overflow: hidden; }
+&.ps5-p-app .highlight_strip_item {
+  border-radius: 10px !important;
+  overflow: hidden;
+  border: 2px solid transparent !important;
+  transition: border-color 160ms ease, transform 200ms var(--ps5-ease) !important;
+}
+&.ps5-p-app .highlight_strip_item:hover { transform: translateY(-2px); }
+&.ps5-p-app .highlight_strip_item.focus { border-color: #fff !important; box-shadow: 0 0 14px var(--ps5-accent-glow); }
+&.ps5-p-app #highlight_slider_left,
+&.ps5-p-app #highlight_slider_right,
+&.ps5-p-app .highlight_slider_left,
+&.ps5-p-app .highlight_slider_right { border-radius: 50% !important; }
+&.ps5-p-app .ui-slider-handle,
+&.ps5-p-app .highlight_selector { background: var(--ps5-accent) !important; border-radius: 99px !important; }
+/* purchase box: the PS Store buy panel */
+&.ps5-p-app .game_area_purchase_game,
+&.ps5-p-app .game_area_purchase_game_wrapper .game_area_purchase_game,
+&.ps5-p-app .game_area_bundle_item {
+  background:
+    linear-gradient(135deg, rgba(0, 112, 209, 0.20), rgba(0, 0, 0, 0) 60%),
+    var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+  padding: 20px 24px 54px !important;
+  box-shadow: var(--ps5-shadow) !important;
+}
+&.ps5-p-app .game_area_purchase_game h1,
+&.ps5-p-app .game_area_purchase_game h2 { color: #fff !important; font-size: 20px !important; }
+&.ps5-p-app .game_purchase_action,
+&.ps5-p-app .game_purchase_action_bg {
+  background: rgba(2, 8, 22, 0.75) !important;
+  border-radius: 999px !important;
+  padding: 3px !important;
+}
+&.ps5-p-app .game_purchase_action .btn_addtocart .btn_green_steamui,
+&.ps5-p-app .game_purchase_action .btn_green_steamui { min-height: 40px; }
+&.ps5-p-app .game_purchase_action .btn_green_steamui > span { font-size: 16px !important; padding: 0 22px !important; line-height: 40px !important; }
+&.ps5-p-app .game_purchase_discount_countdown { color: var(--ps5-ink-2) !important; }
+/* queue / wishlist / follow / ignore */
+&.ps5-p-app .queue_ctn .queue_actions_ctn { padding: 12px !important; }
+&.ps5-p-app #add_to_wishlist_area .btnv6_blue_hoverfade,
+&.ps5-p-app .queue_btn_follow .btnv6_blue_hoverfade { background: var(--ps5-field) !important; }
+&.ps5-p-app #add_to_wishlist_area_success .btnv6_blue_hoverfade { background: var(--ps5-accent-soft) !important; }
+/* details column */
+&.ps5-p-app .details_block,
+&.ps5-p-app .dev_row { color: var(--ps5-ink-2) !important; }
+&.ps5-p-app .details_block b,
+&.ps5-p-app .dev_row .subtitle { color: #fff !important; }
+&.ps5-p-app .game_area_details_specs_ctn { border-radius: var(--ps5-r) !important; margin-bottom: 6px !important; }
+&.ps5-p-app .game_area_details_specs_ctn:hover { background: var(--ps5-hover) !important; }
+/* reviews */
+&.ps5-p-app .review_box { padding: 14px !important; margin-bottom: 12px !important; }
+&.ps5-p-app .review_box .persona_name a { color: #fff !important; }
+&.ps5-p-app .review_box .vote_header { background: rgba(255, 255, 255, 0.06) !important; border-radius: 10px !important; }
+&.ps5-p-app .user_reviews_filter_bar,
+&.ps5-p-app .user_reviews_filter_options { background: var(--ps5-glass) !important; border-radius: var(--ps5-r) !important; border: 1px solid var(--ps5-line) !important; }
+&.ps5-p-app .review_ctn { background: transparent !important; }
+[data-ps5-mount="appreviews"] .Panel.Focusable { border-radius: var(--ps5-r) !important; }
+/* DLC and bundles */
+&.ps5-p-app .game_area_dlc_row { background: rgba(255, 255, 255, 0.04) !important; margin-bottom: 4px !important; }
+&.ps5-p-app .game_area_dlc_row:hover { background: var(--ps5-hover) !important; }
+/* community hub teaser and events on the page */
+.OtherEvents_EventCtn { border-radius: var(--ps5-r) !important; }
+
+/* ---------- search ---------- */
+&.ps5-p-search .searchbar { background: var(--ps5-glass) !important; border-radius: var(--ps5-r-l) !important; border: 1px solid var(--ps5-line) !important; }
+.search_result_row {
   background: rgba(255, 255, 255, 0.04) !important;
   margin-bottom: 6px !important;
-  transition: background 180ms ease, transform 180ms ease !important;
+  border: 1px solid transparent !important;
+  transition: background 160ms ease, transform 200ms var(--ps5-ease), border-color 160ms ease !important;
 }
-.tab_item:hover,
-.tab_item.focus { background: rgba(255, 255, 255, 0.12) !important; transform: translateX(3px); }
-.discount_pct,
-.bundle_base_discount { background: var(--ps5-accent) !important; color: #fff !important; border-radius: 6px 0 0 6px !important; }
-.discount_final_price { color: #fff !important; }
-.store_nav .tab > span,
-.store_nav .tab .pulldown > span { color: #fff !important; font-weight: 600 !important; text-transform: none !important; }
-.store_nav .tab:hover { background: rgba(255, 255, 255, 0.10) !important; border-radius: 10px; }
-.home_page_content h2,
-.home_ctn h2,
-.page_content h2 {
+.search_result_row:hover,
+.search_result_row.ds_collapse_flag:hover { background: rgba(255, 255, 255, 0.12) !important; border-color: rgba(255, 255, 255, 0.2) !important; transform: translateX(4px); }
+.search_result_row .search_capsule img { border-radius: 10px !important; }
+.search_result_row .title { color: #fff !important; font-weight: 600 !important; }
+#additional_search_options .block,
+#additional_search_options .block_content {
+  background: var(--ps5-glass) !important;
+  border-radius: var(--ps5-r) !important;
+  border: none !important;
+}
+#additional_search_options .block_header { background: none !important; }
+#additional_search_options .block_header > div { color: #fff !important; font-weight: 700 !important; text-transform: none !important; }
+.tab_filter_control_row:hover { background: var(--ps5-hover) !important; border-radius: var(--ps5-r-s); }
+.tab_filter_control_include.checked,
+.tab_filter_control_checkbox.checked { background-color: var(--ps5-accent) !important; }
+
+/* ---------- WISHLIST (React application: rows are a virtual list, so they stay rows —
+   each one becomes a PS5 card; every Steam action on it keeps working) ---------- */
+&.ps5-p-wishlist #StoreTemplate section > div:first-child h1,
+&.ps5-p-wishlist #StoreTemplate h1 { font-size: 34px !important; color: #fff !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] { padding: 6px 0 !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button] {
+  background:
+    linear-gradient(90deg, rgba(0, 112, 209, 0.10), rgba(0, 0, 0, 0) 45%),
+    var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+  box-shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.8) !important;
+  transition: transform 220ms var(--ps5-ease), box-shadow 220ms var(--ps5-ease), border-color 220ms ease !important;
+  overflow: hidden;
+}
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button]:hover,
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button]:focus-within {
+  border-color: transparent !important;
+  box-shadow: var(--ps5-focus), var(--ps5-shadow) !important;
+  transform: translateY(-2px);
+}
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button] > a[href*="/app/"] img,
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] img { border-radius: var(--ps5-r) !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] a[href*="/app/"] { color: #fff !important; font-weight: 700 !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] > .Panel[role=button] > div:nth-last-child(2) > div:last-child { background: none !important; }
+/* Add to Cart = the primary action; "In Cart" a state; remove and categories quiet */
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button[type=button] { border-radius: 999px !important; border: none !important; background: transparent !important; padding: 0 !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button[type=button] > span { display: inline-block; padding: 8px 18px !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button[type=button] > span {
+  background: var(--ps5-accent) !important;
+  border-radius: 999px !important;
   color: #fff !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
   font-weight: 700 !important;
 }
-.game_page_background,
-.game_page_background.game { background-color: transparent !important; }
-.apphub_AppName { font-weight: 700 !important; letter-spacing: -0.01em; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] a[href*="/cart"] > span { background: var(--ps5-field) !important; border-radius: 999px !important; color: #fff !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button.Focusable:not([type]),
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button:not([type]):not(.Focusable) {
+  background: var(--ps5-field) !important;
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  color: var(--ps5-ink-2) !important;
+  transition: background 160ms ease, color 160ms ease !important;
+}
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button.Focusable:not([type]):hover,
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] button:not([type]):not(.Focusable):hover { background: rgba(255, 255, 255, 0.2) !important; color: #fff !important; }
+&.ps5-p-wishlist [data-rfd-draggable-id^="WishlistItem-"] a[role=button][href="#"] { background: var(--ps5-accent-soft) !important; border-radius: 999px !important; color: #fff !important; }
+/* toolbar: search, sort, filters, count */
+&.ps5-p-wishlist #StoreTemplate section input[type=text],
+&.ps5-p-wishlist #StoreTemplate section input.Focusable {
+  background: var(--ps5-field) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  padding-left: 16px !important;
+}
+&.ps5-p-wishlist #StoreTemplate section .Panel > div > button.Focusable[role=button],
+&.ps5-p-wishlist #StoreTemplate section button.DialogButton {
+  background: var(--ps5-field) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+}
+&.ps5-p-wishlist #StoreTemplate section .Panel > div > button.Focusable[role=button]:hover { background: rgba(255, 255, 255, 0.2) !important; box-shadow: var(--ps5-focus) !important; }
+/* legacy wishlist (old layout, still served to some accounts) */
+.wishlist_row {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+  transition: transform 200ms var(--ps5-ease), box-shadow 200ms var(--ps5-ease) !important;
+}
+.wishlist_row:hover { box-shadow: var(--ps5-focus), var(--ps5-shadow) !important; }
+.wishlist_row .capsule img { border-radius: var(--ps5-r) !important; }
+#wishlist_ctn .wishlist_header,
+.wishlist_header { background: transparent !important; }
 
-/* ---------- community / PSN-style profile ---------- */
-.profile_page,
-.profile_page.has_profile_background { background-color: transparent !important; }
+/* ---------- cart, account, points: same cards ---------- */
+&.ps5-p-cart .cart_row,
+&.ps5-p-cart .cart_item,
+&.ps5-p-cart .cart_status_flex,
+&.ps5-p-account .accountBox,
+&.ps5-p-account .account_setting_block,
+&.ps5-p-account .youraccount_page .block,
+&.ps5-p-account .page_content .block {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r-l) !important;
+}
+#StoreTemplate .Panel > a.Focusable[href*="/account"] { border-radius: 999px !important; }
+
+/* ═══════════════ COMMUNITY ═══════════════ */
+
+/* ---------- PlayStation Network-style profile ---------- */
 .profile_header_bg,
 .profile_header_bg_texture {
-  background: linear-gradient(180deg, rgba(0, 70, 180, 0.35), transparent) !important;
+  background: linear-gradient(180deg, rgba(0, 80, 200, 0.40), transparent) !important;
+  border-radius: 0 0 var(--ps5-r-l) var(--ps5-r-l);
 }
-.profile_header {
-  padding-top: 26px !important;
-}
+.profile_header { padding-top: 26px !important; }
 .profile_header .playerAvatar,
 .playerAvatar.profile_header_size,
 .playerAvatar.profile_header_size img,
 .playerAvatarAutoSizeInner,
-.playerAvatarAutoSizeInner img {
-  border-radius: 50% !important;
+.playerAvatarAutoSizeInner img,
+.playerAvatarAutoSizeInner picture img { border-radius: 50% !important; }
+.playerAvatar.profile_header_size {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.92), 0 0 44px rgba(0, 112, 209, 0.6) !important;
+  background: none !important;
 }
-.playerAvatar.profile_header_size { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 40px rgba(0, 112, 209, 0.5) !important; background: none !important; }
+.profile_avatar_frame { display: none !important; }
 .profile_header .persona_name .actual_persona_name,
-.actual_persona_name { font-size: 30px !important; font-weight: 700 !important; color: #fff !important; letter-spacing: -0.01em; }
+.actual_persona_name { font-size: 32px !important; font-weight: 700 !important; color: #fff !important; letter-spacing: -0.01em; }
 .profile_header_badgeinfo,
-.profile_header_summary .profile_summary { color: rgba(255, 255, 255, 0.78) !important; }
+.profile_header_summary .profile_summary { color: var(--ps5-ink-2) !important; }
+.profile_header_badge,
+.profile_header_badgeinfo_badge_area { background: var(--ps5-glass) !important; border-radius: var(--ps5-r) !important; }
 .friendPlayerLevel {
   border-radius: 50% !important;
   border-color: var(--ps5-accent) !important;
-  box-shadow: 0 0 14px rgba(0, 112, 209, 0.6);
+  box-shadow: 0 0 16px rgba(0, 112, 209, 0.6);
 }
 .profile_customization,
 .profile_leftcol .profile_customization,
@@ -186,46 +819,143 @@ body.v7::before {
 .profile_in_game,
 .responsive_status_info,
 .profile_comment_area,
-.commentthread_area {
+.commentthread_area,
+.profile_ban_status {
   background: var(--ps5-glass) !important;
   border: 1px solid var(--ps5-line) !important;
-  border-radius: var(--ps5-r) !important;
+  border-radius: var(--ps5-r-l) !important;
   overflow: hidden;
 }
 .profile_customization_header,
 .profile_recentgame_header,
-.profile_count_link_preview_ctn .profile_count_link a .count_link_label {
-  color: rgba(255, 255, 255, 0.7) !important;
+.profile_count_link .count_link_label {
+  color: var(--ps5-ink-2) !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
+  font-weight: 600 !important;
 }
-.profile_count_link .count_link_label { color: rgba(255, 255, 255, 0.7) !important; }
 .profile_count_link .profile_count_link_total { color: #fff !important; font-weight: 700 !important; }
-.recent_game { border-radius: 12px !important; overflow: hidden; }
+.profile_count_link a:hover .count_link_label { color: #fff !important; }
+.recent_game { border-radius: var(--ps5-r) !important; overflow: hidden; background: rgba(255, 255, 255, 0.03) !important; }
+.recent_game:hover { background: var(--ps5-hover) !important; }
 .recent_game .game_info_cap img,
 .game_capsule,
 .showcase_slot img,
-.showcase_content_bg { border-radius: 10px !important; }
-.profile_in_game.in-game { border-color: rgba(143, 212, 255, 0.4) !important; }
+.showcase_content_bg,
+.profile_badges_badge img { border-radius: 10px !important; }
+.profile_in_game.in-game { border-color: rgba(143, 212, 255, 0.45) !important; }
 .achievement_progress_bar_ctn,
 .achieveBar,
-.progress_bar { border-radius: 99px !important; overflow: hidden; }
+.progress_bar { border-radius: 99px !important; overflow: hidden; background: rgba(255, 255, 255, 0.12) !important; }
 .achievement_progress_bar,
 .achieveBarProgress,
 .progress_bar .progress { background: var(--ps5-accent) !important; }
 
-/* community headers & tabs */
-.apphub_HomeHeaderContent,
-.apphub_sectionTabs .apphub_sectionTab { border-radius: 10px !important; }
-.pagecontent,
-.maincontent { background: transparent !important; }
+/* profile sub-pages: games, achievements, friends, badges, inventory */
+&.ps5-p-games [class*="gameslistitems"] > div,
+&.ps5-p-games .gameListRow,
+&.ps5-p-achievements .achieveRow,
+&.ps5-p-friends .friend_block_v2,
+&.ps5-p-friends .selectable,
+&.ps5-p-badges .badge_row,
+&.ps5-p-inventory .inventory_page_left,
+&.ps5-p-inventory .inventory_iteminfo {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  border-radius: var(--ps5-r) !important;
+}
+&.ps5-p-achievements .achieveRow.unlocked,
+&.ps5-p-achievements .achieveRow:not(.locked) { border-color: rgba(143, 212, 255, 0.35) !important; }
+&.ps5-p-achievements .achieveImgHolder img { border-radius: 10px !important; }
+&.ps5-p-friends .friend_block_v2:hover,
+&.ps5-p-badges .badge_row:hover { background: var(--ps5-hover) !important; }
 
-/* inputs */
-input[type="text"],
-input[type="search"],
-textarea,
-.searchbox,
-#store_nav_search_term {
+/* ---------- hubs, workshop, discussions, guides, screenshots, videos, market, groups ---------- */
+.apphub_sectionTabs .apphub_sectionTab,
+.apphub_sectionTab {
+  border-radius: 999px !important;
+  background: var(--ps5-field) !important;
+  border: none !important;
+  margin-right: 6px !important;
+}
+.apphub_sectionTab.active { background: #fff !important; }
+.apphub_sectionTab.active span { color: #0b0b0f !important; }
+.apphub_Card,
+.apphub_CardContentMain,
+.workshopItem,
+.workshopItemPreviewHolder,
+.workshopBrowseItems .workshopItem,
+.workshopItemAuthorName,
+.forum_topic,
+.forum_op,
+.commentthread_comment,
+.discussion_search_result,
+.market_listing_row,
+.market_home_listing_table,
+.groupBlock,
+.group_summary,
+.screenshot_holder,
+.imageWallRow > div,
+.guide_item,
+.collectionItem,
+.detailBox,
+.rightDetailsBlock,
+.workshop_item_header {
+  border-radius: var(--ps5-r) !important;
+}
+.apphub_Card,
+.workshopItem,
+.forum_topic,
+.forum_op,
+.market_listing_row,
+.discussion_search_result,
+.detailBox,
+.rightDetailsBlock,
+.groupBlock,
+.collectionItem {
+  background: var(--ps5-glass) !important;
+  border: 1px solid var(--ps5-line) !important;
+  overflow: hidden;
+  transition: transform 220ms var(--ps5-ease), box-shadow 220ms var(--ps5-ease), background 160ms ease !important;
+}
+.apphub_Card:hover,
+.workshopItem:hover,
+.forum_topic:hover,
+.market_listing_row:hover,
+.collectionItem:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ps5-focus), var(--ps5-shadow) !important;
+  background: rgba(20, 40, 86, 0.7) !important;
+}
+.apphub_CardContentPreviewImage,
+.workshopItemPreviewImage,
+.apphub_Card img,
+.screenshot_holder img,
+.guide_item img { border-radius: 10px !important; }
+.forum_topic_name,
+.workshopItemTitle,
+.apphub_CardContentTitle { color: #fff !important; font-weight: 600 !important; }
+.forum_paging .pagebtn,
+.workshopBrowsePagingControls a,
+.pagebtn { border-radius: 999px !important; background: var(--ps5-field) !important; }
+.forum_topic.unread .forum_topic_name { color: #8fd4ff !important; }
+.rightSectionTopTitle,
+.rightSectionHolder .rightSectionTopTitle { color: #fff !important; text-transform: none !important; }
+.sectionTabs .sectionTab,
+.workshop_browse_menu_area .browseOption {
   border-radius: 999px !important;
 }
-textarea { border-radius: 14px !important; }
+.sectionTabs .sectionTab.active,
+.browseOption.selected { background: var(--ps5-accent) !important; color: #fff !important; }
+.highlight_strip_item,
+.workshopItemPreviewArea { border-radius: 10px !important; overflow: hidden; }
+.market_listing_largeimage img,
+.market_listing_item_img { border-radius: 10px !important; }
+.market_home_main_listing_table,
+.my_listing_section { background: var(--ps5-glass) !important; border-radius: var(--ps5-r-l) !important; }
+
+/* community home */
+&.ps5-community.ps5-p-home .community_home_header,
+&.ps5-community.ps5-p-home .apphub_HomeHeader { background: transparent !important; }
+
+}

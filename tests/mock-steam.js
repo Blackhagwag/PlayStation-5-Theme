@@ -44,13 +44,14 @@
   window.collectionStore = { BIsHidden: id => id === 110 };
   window.appDetailsStore = { GetAppDetails: () => ({}), RequestAppDetails: () => Promise.resolve() };
   window.appAchievementProgressCache = { m_achievementProgress: { mapCache: new Map([[101, { unlocked: 34, total: 50, percentage: 68 }], [103, { unlocked: 12, total: 40 }]]) } };
+  window.MainWindowBrowserManager = { m_browser: { SetVisible: v => calls.push(['SetVisible', v]) } };
   window.SteamUIStore = { Navigate: p => { calls.push(['Navigate', p]); history.push(p); }, WindowStore: { MainWindowInstance: { m_history: history } } };
   let dlCb = null;
   window.SteamClient = {
     Apps: { RunGame: (...a) => calls.push(['RunGame', ...a]), TerminateApp: (...a) => calls.push(['TerminateApp', ...a]), CancelLaunch: (...a) => calls.push(['CancelLaunch', ...a]) },
     URL: { ExecuteSteamURL: u => calls.push(['ExecuteSteamURL', u]) },
     User: { StartRestart: () => calls.push(['StartRestart']), StartShutdown: () => calls.push(['StartShutdown']) },
-    Downloads: { RegisterForDownloadOverview: cb => { dlCb = cb; cb({ update_appid: 104, update_state: 'Updating', update_bytes_to_download: 16e9, update_bytes_downloaded: 9.7e9, update_network_bytes_per_second: 48e6, update_seconds_remaining: 140, paused: false }); return { unregister: () => { dlCb = null; calls.push(['UnregisterDownloads']); } }; } },
+    Downloads: { RegisterForDownloadOverview: cb => { dlCb = cb; calls.push(['RegisterDownloads']); cb({ update_appid: 104, update_state: 'Updating', update_bytes_to_download: 16e9, update_bytes_downloaded: 9.7e9, update_network_bytes_per_second: 48e6, update_seconds_remaining: 140, paused: false }); return { unregister: () => { dlCb = null; calls.push(['UnregisterDownloads']); } }; } },
     Screenshots: { GetAllAppsLocalScreenshotsCount: () => Promise.resolve(0), GetAllAppsLocalScreenshotsRange: () => Promise.resolve([]) },
   };
   const friend = (n, s, g) => ({ display_name: n, persona: { m_strPlayerName: n, m_ePersonaState: s, m_strGameExtraInfo: g || '', avatar_url_medium: `/avatar/${n}.svg`, m_steamid: { ConvertTo64BitString: () => '7656119' + String(n.length).padStart(10, '0') } } });

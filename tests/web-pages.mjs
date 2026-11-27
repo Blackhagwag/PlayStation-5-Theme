@@ -1,0 +1,61 @@
+// Test harness only: stand-ins for Steam web pages, served on the REAL hostnames through
+// Playwright request interception, with css/webkit/web.css and js/web.js added before </head>
+// exactly as Millennium's network hook adds them. The markup reproduces the class names and
+// attributes the stylesheet relies on (classic store classes, React mount points, the
+// wishlist's data-rfd rows); it is not a copy of Valve's pages.
+const head = (title, extra = '') => `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+<style>
+ body{margin:0;font-family:Arial,sans-serif;color:#c6d4df;background:#1b2838}
+ .page_content{max-width:1080px;margin:0 auto;padding:16px}
+ .store_nav{display:flex;gap:4px;padding:6px;align-items:center}.store_nav .tab{padding:8px 14px}
+ .home_tabs_row{display:flex;gap:4px;margin:10px 0}.home_tabs_row .tab{padding:8px 14px}
+ .row{display:flex;gap:14px;flex-wrap:wrap}.store_capsule{width:240px;background:#16202d;display:block}.store_capsule img{width:100%;display:block}
+ .store_main_capsule{position:relative;height:340px;background:#000;display:flex}.store_main_capsule img{width:66%;object-fit:cover}.store_main_capsule .info{flex:1;padding:16px}
+ .tab_item{display:flex;gap:12px;padding:6px;background:#16202d}.tab_item img{width:184px;height:69px;object-fit:cover}
+ .discount_block{display:inline-flex;gap:6px;align-items:center}.discount_pct{background:#4c6b22;color:#beee11;padding:0 4px}
+ .btn_green_steamui{display:inline-block;background:#75b022}.btn_green_steamui>span{display:block;padding:0 15px;line-height:32px;background:#5c7e10;color:#d2efa9}
+ .btnv6_blue_hoverfade{display:inline-block;background:#67c1f5}.btnv6_blue_hoverfade>span{display:block;padding:0 12px;line-height:30px;color:#1a3a4f}
+ .game_area_purchase_game{background:#4c6b22;padding:16px;position:relative;margin:16px 0}
+ .game_purchase_action{position:absolute;right:16px;bottom:-16px;display:flex;align-items:center;gap:8px;background:#000}
+ #game_highlights{display:flex;gap:16px;background:#000}.highlight_ctn{flex:2}.highlight_ctn img{width:100%;display:block}.glance_ctn{flex:1;padding:12px}
+ .highlight_strip{display:flex;gap:6px;margin-top:8px}.highlight_strip_item{width:116px;height:65px;overflow:hidden}.highlight_strip_item img{width:100%}
+ .game_area_description{padding:12px;margin-top:16px}.review_box{background:#16202d;padding:10px;margin-top:10px}
+ #StoreTemplate section{max-width:1080px;margin:0 auto;padding:16px}.wl-tools{display:flex;gap:10px;margin:14px 0}
+ [data-rfd-draggable-id]>.Panel{display:flex;gap:16px;align-items:center;padding:12px;background:#22344a;border:1px solid #2a475e}
+ [data-rfd-draggable-id] img{width:230px;height:86px;object-fit:cover}
+ .profile_header_bg{height:220px}.profile_header{display:flex;gap:24px;align-items:center;max-width:1000px;margin:-180px auto 0;padding:20px}
+ .playerAvatar.profile_header_size{width:166px;height:166px;overflow:hidden}.playerAvatar img{width:100%;height:100%}
+ .profile_body{display:flex;gap:20px;max-width:1000px;margin:20px auto}.profile_leftcol{flex:2}.profile_rightcol{flex:1}
+ .profile_customization,.recent_games,.profile_item_links{padding:14px;margin-bottom:14px;background:rgba(0,0,0,.3)}
+ .friendPlayerLevel{display:inline-grid;place-items:center;width:32px;height:32px;border:2px solid #9b9b9b}
+</style>${extra}<link rel="stylesheet" href="https://millennium.host/v1/themes/PS5/css/webkit/web.css"><script type="module" src="https://millennium.host/v1/themes/PS5/js/web.js"></script></head>`;
+const img = (id, kind = 'header') => `https://cdn.ps5-mock.test/assets/${id}/${kind === 'header' ? 'header.jpg' : kind === 'hero' ? 'library_hero.jpg' : 'library_600x900.jpg'}`;
+const nav = `<div id="store_header"><div class="store_nav"><a class="tab"><span>Your Store</span></a><a class="tab"><span>New &amp; Noteworthy</span></a><a class="tab"><span>Categories</span></a><a class="tab"><span>Points Shop</span></a><a class="tab"><span>News</span></a><a class="tab"><span>Labs</span></a><div style="flex:1"></div><div id="store_search"><input id="store_nav_search_term" placeholder="search"></div></div></div>`;
+const price = (pct, was, now) => pct ? `<div class="discount_block"><div class="discount_pct">-${pct}%</div><div class="discount_prices"><div class="discount_original_price">${was}</div><div class="discount_final_price">${now}</div></div></div>` : `<div class="discount_final_price">${now}</div>`;
+export const pages = {
+  'https://store.steampowered.com/': () => `${head('Welcome to Steam')}<body class="v6 responsive_page"><div id="global_header">GLOBAL HEADER</div><div class="responsive_page_frame"><div class="page_content">${nav}
+  <h2>Featured &amp; Recommended</h2><div class="main_cluster_content"><a class="store_main_capsule"><img src="${img(101, 'hero')}"><div class="info"><div class="app_name">Starfall Odyssey</div><p>Now available</p>${price(25, '59,99€', '44,99€')}</div></a></div>
+  <h2>Special Offers</h2><div class="row">${[102, 103, 104, 105].map((id, i) => `<a class="store_capsule" href="/app/${id}"><img src="${img(id)}"><div style="padding:8px">${price([50, 30, 0, 75][i], '29,99€', ['14,99€', '20,99€', '24,99€', '7,49€'][i])}</div></a>`).join('')}</div>
+  <div data-featuretarget="discounts-and-events"><h2>Discounts &amp; Events</h2><div class="row">${[106, 107, 108].map(id => `<a href="https://store.steampowered.com/app/${id}" style="width:300px;display:block"><img src="${img(id)}" style="width:100%"></a>`).join('')}</div></div>
+  <div class="home_tabs_row"><div class="tab active"><div>New &amp; Trending</div></div><div class="tab"><div>Top Sellers</div></div><div class="tab"><div>Popular Upcoming</div></div><div class="tab"><div>Specials</div></div></div>
+  ${[109, 110, 102].map((id, i) => `<a class="tab_item" href="/app/${id}"><img src="${img(id)}"><div><div class="tab_item_name">${['Last Frontier', 'Crystal Caves', 'Neon Drift Racing'][i]}</div>${price(i ? 0 : 40, '19,99€', ['11,99€', '9,99€', '29,99€'][i])}</div></a>`).join('')}
+  </div></div></body></html>`,
+  'https://store.steampowered.com/app/101/Starfall_Odyssey/': () => `${head('Starfall Odyssey on Steam')}<body class="v6 app game_bg responsive_page"><div class="responsive_page_frame"><div class="game_page_background game" style="background-image:url('${img(101, 'hero')}')"><div class="page_content">${nav}
+  <div class="apphub_HomeHeaderContent"><div class="apphub_AppName">Starfall Odyssey</div></div>
+  <div id="game_highlights"><div class="highlight_ctn"><img src="${img(101, 'hero')}"><div class="highlight_strip">${[1, 2, 3, 4, 5].map(i => `<div class="highlight_strip_item${i === 1 ? ' focus' : ''}"><img src="https://cdn.ps5-mock.test/shot/101/${i}.svg"></div>`).join('')}</div></div>
+  <div class="glance_ctn"><img src="${img(101)}" style="width:100%"><p class="game_description_snippet">Explore shattered worlds in a sweeping space adventure.</p><div>All reviews: <span class="game_review_summary positive">Very Positive</span></div></div></div>
+  <div class="game_area_purchase_game"><h1>Buy Starfall Odyssey</h1><div class="game_purchase_action">${price(25, '59,99€', '44,99€')}<div class="btn_addtocart"><a class="btn_green_steamui"><span>Add to Cart</span></a></div></div></div>
+  <div id="add_to_wishlist_area"><a class="btnv6_blue_hoverfade"><span>Add to your wishlist</span></a></div>
+  <div class="game_area_description"><h2>About This Game</h2>A long description of the game, its worlds and its story.</div>
+  <div class="review_box">"Best space game in years." — 120 hrs on record</div>
+  </div></div></div></body></html>`,
+  'https://store.steampowered.com/wishlist/id/vasya/': () => `${head("Vasya's Wishlist")}<body class="v7"><header id="global_header">HDR</header><div id="StoreTemplate"><section><h1>Vasya's Wishlist</h1><div class="wl-tools"><input type="text" placeholder="Search by name or tag"><div class="Panel"><div><button class="Focusable" role="button">Sort by: Your rank</button></div></div><div class="Panel"><div><button class="Focusable" role="button">Filters</button></div></div><span>4 games</span></div>
+  ${[107, 109, 105, 103].map((id, i) => `<div data-rfd-draggable-id="WishlistItem-${id}"><div class="Panel" role="button" tabindex="0"><a href="https://store.steampowered.com/app/${id}"><img src="${img(id)}"></a><div style="flex:1"><a href="https://store.steampowered.com/app/${id}">${['Shadow Protocol', 'Last Frontier', 'Ocean of Echoes', 'Hollow Kingdom'][i]}</a><div>Added on ${['3 Mar', '12 Feb', '1 Jan', '20 Dec'][i]}</div></div><div role="link" aria-label="${[40, 0, 20, 0][i]}% off"><div><div>-${[40, 0, 20, 0][i]}%</div></div><div><div>29,99€</div><div>17,99€</div></div></div><button type="button" class="Focusable"><span>Add to Cart</span></button><button class="Focusable">remove</button></div></div>`).join('')}
+  </section></div></body></html>`,
+  'https://steamcommunity.com/id/vasya/': () => `${head("Steam Community :: Vasya")}<body class="flat_page profile_page"><div class="responsive_page_frame"><div class="profile_header_bg"><div class="profile_header_bg_texture"></div></div>
+  <div class="profile_header"><div class="playerAvatar profile_header_size"><img src="https://cdn.ps5-mock.test/avatar/vasya.svg"></div><div><div class="persona_name"><span class="actual_persona_name">Vasya_PS5</span></div><div class="profile_header_summary"><div class="profile_summary">PlayStation fan. Trophy hunter.</div></div></div><div style="margin-left:auto">Level <span class="friendPlayerLevel"><span class="friendPlayerLevelNum">42</span></span><br><a class="btn_profile_action"><span>Edit Profile</span></a></div></div>
+  <div class="profile_body"><div class="profile_leftcol"><div class="profile_customization"><div class="profile_customization_header">Achievement Showcase</div><p>612 achievements · 14 perfect games</p></div><div class="recent_games"><div class="profile_recentgame_header">Recent Activity</div><div class="recent_game" style="padding:10px">Starfall Odyssey — 90 hrs on record</div></div></div>
+  <div class="profile_rightcol"><div class="profile_item_links"><div class="profile_count_link"><a><span class="count_link_label">Games</span> <span class="profile_count_link_total">57</span></a></div><div class="profile_count_link"><a><span class="count_link_label">Screenshots</span> <span class="profile_count_link_total">231</span></a></div><div class="profile_count_link"><a><span class="count_link_label">Friends</span> <span class="profile_count_link_total">12</span></a></div></div></div></div>
+  </div></body></html>`,
+  'https://example.com/': () => `${head('Other site')}<body><p>Not a Steam page</p></body></html>`,
+};

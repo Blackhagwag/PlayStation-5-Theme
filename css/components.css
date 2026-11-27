@@ -63,7 +63,7 @@
 /* game pages: Steam draws its own hero there, so ours sits back */
 html.ps5-on-app #ps5-bg .ps5-bg-layer.on { opacity: 0.55; filter: blur(calc(var(--ps5-bg-blur, 0px) + 40px)); }
 /* web pages cover the window anyway */
-html.ps5-on-web #ps5-bg { display: none; }
+html.ps5-on-web:not(.ps5-web-hidden) #ps5-bg { display: none; }
 
 /* ───────────── boot fade ───────────── */
 #ps5-boot {
@@ -533,6 +533,9 @@ html.ps5-on-web #ps5-bg { display: none; }
 #ps5-cc.open .ps5-cc-panel { transform: translate(-50%, 0); opacity: 1; }
 .ps5-cc-card {
   min-height: 150px;
+  max-height: calc(100vh - var(--ps5-top, 32px) - 150px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   margin-bottom: 16px;
   padding: 22px 26px;
   box-sizing: border-box;
@@ -577,6 +580,7 @@ html.ps5-on-web #ps5-bg { display: none; }
 .ps5-cc-btn.status.s2::before { background: #e2384d; }
 .ps5-cc-btn.status.s3::before { background: #f0b232; }
 .ps5-cc-btn.status.s7::before { background: transparent; border: 2px solid #7a7f8c; box-sizing: border-box; }
+.ps5-cc-subhead { margin: 18px 0 2px; font-size: 12px; font-weight: 700; color: var(--ps5-text-3); text-transform: uppercase; letter-spacing: 0.08em; }
 .ps5-cc-profile { display: flex; align-items: center; gap: 18px; }
 .ps5-cc-profile h3 { margin: 0; font-size: 24px; }
 .ps5-cc-sub { color: var(--ps5-text-2); font-size: 14px; margin-top: 2px; }

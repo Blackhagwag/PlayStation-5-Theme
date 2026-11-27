@@ -80,3 +80,65 @@ body.friendsui-container,
   background: rgba(0, 112, 209, 0.18) !important;
   border-radius: 14px !important;
 }
+
+/* ---------- v1.1.0: the friends list and chat as Steam builds them today ---------- */
+body.fullheight #popup_target.popup_chat_frame,
+.chat_main,
+.friendsListContainer,
+.friendlist,
+.FriendsListContent,
+.friendListHeaderContainer,
+.friendListFooter,
+.ChatRoomListAndChat,
+.friendlistListContainer,
+.chatRoomListContainer {
+  background: transparent !important;
+  background-image: none !important;
+}
+.chat_main_flex,
+body.fullheight #popup_target.popup_chat_frame {
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(0, 80, 190, 0.30), transparent 60%),
+    linear-gradient(180deg, #0b1a3c 0%, #050912 70%) !important;
+  color: #fff !important;
+}
+.friendsListSectionTitle,
+.chatSectionTitle {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  font-weight: 700 !important;
+}
+.currentUserContainer { border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important; }
+.currentUserContainer .avatarHolder,
+.avatarHolder .avatar,
+.avatarHolder img { border-radius: 50% !important; }
+.currentUserContainer .avatarHolder.online { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px rgba(0, 112, 209, 0.7); }
+.currentUserContainer .avatarHolder.ingame { box-shadow: 0 0 0 2px #fff, 0 0 18px 2px rgba(63, 209, 90, 0.6); }
+.playerName { color: #fff !important; }
+.labelHolder.online .playerName { color: #8fd4ff !important; }
+.labelHolder.ingame .playerName { color: #8ee08a !important; }
+.labelHolder.offline .playerName { color: rgba(255, 255, 255, 0.5) !important; }
+.richPresenceLabel { color: rgba(255, 255, 255, 0.55) !important; }
+.friendGroup.onlineFriends { border-top-color: rgba(255, 255, 255, 0.10) !important; }
+.FriendStatusHover {
+  background: rgba(9, 20, 46, 0.97) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 14px 30px -10px rgba(0, 0, 0, 0.85) !important;
+}
+.friendTab.socialListTab { border-radius: 10px 10px 0 0 !important; }
+.friendTab.socialListTab.activeTab { background: rgba(255, 255, 255, 0.10) !important; }
+.chatEntry .chatentry_chatTextarea,
+.chatEntry textarea,
+.friendSearchInput {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+}
+.chatEntry textarea { border-radius: 16px !important; }
+.chatEntry .chatSubmitButton { background: var(--ps5-accent, #0070D1) !important; border-radius: 999px !important; }
+.msg.isCurrentUser .msgText,
+.ChatMessageBlock.isCurrentUser .msgText { color: #fff; }
+.chatHistoryScroll { scrollbar-width: thin; }
+.FriendChatTypingNotification { color: rgba(255, 255, 255, 0.6) !important; }
+.quickAccessFriends { background: transparent !important; }

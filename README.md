@@ -18,8 +18,14 @@ glass panels and smooth motion — while every Steam function keeps working unde
 | Game Library | Control Center |
 |---|---|
 | ![Game Library](assets/preview-library.jpg) | ![Control Center](assets/preview-control-center.jpg) |
-| **Game hub** | **Game Base (friends)** |
-| ![Game hub](assets/preview-game.jpg) | ![Friends](assets/preview-friends.jpg) |
+| **PlayStation Store** | **Store game page** |
+| ![Store](assets/preview-store.jpg) | ![Store game page](assets/preview-store-game.jpg) |
+| **Wishlist** | **PSN-style profile** |
+| ![Wishlist](assets/preview-wishlist.jpg) | ![Profile](assets/preview-profile-psn.jpg) |
+| **What's New + bottom bar** | **Profile panel over the Store** |
+| ![What's New](assets/preview-whatsnew.jpg) | ![Profile panel](assets/preview-profile-store.jpg) |
+| **Game hub** | **Steam menus** |
+| ![Game hub](assets/preview-game.jpg) | ![Menus](assets/preview-menu.jpg) |
 
 ## Features
 
@@ -35,10 +41,23 @@ glass panels and smooth motion — while every Steam function keeps working unde
   real Steam functions (`steam://` URLs and `SteamClient`), nothing is faked.
 - **Game hub** — large art, PS5 white Play button, activity cards, About, screenshots
   (yours + store) with a lightbox. Steam's achievements, news and activity stay on the page.
+- **PlayStation Store** — glass navigation bar, big banners, game cards with hover glow, pill
+  tabs, blue discounts, PS Store product pages (buy panel, screenshots, description, system
+  requirements, reviews, DLC), search, cart and account pages.
+- **Wishlist** — every game a PS5 card with cover, price, discount and Add to Cart; Steam's
+  search, sort, filters, reordering and remove keep working.
+- **Community & PSN profile** — round glowing avatar, level, showcases, games, achievements,
+  friends, badges, inventory; hubs, Workshop, Discussions, Guides, Screenshots, Market.
+- **One profile button** — the PS5 avatar replaces Steam's account button; account details,
+  wallet, store preferences, language, status and change account are in its panel. The panel
+  works the same on every page, including on top of the Store (the native web view is hidden
+  while it is open, exactly as Millennium does for its own panels).
+- **What's New** as PS5 content cards; **bottom bar** (Downloads with live progress, Add a
+  Game, Friends & Chat with online count) as PS5 pills; **every Steam menu** (Steam / View /
+  Friends / Games / Help, right-click, account, notifications) as dark-blue rounded panels with
+  blue highlight — all items and commands untouched.
 - **Everywhere else** — PS5 top tabs with clock and avatar, glass game list, downloads page,
-  friends & chat, menus, notifications, settings dialogs, and optional PS5 styling for the
-  Store, Community and a PlayStation Network-style **profile** (avatar, level, games,
-  achievements, friends).
+  friends & chat, notifications, settings and properties dialogs.
 - **Options** in Millennium → Themes → PlayStation 5: accent colour (5 presets or your own),
   background (game art / PS5 waves / black), blur, reduced motion, boot animation, clock
   format, home layout, store styling, theme language (English / Русский).
@@ -49,7 +68,7 @@ glass panels and smooth motion — while every Steam function keeps working unde
 |---|---|
 | Millennium | current releases (themes in `<Steam>/millennium/themes/`, `skin.json` Patches + Conditions) |
 | Steam | the current desktop client (new library UI). Windows and Linux |
-| Sections | Library, Home, game pages, Downloads, Store, Community, Profile, Friends & Chat, menus, notifications, dialogs |
+| Sections | Library, Home, What's New, game pages, Downloads, Store, Wishlist, Community, Profile, Workshop, Discussions, Friends & Chat, menus, notifications, dialogs, bottom bar |
 | Left untouched | Big Picture Mode and the in-game overlay (so games and the overlay can never break) |
 
 The theme only adds CSS and one script to Steam's windows through Millennium. It does not
@@ -95,18 +114,23 @@ css/root.css         colours editable in Millennium's Colors tab
 css/shared.css       tokens, font, buttons, inputs, dialogs (all desktop windows)
 css/main.css         main window: top bar, game list, home shelves, game page, downloads
 css/components.css   the PS5 components built by the script
-css/friends.css      friends & chat     css/menus.css   context menus
-css/toasts.css       notifications      css/webkit/web.css  Store, Community, Profile
+css/friends.css      friends & chat     css/menus.css   all Steam menus
+css/toasts.css       notifications      css/webkit/web.css  Store, Wishlist, Community, Profile
 css/options/         one small file per option value
-js/ps5.js            runtime for the main window (Home, Library, Control Center, game hub)
+js/ps5.js            runtime for the main window (Home, Library, Control Center, game hub, bottom bar)
+js/web.js            runtime for store / community pages (page detection, marks for web.css)
 fonts/inter/         Inter variable font (OFL)
 tests/               mock Steam window + Playwright checks (not shipped)
 scripts/             validate.mjs, package.sh (not shipped)
 ```
 
 How it works: Millennium injects the CSS/JS listed in `skin.json` into matching Steam windows
-(by window title or class, e.g. `^Steam$` for the main window, `.friendsui-container` for chat)
-and into store/community pages (by URL). `js/ps5.js` reads Steam's own stores
+(by window title or body class: `^Steam$` for the main window, `.friendsui-container` for chat,
+`ContextMenuPopupBody` for menus, `ModalDialogBody` for dialogs, `DesktopToastContainer` for
+notifications). Web pages get `css/webkit/web.css` and `js/web.js` through Millennium's global
+`webkitCSS` / `webkitJS` hooks — URL patches are matched against the whole URL, and conditional
+web CSS only applies once an option is saved, so the script itself picks store and community
+pages and leaves every other site alone. `js/ps5.js` reads Steam's own stores
 (`appStore`, `collectionStore`, `appDetailsStore`, `SteamUIStore`, `FriendStore`) and acts only
 through Steam (`SteamClient.Apps.RunGame`, `SteamClient.Downloads`, `steam://…`).
 
@@ -119,13 +143,17 @@ Checks (developer only, needs Node 18+ and Playwright):
 
 ```
 node scripts/validate.mjs     # manifest, referenced files, CSS urls, JS syntax
-node tests/run.mjs            # 40 checks against a mock Steam window
+node tests/run.mjs            # 76 checks: mock Steam window, menus, store/community pages
 scripts/package.sh            # builds + verifies dist/PlayStation-5-Millennium-Theme-vX.Y.Z.zip
 ```
 
 Releases: bump `version` in `skin.json`, add a section to `CHANGELOG.md`, push a `vX.Y.Z` tag (or
 run the *Build & Release* workflow) — GitHub Actions validates, builds the ZIP, verifies it and
 publishes the release with the ZIP attached.
+
+Limits of the tests: there is no Steam client in CI, so the checks run against a faithful mock
+of Steam's markup (the readable class names Millennium adds, Steam's stores and APIs, store
+pages on their real hostnames). Steam changes its markup often.
 
 Found something broken after a Steam update? Open an issue with a screenshot and your
 Millennium version.

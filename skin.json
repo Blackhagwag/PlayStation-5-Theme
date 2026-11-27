@@ -2,50 +2,107 @@
   "name": "PlayStation 5",
   "description": "A PlayStation 5 style shell for the Steam desktop client: PS5 Home Screen with your real games, Game Library, Control Center, PS5 game pages, PSN-style profile, glass panels and smooth motion. Not affiliated with Sony Interactive Entertainment.",
   "author": "Blackhagwag",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source": "https://github.com/Blackhagwag/PlayStation-5-Millennium-Theme",
   "github": {
     "owner": "Blackhagwag",
     "repo_name": "PlayStation-5-Millennium-Theme"
   },
-  "tags": ["Dark", "Console", "PlayStation", "Glass", "Animated", "Blue"],
+  "tags": [
+    "Dark",
+    "Console",
+    "PlayStation",
+    "Glass",
+    "Animated",
+    "Blue"
+  ],
   "header_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
   "splash_image": "https://raw.githubusercontent.com/Blackhagwag/PlayStation-5-Millennium-Theme/HEAD/assets/preview-home.jpg",
   "RootColors": "css/root.css",
+  "webkitCSS": "css/webkit/web.css",
+  "webkitJS": "js/web.js",
   "UseDefaultPatches": false,
   "Patches": [
     {
       "MatchRegexString": "^Steam$",
-      "TargetCss": ["css/shared.css", "css/main.css", "css/components.css"],
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css",
+        "css/main.css",
+        "css/components.css"
+      ],
       "TargetJs": "js/ps5.js"
     },
     {
       "MatchRegexString": ".DesktopUI",
-      "TargetCss": "css/shared.css"
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
+    },
+    {
+      "MatchRegexString": "ModalDialogBody",
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
     },
     {
       "MatchRegexString": ".friendsui-container",
-      "TargetCss": ["css/shared.css", "css/friends.css"]
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css",
+        "css/friends.css"
+      ]
+    },
+    {
+      "MatchRegexString": "ContextMenuPopupBody",
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
     },
     {
       "MatchRegexString": "Menu$",
-      "TargetCss": ["css/shared.css", "css/menus.css"]
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
     },
     {
       "MatchRegexString": "Supernav$",
-      "TargetCss": ["css/shared.css", "css/menus.css"]
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
+    },
+    {
+      "MatchRegexString": "DesktopToastContainer",
+      "TargetCss": [
+        "css/shared.css",
+        "css/toasts.css"
+      ]
     },
     {
       "MatchRegexString": "^notificationtoasts_",
-      "TargetCss": ["css/shared.css", "css/toasts.css"]
+      "TargetCss": [
+        "css/shared.css",
+        "css/toasts.css"
+      ]
     },
     {
       "MatchRegexString": ".ModalDialogPopup",
-      "TargetCss": "css/shared.css"
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
     },
     {
       "MatchRegexString": ".FullModalOverlay",
-      "TargetCss": "css/shared.css"
+      "TargetCss": [
+        "css/shared.css",
+        "css/menus.css"
+      ]
     }
   ],
   "Conditions": {
@@ -57,7 +114,12 @@
       "values": {
         "PlayStation 5": {},
         "Steam default": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/home-off.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/home-off.css"
+          }
         }
       }
     },
@@ -69,7 +131,12 @@
       "values": {
         "Recently played (installed)": {},
         "Recently played (whole library)": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/home-all.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/home-all.css"
+          }
         }
       }
     },
@@ -81,7 +148,29 @@
       "values": {
         "Show": {},
         "Hide": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/shelves-hide.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/shelves-hide.css"
+          }
+        }
+      }
+    },
+    "What's New": {
+      "description": "Steam's What's New shelf on the library home as a row of PS5 content cards, or hidden.",
+      "tab": "Home",
+      "section": "Home Screen",
+      "default": "PS5 cards",
+      "values": {
+        "PS5 cards": {},
+        "Hidden": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/whatsnew-hide.css"
+          }
         }
       }
     },
@@ -93,7 +182,12 @@
       "values": {
         "Hidden": {},
         "Visible": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/sidebar-home-show.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/sidebar-home-show.css"
+          }
         }
       }
     },
@@ -105,19 +199,99 @@
       "values": {
         "Colors tab": {},
         "Cosmic Red": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-red.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay",
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/accent-red.css"
+          }
         },
         "Nova Pink": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-pink.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay",
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/accent-pink.css"
+          }
         },
         "Galactic Purple": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-purple.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay",
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/accent-purple.css"
+          }
         },
         "Starlight Blue": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-starlight.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay",
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/accent-starlight.css"
+          }
         },
         "Volcanic Orange": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay", "https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/options/accent-orange.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay",
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/accent-orange.css"
+          }
         }
       }
     },
@@ -129,10 +303,20 @@
       "values": {
         "Game art": {},
         "PS5 ambient waves": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/bg-waves.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/bg-waves.css"
+          }
         },
         "Pure black": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/bg-black.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/bg-black.css"
+          }
         }
       }
     },
@@ -157,7 +341,22 @@
       "values": {
         "Full": {},
         "Reduced": {
-          "TargetCss": { "affects": ["^Steam$", ".DesktopUI", ".friendsui-container", "Menu$", "Supernav$", "^notificationtoasts_", ".ModalDialogPopup", ".FullModalOverlay"], "src": "css/options/motion-reduced.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$",
+              ".DesktopUI",
+              ".friendsui-container",
+              "Menu$",
+              "Supernav$",
+              "^notificationtoasts_",
+              "ContextMenuPopupBody",
+              "ModalDialogBody",
+              "DesktopToastContainer",
+              ".ModalDialogPopup",
+              ".FullModalOverlay"
+            ],
+            "src": "css/options/motion-reduced.css"
+          }
         }
       }
     },
@@ -169,7 +368,12 @@
       "values": {
         "On": {},
         "Off": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/boot-off.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/boot-off.css"
+          }
         }
       }
     },
@@ -181,23 +385,72 @@
       "values": {
         "24-hour": {},
         "12-hour": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/clock-12.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/clock-12.css"
+          }
         },
         "Hidden": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/clock-off.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/clock-off.css"
+          }
+        }
+      }
+    },
+    "Steam account button": {
+      "description": "Steam's own account button in the top bar. Hidden: the PS5 avatar is the single profile button; account details, wallet, store preferences, status and sign-in options are in its panel (Control Center → Profile).",
+      "tab": "Look",
+      "section": "Top bar",
+      "default": "Hidden (PS5 profile)",
+      "values": {
+        "Hidden (PS5 profile)": {},
+        "Visible": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/account-show.css"
+          }
+        }
+      }
+    },
+    "Bottom bar": {
+      "description": "Downloads, Add a Game and Friends & Chat at the bottom of the window: PS5 pills with icons, or Steam's own look.",
+      "tab": "Look",
+      "section": "Bottom bar",
+      "default": "PS5",
+      "values": {
+        "PS5": {},
+        "Steam default": {
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/bottombar-steam.css"
+          }
         }
       }
     },
     "Store and Community": {
-      "description": "PS5 colors, glass and rounded cards on the Store, Community and Profile pages (PlayStation Network style profile).",
+      "description": "PS5 design for the Store (home, game pages, search, wishlist), Community, Workshop, guides, discussions and the PlayStation Network-style profile. Steam default leaves every web page as Steam draws it.",
       "tab": "Web pages",
       "section": "Store and Community",
       "default": "PS5 style",
       "values": {
-        "PS5 style": {
-          "TargetCss": { "affects": ["https://store\\.steampowered\\.com", "https://steamcommunity\\.com"], "src": "css/webkit/web.css" }
-        },
-        "Steam default": {}
+        "PS5 style": {},
+        "Steam default": {
+          "TargetCss": {
+            "affects": [
+              "https://(store\\.steampowered\\.com|steamcommunity\\.com)(/.*)?"
+            ],
+            "src": "css/options/web-off.css"
+          }
+        }
       }
     },
     "Theme language": {
@@ -208,10 +461,20 @@
       "values": {
         "Auto": {},
         "English": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/lang-en.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/lang-en.css"
+          }
         },
         "Русский": {
-          "TargetCss": { "affects": ["^Steam$"], "src": "css/options/lang-ru.css" }
+          "TargetCss": {
+            "affects": [
+              "^Steam$"
+            ],
+            "src": "css/options/lang-ru.css"
+          }
         }
       }
     }

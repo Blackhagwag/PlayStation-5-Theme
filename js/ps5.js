@@ -28,7 +28,7 @@
     try { window.__ps5Theme.destroy(); } catch (e) { /* old instance already gone */ }
   }
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const doc = document;
   const root = doc.documentElement;
 
@@ -127,6 +127,7 @@
       restart: 'Restart Steam', exit: 'Exit Steam', changeUser: 'Change account', goOffline: 'Go offline', confirm: 'Press again to confirm',
       launching: name => `Starting ${name}…`, screenshots: 'Screenshots', about: 'About', loading: 'Loading…',
       keysHint: 'Ctrl+Shift+Space Control Center · Ctrl+Shift+L Game Library',
+      account: 'Account', accountDetails: 'Account details', wallet: 'Wallet & purchases', storePrefs: 'Store preferences', language: 'Language',
     },
     ru: {
       play: 'Играть', stop: 'Остановить', cancel: 'Отмена', install: 'Установить', details: 'Центр игры', more: 'Ещё',
@@ -152,6 +153,7 @@
       restart: 'Перезапустить Steam', exit: 'Выйти из Steam', changeUser: 'Сменить аккаунт', goOffline: 'Перейти в офлайн', confirm: 'Нажмите ещё раз для подтверждения',
       launching: name => `Запуск: ${name}…`, screenshots: 'Скриншоты', about: 'Об игре', loading: 'Загрузка…',
       keysHint: 'Ctrl+Shift+Space Центр управления · Ctrl+Shift+L Библиотека',
+      account: 'Аккаунт', accountDetails: 'Об аккаунте', wallet: 'Кошелёк и покупки', storePrefs: 'Настройки магазина', language: 'Язык',
     },
   };
   const lang = () => {
@@ -412,6 +414,61 @@
     cloud: '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.8A3.6 3.6 0 0 1 17.5 18.5zM4 4l16 16"/></svg>',
   };
   const icon = (name, cls) => `<span class="ps5-ico${cls ? ' ' + cls : ''}" aria-hidden="true">${I[name] || ''}</span>`;
+
+  /* ───────────────────────── web pages: the native web view ─────────────────────────
+     Store, Community, Profile, Wishlist… are drawn by a native browser view (CEF) laid OVER
+     the main window's page, so nothing in this document can be painted above it: that is why
+     a panel opened on a web page ended up under the page or cut off. Millennium solves the
+     same problem for its own panels by hiding that view (MainWindowBrowserManager.m_browser
+     .SetVisible(false)) while they are open; the theme does the same, and shows it again
+     when the last panel closes. */
+  const WebView = (() => {
+    let holders = 0, hidden = false;
+    const browser = () => safe(() => S().MainWindowBrowserManager.m_browser, null);
+    const onWebPage = () => {
+      const lc = doc.querySelector('.LocalContentContainer');
+      const web = doc.querySelector('.BrowserWrapper');
+      if (web && web.offsetParent !== null && (!lc || lc.style.display === 'none' || lc.offsetParent === null)) return true;
+      return /^\/browser/.test(currentPath());
+    };
+    const setVisible = v => { const b = browser(); try { if (b && typeof b.SetVisible === 'function') b.SetVisible(v); } catch (e) { /* nothing to hide */ } };
+    const hold = () => {
+      holders++;
+      if (!hidden && onWebPage()) { hidden = true; setVisible(false); root.classList.add('ps5-web-hidden'); }
+    };
+    const release = () => {
+      holders = Math.max(0, holders - 1);
+      if (holders || !hidden) return;
+      hidden = false;
+      root.classList.remove('ps5-web-hidden');
+      if (onWebPage()) setVisible(true);
+    };
+    // Steam re-shows the view on resizes and page loads; while a panel is open it stays hidden
+    const enforce = () => { if (hidden && holders) setVisible(false); };
+    onCleanup(() => { if (hidden) { hidden = false; root.classList.remove('ps5-web-hidden'); setVisible(true); } });
+    return { hold, release, enforce, onWebPage };
+  })();
+
+  /* ───────────────────────── downloads: one listener for the bottom bar and Control Center ───────────────────────── */
+
+  const Downloads = (() => {
+    let overview = null, un = null;
+    const subs = new Set();
+    const active = () => !!(overview && overview.update_appid && overview.update_state && overview.update_state !== 'None' && !overview.paused);
+    const start = () => {
+      if (un) return;
+      try {
+        const reg = SC().Downloads.RegisterForDownloadOverview(ov => {
+          overview = ov;
+          root.classList.toggle('ps5-downloading', active());
+          subs.forEach(fn => { try { fn(ov); } catch (e) { /* a listener failed */ } });
+        });
+        un = () => { try { if (reg && reg.unregister) reg.unregister(); } catch (e) { /* gone */ } };
+      } catch (e) { un = null; }
+    };
+    onCleanup(() => { if (un) un(); un = null; subs.clear(); root.classList.remove('ps5-downloading'); });
+    return { start, get overview() { return overview; }, on: fn => { subs.add(fn); return () => subs.delete(fn); } };
+  })();
 
   /* ───────────────────────── background art layer ───────────────────────── */
 
@@ -896,6 +953,7 @@
       CC.close();
       if (!node) build();
       placeBelowTitleBar();
+      if (!open) WebView.hold();
       open = true;
       node.classList.add('open');
       root.classList.add('ps5-library-open');
@@ -910,11 +968,12 @@
       open = false;
       node.classList.remove('open');
       root.classList.remove('ps5-library-open');
+      WebView.release();
       // drop the rendered cards so the images are released
       setTimeout(() => { if (!open && node) node.querySelector('.ps5-lib-grid').innerHTML = ''; }, 400);
       Shell.soon();
     };
-    onCleanup(() => { if (io) io.disconnect(); if (node) node.remove(); root.classList.remove('ps5-library-open'); });
+    onCleanup(() => { if (io) io.disconnect(); if (open) WebView.release(); if (node) node.remove(); root.classList.remove('ps5-library-open'); });
     return { open: openFn, close, toggle: () => (open ? close() : openFn()), isOpen: () => open };
   })();
 
@@ -995,6 +1054,10 @@
           </div>
           <div class="ps5-cc-actions">
             ${btn('profile', t.viewProfile, 'user', 'primary')}${btn('my-games', t.myGames, 'grid')}${btn('my-achievements', t.myAchievements, 'trophy')}${btn('my-friends', t.myFriends, 'friends')}${btn('my-badges', t.badges, '')}
+          </div>
+          <div class="ps5-cc-subhead">${esc(t.account)}</div>
+          <div class="ps5-cc-actions">
+            ${btn('account', t.accountDetails, 'gear')}${btn('wallet', t.wallet, '')}${btn('store-prefs', t.storePrefs, '')}${btn('language', t.language, '')}${btn('changeuser', t.changeUser, 'swap')}
           </div>`;
       } else if (section === 'friends') {
         const fr = friendsData();
@@ -1049,16 +1112,15 @@
         </div>`;
     };
 
+    // the CC only listens to the shared Downloads module while it is open
     const watchDownloads = on => {
       if (on && !unDownloads) {
-        try {
-          const reg = SC().Downloads.RegisterForDownloadOverview(ov => {
-            overview = ov;
-            const box = open && section === 'downloads' && node.querySelector('.ps5-cc-dl');
-            if (box) box.innerHTML = downloadsHTML();
-          });
-          unDownloads = () => { try { reg && reg.unregister && reg.unregister(); } catch (e) { /* gone */ } };
-        } catch (e) { unDownloads = null; }
+        overview = Downloads.overview;
+        unDownloads = Downloads.on(ov => {
+          overview = ov;
+          const box = open && section === 'downloads' && node.querySelector('.ps5-cc-dl');
+          if (box) box.innerHTML = downloadsHTML();
+        });
       } else if (!on && unDownloads) { unDownloads(); unDownloads = null; }
     };
 
@@ -1103,6 +1165,10 @@
         case 'my-achievements': shut(); openWeb('https://steamcommunity.com/my/achievements/'); break;
         case 'my-friends': shut(); openWeb('https://steamcommunity.com/my/friends/'); break;
         case 'my-badges': shut(); openWeb('https://steamcommunity.com/my/badges/'); break;
+        case 'account': shut(); openWeb('https://store.steampowered.com/account/'); break;
+        case 'wallet': shut(); openWeb('https://store.steampowered.com/account/history/'); break;
+        case 'store-prefs': shut(); openWeb('https://store.steampowered.com/account/preferences/'); break;
+        case 'language': shut(); steamURL('steam://settings/interface'); break;
         case 'friends': shut(); steamURL('steam://open/friends'); break;
         case 'chat': shut(); if (b.dataset.id) steamURL('steam://friends/message/' + b.dataset.id); else steamURL('steam://open/friends'); break;
         case 'notifications': shut(); if (!clickNotificationBell()) openWeb('https://steamcommunity.com/my/notifications'); break;
@@ -1138,7 +1204,10 @@
       if (!node) build();
       Library.close();
       if (s) section = s;
+      if (!open) WebView.hold();
       open = true;
+      const tb = doc.querySelector('.TitleBar');
+      root.style.setProperty('--ps5-top', Math.max(0, Math.round(tb ? tb.getBoundingClientRect().bottom : 32)) + 'px');
       row();
       card();
       watchDownloads(true);
@@ -1154,6 +1223,7 @@
       node.classList.remove('open');
       root.classList.remove('ps5-cc-open');
       watchDownloads(false);
+      WebView.release();
     };
     const key = e => {
       if (!open) return false;
@@ -1168,7 +1238,7 @@
     };
     // the friends card refreshes while it is on screen
     every(() => { if (open && !doc.hidden && section === 'friends') card(); }, 15000);
-    onCleanup(() => { watchDownloads(false); clearTimeout(confirmTimer); if (node) node.remove(); root.classList.remove('ps5-cc-open'); });
+    onCleanup(() => { watchDownloads(false); clearTimeout(confirmTimer); if (open) WebView.release(); if (node) node.remove(); root.classList.remove('ps5-cc-open'); });
     return { open: openFn, close, toggle: s => (open ? close() : openFn(s)), isOpen: () => open, key };
   })();
 
@@ -1251,6 +1321,29 @@
     return { update, closeLightbox: () => { if (lightbox && lightbox.classList.contains('open')) { lightbox.classList.remove('open'); return true; } return false; } };
   })();
 
+  /* ───────────────────────── bottom bar: online friends on Friends & Chat ───────────────────────── */
+
+  const BottomBar = (() => {
+    let badge = null, counted = 0, count = -1;
+    const update = () => {
+      const btn = doc.querySelector('.BottomBar .FriendsButton') || doc.querySelector('.BottomBar [class*="FriendsButton"]');
+      if (!btn || cssVar('--ps5-bottombar') === 'steam') { if (badge) badge.remove(); return; }
+      const now = Date.now();
+      if (now - counted > 10000) {
+        counted = now;
+        const all = safe(() => friendsApp().FriendStore.all_friends, null);
+        count = Array.isArray(all) ? all.filter(f => safe(() => f.persona.m_ePersonaState > 0, false)).length : -1;
+      }
+      if (!badge) { badge = h('span', 'ps5-friends-badge'); badge.setAttribute('aria-hidden', 'true'); }
+      badge.hidden = !(count > 0);
+      const text = count > 99 ? '99+' : String(Math.max(0, count));
+      if (badge.textContent !== text) badge.textContent = text;
+      if (badge.parentElement !== btn) btn.appendChild(badge);
+    };
+    onCleanup(() => { if (badge) badge.remove(); badge = null; });
+    return { update };
+  })();
+
   /* ───────────────────────── the shell: one observer, one tick ───────────────────────── */
 
   const Shell = (() => {
@@ -1265,7 +1358,11 @@
       // background: home → selected game; game page → set by Details; elsewhere → ambient
       if (!onHome && !/^\/library\/app\//.test(path) && !Library.isOpen()) Bg.clear();
       root.classList.toggle('ps5-on-app', /^\/library\/app\//.test(path));
-      root.classList.toggle('ps5-on-web', /^\/browser/.test(path) || /^\/(store|community)/.test(path));
+      root.classList.toggle('ps5-on-web', WebView.onWebPage());
+      root.classList.toggle('ps5-account-show', cssVar('--ps5-account') === 'show');
+      root.classList.toggle('ps5-bb-steam', cssVar('--ps5-bottombar') === 'steam');
+      BottomBar.update();
+      WebView.enforce();
     };
     const soon = () => {
       if (queued) return;
@@ -1292,12 +1389,13 @@
       if (unlisten) return;
       const hist = safe(() => S().SteamUIStore.WindowStore.MainWindowInstance.m_history, null);
       if (hist && typeof hist.listen === 'function') {
-        try { const u = hist.listen(() => { Library.close(); soon(); }); unlisten = typeof u === 'function' ? u : null; } catch (e) { /* polling covers it */ }
+        try { const u = hist.listen(() => { Library.close(); CC.close(); soon(); }); unlisten = typeof u === 'function' ? u : null; } catch (e) { /* polling covers it */ }
       }
     };
     onCleanup(() => { if (unlisten) unlisten(); });
 
     const start = () => {
+      Downloads.start();
       tick(); watch(); hookHistory(); boot();
       every(() => {
         if (doc.hidden) return;
@@ -1331,7 +1429,7 @@
     openLibrary: () => Library.open(),
     destroy: () => {
       while (cleanups.length) { try { cleanups.pop()(); } catch (e) { /* keep going */ } }
-      root.classList.remove('ps5-theme', 'ps5-home-mounted', 'ps5-hide-list', 'ps5-on-app', 'ps5-on-web');
+      root.classList.remove('ps5-theme', 'ps5-home-mounted', 'ps5-hide-list', 'ps5-on-app', 'ps5-on-web', 'ps5-account-show', 'ps5-bb-steam');
       if (window.__ps5Theme === api) delete window.__ps5Theme;
     },
   };

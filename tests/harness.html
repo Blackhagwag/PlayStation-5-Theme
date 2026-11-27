@@ -2,6 +2,7 @@
 <html><head><meta charset="utf-8"><title>Steam</title>
 <link rel="stylesheet" href="../css/root.css">
 <link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/menus.css">
 <link rel="stylesheet" href="../css/main.css">
 <link rel="stylesheet" href="../css/components.css">
 <style>
@@ -22,10 +23,13 @@
  .PlayBar{display:flex;align-items:center;gap:30px;padding:16px 28px}
  .PlayButton{height:44px;border:none;font-size:16px;padding:0 28px}
  .BottomBar{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:13px}
+ .BrowserWrapper{flex:1}
+ .UpdatesContainer{display:flex;gap:16px}.PartnerEventRowCapsule_Container{width:260px}.PartnerEventRowCapsule_Container>div{height:230px;display:flex;flex-direction:column}
+ .PartnerEventRowCapsule_Container img{width:100%;height:120px;object-fit:cover}.PartnerEventRowCapsule_TextTitle{padding:8px 12px}
 </style></head>
 <body class="DesktopUI">
 <div id="popup_target">
-  <div class="TitleBar"><div class="TitleBarControls"><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
+  <div class="TitleBar"><div class="TitleBarControls"><div class="AccountMenu" id="acct">Vasya_PS5 · 12,50€</div><div class="Button">▢</div><div class="Button">_</div><div class="Button">✕</div></div></div>
   <div class="SuperNavBar">
     <div class="SuperNavMenu"><div class="MenuButton">Store</div></div>
     <div class="SuperNavMenu Selected"><div class="MenuButton">Library</div></div>
@@ -36,7 +40,7 @@
     <div class="LibraryWindowDivider"></div>
     <div class="MainPanel"><div class="AppDetailsTransitionGroup" id="route"></div></div>
   </div></div></div>
-  <div class="BottomBar"><div class="DownloadStatus">Downloads</div><div class="FriendsButton">Friends &amp; Chat</div></div>
+  <div class="BottomBar"><div class="DownloadStatus"><span class="Status">Downloading</span><div class="ProgressBar" style="width:90px"><div style="width:60%;height:100%"></div></div><span class="Percentage">60%</span></div><div style="flex:1"></div><div class="AddGameButton"><svg width="12" height="12"></svg>Add a Game</div><div class="FriendsButton"><svg width="12" height="12"></svg>Friends &amp; Chat</div></div>
 </div>
 <script src="mock-steam.js"></script>
 <script>
@@ -46,8 +50,13 @@
    if (m) {
      r.innerHTML = `<div class="AppDetailsMain"><div class="Header"><div class="TopCapsule"><div class="HeaderBackgroundImage"><img src="/assets/${m[1]}/library_hero.jpg"></div></div></div><div class="PlayBar"><div class="PlayButtonContainer"><button class="PlayButton">▶ PLAY</button></div><div><div class="PlayBarLabel">Last played</div><div class="PlayBarDetailLabel">Today</div></div></div><div class="AppDetailsOverviewPanel" style="padding:20px 28px;height:600px"><div class="AppDetailsSectionContainer" style="padding:16px">Steam activity feed (native)</div></div></div>`;
    } else {
-     r.innerHTML = `<div class="Body InnerContainer"><div class="LibraryHome"><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div>`;
+     r.innerHTML = `<div class="Body InnerContainer"><div class="LibraryHome"><h2 class="SectionHeader">What's New</h2><div class="UpdatesContainer">${[101,103,104].map((id,i)=>`<div><div class="EventTime">${['This week','Yesterday','2 days ago'][i]}</div><div class="PartnerEventRowCapsule_Container"><div><img src="/assets/${id}/header.jpg"><div class="PartnerEventRowCapsule_TextTitle">${['Major update 2.0 is live','Patch notes 1.4.2','Weekend event starts now'][i]}</div><div class="GameIconAndName"><span class="GameIcon"></span><span class="GameName">Game</span></div></div></div></div>`).join('')}</div><h2 class="SectionHeader">Recent Games</h2><div class="Shelf"><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div><div class="LibraryItemBox"></div></div></div></div>`;
    }
+   const web = /^\/browser/.test(p);
+   document.querySelector('.LocalContentContainer').style.display = web ? 'none' : '';
+   let bw = document.querySelector('.BrowserWrapper');
+   if (web && !bw) { bw = document.createElement('div'); bw.className = 'BrowserWrapper'; bw.innerHTML = '<div style="padding:40px;color:#000;background:#c6d4df;height:100%">STORE WEB VIEW (native CEF view in real Steam)</div>'; document.querySelector('.ContentFrame').appendChild(bw); }
+   if (bw) bw.style.display = web ? '' : 'none';
  };
  window.__mockRoute('/library/home');
 </script>
