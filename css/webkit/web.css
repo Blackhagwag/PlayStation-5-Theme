@@ -1640,14 +1640,27 @@ a.ps5-rev-link:hover { color: #fff !important; }
 &:not(.ps5-wish-grid) #ps5-wish .ps5-wchip,
 &:not(.ps5-wish-grid) #ps5-wish .ps5-wcount { display: none !important; }
 /* grid mode: Steam's page column widens (title and grid on one edge), centred */
+&.ps5-wish-grid [data-ps5-wclip] { overflow-x: visible !important; }
 &.ps5-wish-grid [data-ps5-wcol] {
   width: 100% !important;
   min-width: 0 !important;
+  flex-grow: 1 !important;
+  flex-basis: auto !important;
   box-sizing: border-box !important;
   align-self: stretch !important;
+  justify-self: stretch !important;
   max-width: min(1400px, 100vw - 48px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
+}
+/* the grid itself breaks out of whatever column Steam keeps it in: window width (max 1400 px),
+   centred on the column, which Steam centres in the page */
+&.ps5-wish-grid #ps5-wish {
+  width: min(1400px, calc(100vw - 48px)) !important;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
 }
 #ps5-wish {
   margin: 10px 0 30px !important;

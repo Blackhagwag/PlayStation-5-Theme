@@ -9,7 +9,14 @@ ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Millennium
 ### Added
 - Real captures of the **library game page** (Portal 2) and the **Control Center** profile
   panel (`assets/real/game-page.jpg`, `assets/real/control-center.jpg`) in the README gallery;
-  friends' names and avatars are blurred. The theme's files are unchanged from 1.5.1.
+  friends' names and avatars are blurred.
+
+### Fixed
+- **Wishlist grid width, belt and braces**: on top of 1.5.1's fix, the grid now also breaks out
+  of Steam's column by itself (window width up to 1400 px, centred), so it fills the window even
+  where Steam holds the column with a fixed grid/flex track or clips overflow. Wrappers are
+  re-checked on every re-render and when switching views. The test mock now has such a stubborn
+  wrapper (fixed 720 px grid track + overflow hidden).
 
 ## [1.5.1] — 2026-11-27 — Real Screenshots & Wishlist Width
 

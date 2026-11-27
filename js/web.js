@@ -571,6 +571,7 @@
     const refresh = () => {
       listEl = compute();
       shown = 0;
+      widen();
       const grid = node.querySelector('.ps5-wgrid');
       grid.textContent = '';
       node.querySelector('.ps5-wcount').textContent = W.games(listEl.length);
@@ -606,8 +607,21 @@
       clearTimeout(t._h);
       t._h = setTimeout(() => t.classList.remove('on'), 2400);
     };
+    // Steam caps the wishlist in wrappers (max-width, fixed width, grid / flex tracks) between
+    // the list and the page. Mark every narrower ancestor of the grid so grid mode can widen it,
+    // and un-clip the ones that hide overflow: web.css then lets #ps5-wish break out to the
+    // window's width even where a wrapper cannot be widened.
+    const widen = () => {
+      if (!node) return;
+      for (let a = node.parentElement; a && a !== document.body && a !== root; a = a.parentElement) {
+        const cs = getComputedStyle(a);
+        if (cs.maxWidth !== 'none' || a.getBoundingClientRect().width < window.innerWidth - 80) a.setAttribute('data-ps5-wcol', '');
+        if (/hidden|clip/.test(cs.overflowX)) a.setAttribute('data-ps5-wclip', '');
+      }
+    };
     const setMode = grid => {
       root.classList.toggle('ps5-wish-grid', grid);
+      widen();
       try { localStorage.setItem('ps5-wish-view', grid ? 'grid' : 'list'); } catch (e) { /* not kept */ }
       const t = node.querySelector('.ps5-wview');
       t.textContent = grid ? W.view : W.grid;
@@ -626,12 +640,6 @@
       }
       const col = list.closest('section') || list.parentElement;
       if (col) col.setAttribute('data-ps5-wcol', '');
-      // the real page also caps the column higher up (page wrappers ~940px wide): mark every
-      // narrower ancestor up to <body> so grid mode can use the window's width
-      for (let a = (col || list).parentElement; a && a !== document.body; a = a.parentElement) {
-        const cs = getComputedStyle(a);
-        if (cs.maxWidth !== 'none' || a.getBoundingClientRect().width < window.innerWidth - 80) a.setAttribute('data-ps5-wcol', '');
-      }
       const opt = (v, l) => el('option', '', { value: v, text: l });
       const sel = el('select', 'ps5-wsort', {}, [opt('rank', W.rank), opt('added', W.added), opt('discount', W.discount), opt('price', W.price), opt('name', W.name), opt('release', W.release), opt('reviews', W.reviews)]);
       const search = el('input', 'ps5-wsearch', { type: 'search', placeholder: W.search, spellcheck: 'false' });
@@ -643,6 +651,7 @@
         el('div', 'ps5-wmore'),
       ]);
       list.before(node);
+      widen();
       let qt = 0;
       search.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { query = search.value.trim(); refresh(); }, 140); });
       sel.addEventListener('change', () => { sort = sel.value; refresh(); });
