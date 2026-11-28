@@ -139,7 +139,6 @@ No installer, no Node.js, no Python — just the ZIP.
    recent versions; otherwise open it yourself):
    - Windows: `C:\Program Files (x86)\Steam\millennium\themes\`
    - Linux: `~/.local/share/Steam/millennium/themes/` (or `~/.steam/steam/millennium/themes/`)
-   - Older Millennium versions use `<Steam>/steamui/skins/` instead.
 4. Extract the ZIP **into that folder**. You should end up with
    `themes/PlayStation-5-Millennium-Theme/skin.json` (one folder, `skin.json` directly inside it).
 5. Back in **Millennium → Themes**, pick **PlayStation 5** and let Steam reload.
