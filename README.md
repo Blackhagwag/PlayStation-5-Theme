@@ -135,8 +135,7 @@ No installer, no Node.js, no Python — just the ZIP.
    haven't yet, and start Steam once.
 2. Download **`PlayStation-5-Millennium-Theme-vX.Y.Z.zip`** from
    [Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases/latest).
-3. Open Millennium's themes folder (the Themes page in Millennium's settings links to it in
-   recent versions; otherwise open it yourself):
+3. Open Millennium's themes folder (the Themes page in Millennium's settings links to it):
    - Windows: `C:\Program Files (x86)\Steam\millennium\themes\`
    - Linux: `~/.local/share/Steam/millennium/themes/` (or `~/.steam/steam/millennium/themes/`)
 4. Extract the ZIP **into that folder**. You should end up with
