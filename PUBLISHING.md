@@ -8,7 +8,7 @@ repository. This repository already meets its requirements:
 |---|---|
 | `skin.json` at the repository root | ✅ |
 | a `github` block whose `owner` / `repo_name` match the entry | ✅ `Blackhagwag` / `PlayStation-5-Theme` |
-| `header_image` and `splash_image`: `https` URLs that load an image | ✅ `assets/real/header.jpg` (real capture) |
+| `header_image` and `splash_image`: `https` URLs that load an image | ✅ `assets/real/header-store.jpg` (real capture) |
 | `README.md` (shown on the theme page) | ✅ |
 
 `node scripts/validate.mjs` checks the same rules before every release.
