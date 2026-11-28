@@ -4,6 +4,24 @@ All notable changes to the PlayStation 5 Millennium Theme.
 Versions follow [Semantic Versioning](https://semver.org/). Every version ships as one complete
 ZIP on [GitHub Releases](https://github.com/Blackhagwag/PlayStation-5-Theme/releases).
 
+## [1.8.1] — 2026-11-28 — Friends List Fixes
+
+From screenshots of a real friends list.
+
+### Fixed
+- **"Online friends" slid to the right and the +/– sat below the title**: the collapse icon
+  pushed the title away; group titles now start at the left with the icon on the same line.
+- **The white plate around "Friends" and its buttons**: Steam keeps the search / requests / add
+  buttons inside the Friends tab, so the white active pill covered them (white icons on white).
+  Now only the caption is the pill; the buttons stay round glass buttons beside it.
+- **"Drag favourite friends and chats here"** sat crooked with Steam's "Got it" button sticking
+  out of it: now a tidy dashed box with "Got it" as a small pill inside; it closes properly.
+- **Window buttons** (minimise / maximise / close): soft rounded buttons, close turns red on
+  hover, and the profile card starts below them instead of under them.
+- **Avatar frame**: Steam's square avatar frame clashed with the round avatar in the profile
+  card — hidden there (the ring is the frame).
+- Status dots stay on when chats are docked into the friends list window.
+
 ## [1.8.0] — 2026-11-27 — Cart & Checkout
 
 ### Added

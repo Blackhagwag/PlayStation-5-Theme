@@ -92,7 +92,6 @@ body.fullheight #popup_target.popup_chat_frame {
 :is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.ingame::after { background: var(--ps5-st-ingame); }
 :is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.awayOrSnooze::after { background: var(--ps5-st-away); }
 :is(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder.offline::after { background: transparent; border: 2px solid var(--ps5-st-off); }
-.friendsui-container .avatarFrame { border-radius: 50%; overflow: hidden; }
 
 /* names by status */
 .friendsui-container .playerName { color: #fff !important; font-weight: 600 !important; }
@@ -205,7 +204,7 @@ body.fullheight #popup_target.popup_chat_frame {
   color: #0b0b0f !important;
 }
 :is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab :is(.tabLabel, span) { color: #0b0b0f !important; }
-:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendTab.activeTab svg * { fill: #0b0b0f !important; stroke: #0b0b0f !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendTab.activeTab > .tabLabel svg * { fill: #0b0b0f !important; stroke: #0b0b0f !important; }
 :is(.MillenniumWindow_FriendsList, .ps5-fl) .friendsTabButtonsContainer {
   display: flex !important;
   align-items: center !important;
@@ -301,8 +300,12 @@ body.fullheight #popup_target.popup_chat_frame {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  height: 30px !important;
+  min-height: 30px !important;
+  height: auto !important;
   padding: 0 8px !important;
+  margin: 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
   border-radius: 10px !important;
   background: transparent !important;
   color: var(--ps5-text-2) !important;
@@ -327,7 +330,20 @@ body.fullheight #popup_target.popup_chat_frame {
   line-height: 20px !important;
   text-align: center;
 }
-:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus { margin-left: auto !important; opacity: 0.7; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus {
+  order: -1;
+  flex: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  opacity: 0.7;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus svg { width: 10px !important; height: 10px !important; margin: 0 !important; }
 :is(.MillenniumWindow_FriendsList, .ps5-fl) .friendGroup .groupName .ExpandPlusMinus svg * { stroke: #fff !important; fill: #fff !important; }
 
 /* --- a friend row --- */
@@ -631,7 +647,7 @@ body.fullheight #popup_target.popup_chat_frame {
 :is(.MillenniumWindow_FriendChatWindow, .ps5-chat) :is(.ChatTabs, .ChatSpeaker, .chatHeader) img.avatar,
 :is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder img { border-radius: 50% !important; }
 :is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder > .avatarStatus { display: none !important; }
-:is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .avatarHolder::after { content: none !important; }
+:is(.MillenniumWindow_FriendChatWindow, .ps5-chat):not(.MillenniumWindow_FriendsList, .ps5-fl) .avatarHolder::after { content: none !important; }
 
 /* header: Steam's strip without its grey, a hairline under it */
 :is(.MillenniumWindow_FriendChatWindow, .ps5-chat) .chatHeader {
@@ -777,3 +793,103 @@ body.fullheight #popup_target.popup_chat_frame {
 }
 .friendsui-container .FriendPickerScrollPanel .friend { border-radius: 12px !important; }
 .friendsui-container .FriendPickerScrollPanel .friend:hover { background: var(--ps5-fl-row) !important; }
+
+/* ==========================================================================
+   v1.8.1 fixes from a real friends list
+   ========================================================================== */
+/* the window controls (minimise / maximise / close): soft round buttons, the profile card
+   starts below them instead of under them */
+.friendsui-container .title-bar-actions { gap: 2px; padding: 4px 6px 0 0; }
+.friendsui-container .title-bar-actions .title-area-icon,
+.friendsui-container .title-bar-actions .windowControlButton {
+  width: 30px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  opacity: 0.75;
+  transition: background var(--ps5-t) var(--ps5-ease), opacity var(--ps5-t) var(--ps5-ease) !important;
+}
+.friendsui-container .title-bar-actions .title-area-icon:hover,
+.friendsui-container .title-bar-actions .windowControlButton:hover { background: rgba(255, 255, 255, 0.12) !important; opacity: 1; }
+.friendsui-container .title-bar-actions .closeButton:hover { background: #e5484d !important; }
+.friendsui-container .title-bar-actions svg { width: 11px !important; height: 11px !important; }
+.friendsui-container .title-bar-actions svg * { stroke: #fff !important; fill: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .friendListHeaderContainer { padding-top: 30px !important; }
+
+/* your avatar: Steam's square avatar frame clashed with the round PS5 avatar — hidden in
+   the profile card (the ring is the frame here) */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .currentUserAvatar .avatarFrame { display: none !important; }
+
+/* the Friends tab holds its own buttons: the tab itself stays clear, its caption is the
+   pill (white when active), the buttons sit on the right */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab):has(.friendsTabButtonsContainer) {
+  flex: 1 1 auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  gap: 6px;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab):has(.friendsTabButtonsContainer) > .tabLabel {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 34px !important;
+  padding: 0 16px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: var(--ps5-text-2) !important;
+  font-weight: 700 !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab:has(.friendsTabButtonsContainer) > .tabLabel {
+  background: #fff !important;
+  color: #0b0b0f !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab .friendsTabButtonsContainer svg :is(path, circle, line, polyline, polygon, rect, g) { stroke: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) :is(.friendTab, .socialListTab).activeTab .friendsTabButtonsContainer svg :is(.friendHead, .friendBody, .friendArm, .friendHead circle) { fill: #fff !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .TabSearchActive > .tabLabel { display: none !important; }
+
+/* "Drag favourite friends and chats here": a tidy dashed box, Steam's "Got it" button inside */
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends.emptyQuickAccess {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 10px 8px !important;
+  padding: 8px 10px 8px 14px !important;
+  border: 1px dashed rgba(255, 255, 255, 0.22) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  box-sizing: border-box;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends.emptyQuickAccess .quickAccessFriendsMessage {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--ps5-text-3) !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends.emptyQuickAccess .quickAccessFriendsMessageDismiss {
+  position: static !important;
+  flex: none;
+  margin: 0 !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  cursor: pointer;
+}
+:is(.MillenniumWindow_FriendsList, .ps5-fl) .quickAccessFriends.emptyQuickAccess .quickAccessFriendsMessageDismiss:hover { background: #fff !important; color: #0b0b0f !important; }
+:is(.MillenniumWindow_FriendsList, .ps5-fl) body:not(.in_global_drag) .quickAccessFriends.emptyQuickAccess.hintDismissed {
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}

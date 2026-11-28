@@ -342,11 +342,22 @@ try {
   const fprof = await fp.locator('.currentUserContainer').evaluate(n => [getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.querySelector('.currentUserAvatar .avatarHolder')).width]);
   check('friends: profile card (rounded, 54 px avatar)', fprof[0] === '22px' && fprof[1] === '54px', fprof.join(' '));
   check('friends: Steam\'s header glow hidden', await fp.locator('.statusHeaderGlow').isHidden());
-  const ftab = await fp.locator('.friendTab.activeTab').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n).textTransform]);
+  const ftab = await fp.locator('.friendTab.activeTab > .tabLabel').evaluate(n => [getComputedStyle(n).backgroundColor, getComputedStyle(n).borderTopLeftRadius, getComputedStyle(n.parentElement).textTransform]);
   check('friends: active tab = white pill, no caps', ftab[0] === 'rgb(255, 255, 255)' && ftab[2] === 'none', ftab.join(' '));
   const fbtn = await fp.locator('.addFriendButton').evaluate(n => [getComputedStyle(n).width, getComputedStyle(n).borderTopLeftRadius]);
   check('friends: round 34 px icon buttons', fbtn[0] === '34px' && fbtn[1] === '50%', fbtn.join(' '));
   check('friends: group header — count chip, no caps', await fp.locator('.onlineFriends .groupName').evaluate(n => getComputedStyle(n).textTransform === 'none' && getComputedStyle(n.querySelector('.groupCount')).borderTopLeftRadius === '99px'));
+  const fx = await fp.evaluate(() => {
+    const g = s => document.querySelector(s), r = s => g(s).getBoundingClientRect();
+    return { tabBg: getComputedStyle(g('.friendTab.activeTab')).backgroundColor, frame: getComputedStyle(g('#afr')).display,
+      plusY: Math.abs((r('#gn-on .ExpandPlusMinus').top + r('#gn-on .ExpandPlusMinus').height / 2) - (r('#gn-on').top + r('#gn-on').height / 2)),
+      titleL: r('#gn-on').left, otherL: r('.offlineFriends .groupName').left, qa: getComputedStyle(g('#qa .quickAccessFriendsMessageDismiss')).position,
+      qaIn: r('#qa .quickAccessFriendsMessageDismiss').right <= r('#qa').right + 1, card: r('.currentUserContainer').top, close: getComputedStyle(g('#wclose')).borderTopLeftRadius };
+  });
+  check('friends fix: the Friends tab with its buttons is no longer one white plate', fx.tabBg === 'rgba(0, 0, 0, 0)', fx.tabBg);
+  check('friends fix: group titles start at the left, the +/- sits on the title line', Math.abs(fx.titleL - fx.otherL) < 2 && fx.plusY <= 2, `${fx.titleL}/${fx.otherL} dy=${fx.plusY}`);
+  check('friends fix: "drag favourites here" box tidy, "Got it" inside it', fx.qa === 'static' && fx.qaIn);
+  check('friends fix: Steam\'s square avatar frame hidden, card below the window buttons', fx.frame === 'none' && fx.card >= 30 && fx.close === '8px', `${fx.frame} top=${fx.card}`);
   await fp.hover('#fr-on');
   await fp.waitForTimeout(300);
   check('friends: hover = PS5 white focus ring', /rgba\(255, 255, 255, 0\.9\) 0px 0px 0px 2px/.test(await fp.locator('#fr-on').evaluate(n => getComputedStyle(n).boxShadow)));

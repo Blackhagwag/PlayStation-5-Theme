@@ -33,23 +33,25 @@
 </style></head>
 <body class="friendsui-container">
 <div id="friends" class="friendlist FriendsListContent">
+  <div class="TitleBar" style="position:absolute;top:0;right:0"><div class="title-bar-actions window-controls" style="display:flex"><div class="title-area-icon windowControlButton minimizeButton"><svg width="10" height="10"><line x1="0" y1="5" x2="10" y2="5"/></svg></div><div class="title-area-icon windowControlButton closeButton" id="wclose"><svg width="10" height="10"><line x1="0" y1="0" x2="10" y2="10"/></svg></div></div></div>
   <div class="friendListHeaderContainer">
     <div class="currentUserContainer online">
       <svg class="statusHeaderGlow" width="10" height="10"></svg>
       <div class="AvatarAndUser">
-        <div class="currentUserAvatar"><div class="avatarHolder Medium online"><img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f06'/%3E%3C/svg%3E"><div class="avatarStatus"></div></div></div>
+        <div class="currentUserAvatar"><div class="avatarFrame" id="afr"><img src=""></div><div class="avatarHolder Medium online"><img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f06'/%3E%3C/svg%3E"><div class="avatarStatus"></div></div></div>
         <div class="labelHolder online"><div class="statusAndName"><div class="playerName">Vasya</div><div class="ContextMenuButton"><svg viewBox="0 0 10 10" width="10" height="10"><polygon points="0,2 10,2 5,8"/></svg></div></div>
           <div class="richPresenceContainer"><div class="richPresenceLabel">Online</div></div></div>
       </div>
     </div>
   </div>
+  <div class="quickAccessFriends emptyQuickAccess" id="qa" style="height:44px;position:relative"><div class="quickAccessFriendsMessage">Drag favourite friends and chats here</div><div class="quickAccessFriendsMessageDismiss" style="position:absolute;right:-10px;top:-6px">Got it!</div></div>
   <div class="socialTabContainer">
-    <div class="friendTab socialListTab activeTab"><span class="tabLabel">Friends</span></div>
+    <div class="friendTab socialListTab activeTab" style="display:flex;align-items:center"><span class="tabLabel">Friends</span>
     <div class="friendsTabButtonsContainer">
       <div class="TabSearchButton"><div class="tabSearchTransitionGroup"></div><div class="searchIconButton"><svg viewBox="0 0 10 10" width="10" height="10"><circle cx="4" cy="4" r="3" fill="none"/></svg></div></div>
       <div class="friendRequestButton"><svg viewBox="0 0 10 10" width="10" height="10"><circle class="friendHead" cx="5" cy="3" r="2"/></svg><div class="requestsNumber">2</div></div>
       <div class="addFriendButton"><svg viewBox="0 0 10 10" width="10" height="10"><line x1="5" y1="0" x2="5" y2="10"/></svg></div>
-    </div>
+    </div></div>
   </div>
   <div class="friendlistListContainer">
     <div class="friendGroup gameGroup OtherGamesGroup">
@@ -65,7 +67,7 @@
       <div class="friend ingame"><div class="avatarHolder ingame"><img class="avatar" src=""><div class="avatarStatus"></div></div><div class="labelHolder ingame"><div class="statusAndName"><div class="playerName">Kira</div></div><div class="richPresenceContainer"><div class="richPresenceLabel">Iron Tactics</div></div></div><div class="FriendInGameIcon"><img class="gameIcon" src="https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/440/def456.jpg"></div></div>
     </div>
     <div class="friendGroup onlineFriends">
-      <div class="groupName">Online <span class="groupCount">2</span></div>
+      <div class="groupName" id="gn-on"><div class="ExpandPlusMinus" style="margin-top:8px"><svg width="10" height="10"><line x1="0" y1="5" x2="10" y2="5"/></svg></div>Online <span class="groupCount">2</span></div>
       <div class="friend online" id="fr-on"><div class="avatarHolder online"><img class="avatar" src=""><div class="avatarStatus"></div></div><div class="labelHolder online"><div class="statusAndName"><div class="playerName">Nova</div></div><div class="richPresenceContainer"><div class="richPresenceLabel">Online</div></div></div></div>
       <div class="friend online unreadFriend"><div class="avatarHolder online awayOrSnooze" id="av-away"><img class="avatar" src=""><div class="avatarStatus"></div></div><div class="labelHolder online awayOrSnooze"><div class="statusAndName"><div class="playerName">Sleepy</div></div><div class="richPresenceContainer"><div class="richPresenceLabel">Away</div></div></div></div>
     </div>
