@@ -208,8 +208,14 @@ Limits of the tests: there is no Steam client in CI, so the checks run against a
 of Steam's markup (the readable class names Millennium adds, Steam's stores and APIs, store
 pages on their real hostnames). Steam changes its markup often.
 
-Found something broken after a Steam update? Open an issue with a screenshot and your
-Millennium version.
+**Maintenance.** The theme is actively maintained: when a Steam or Millennium update breaks
+something, it gets fixed in a new release. It targets the readable class names that Millennium
+provides (and remaps when Steam ships hashed ones), not Steam's hashed names; where Steam has no
+stable names (the cart), `js/web.js` finds elements by page structure. After a breaking update
+the test harness is updated to the new markup and every fix is checked against it.
+
+Found something broken? [Open an issue](https://github.com/Blackhagwag/PlayStation-5-Theme/issues/new/choose)
+with a screenshot, the theme and Millennium versions and whether you use the Steam beta.
 
 ## License
 

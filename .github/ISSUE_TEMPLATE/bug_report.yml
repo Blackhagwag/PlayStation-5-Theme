@@ -1,0 +1,57 @@
+name: Something looks broken
+description: A part of Steam looks wrong or a feature stopped working with the PlayStation 5 theme
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Steam and Millennium change their markup often — these details let me find and fix it fast.
+  - type: textarea
+    id: what
+    attributes:
+      label: What is broken
+      description: Which window or page (Home, Library, a game page, Store, Wishlist, Cart, Checkout, Friends, Chat, Settings, Sign-in…) and what you see.
+    validations:
+      required: true
+  - type: textarea
+    id: shots
+    attributes:
+      label: Screenshot
+      description: Drag a screenshot here. Blur personal data (wallet, card numbers, friends' names) if you want.
+    validations:
+      required: true
+  - type: input
+    id: theme
+    attributes:
+      label: Theme version
+      description: Millennium → Themes → PlayStation 5 (or the ZIP name), e.g. 1.8.0
+    validations:
+      required: true
+  - type: input
+    id: millennium
+    attributes:
+      label: Millennium version
+    validations:
+      required: true
+  - type: dropdown
+    id: steam
+    attributes:
+      label: Steam client
+      options:
+        - Stable
+        - Beta
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: System
+      options:
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Theme options you changed (optional)
